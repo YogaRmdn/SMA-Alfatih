@@ -70,10 +70,10 @@ class DemoSeeder extends Seeder
     protected function seedContact(): void
     {
         Contact::updateOrCreate(['id' => 1], [
-            'address' => Setting::get('address') ?? 'Jl. Garuda Sakti KM 3, Panam, Kec. Tampan, Kota Pekanbaru, Riau 28291',
-            'phone' => Setting::get('phone') ?? '(0761) 562206',
-            'whatsapp' => Setting::get('whatsapp') ?? '6281270000000',
-            'email' => Setting::get('email') ?? 'info@smaitalfatih.sch.id',
+            'address' => Setting::get('address') ?? 'Jl. Rasamala, Komplek Perumahan Beringin Indah, Kel. Sidomulyo Timur, Kec. Marpoyan Damai, Kota Pekanbaru, Riau',
+            'phone' => Setting::get('phone') ?? '081364356067',
+            'whatsapp' => Setting::get('whatsapp') ?? '6281364356067',
+            'email' => Setting::get('email') ?? 'smaiittahfizhalfatih@gmail.com',
             'maps_embed' => Setting::get('maps_embed'),
             'operational_hours' => Setting::get('operational_hours') ?? 'Senin - Jumat: 07.00 - 16.00 WIB',
         ]);
@@ -117,11 +117,12 @@ class DemoSeeder extends Seeder
     protected function seedFacilities(): void
     {
         $facilities = [
-            ['Masjid Dua Lantai', self::ICON_BUILDING, 'Tempat ibadah dan pusat kegiatan keagamaan.'],
+            ['Masjid', self::ICON_BUILDING, 'Tempat ibadah dan pusat kegiatan keagamaan.'],
             ['Laboratorium IPA', self::ICON_BEAKER, 'Lab fisika, kimia, dan biologi yang lengkap.'],
             ['Perpustakaan', self::ICON_BOOK, 'Koleksi buku lebih dari 5.000 judul.'],
             ['Lab Komputer & Robotik', self::ICON_CODE, '40 unit komputer modern untuk praktik IT.'],
             ['Lapangan Olahraga', self::ICON_BOLT, 'Lapangan futsal, basket, dan voli.'],
+            ['Kolam Renang', self::ICON_BOLT, 'Kolam renang untuk pembelajaran olahraga.'],
             ['Ruang Kelas Ber-AC', self::ICON_ACADEMIC, 'Kelas nyaman dengan multimedia learning.'],
             ['Asrama Putra & Putri', self::ICON_HEART, 'Hunian aman dan nyaman untuk santri mukim.'],
             ['Kantin Sehat', self::ICON_CAMERA, 'Menu makanan bergizi dan higienis.'],
@@ -139,16 +140,15 @@ class DemoSeeder extends Seeder
     protected function seedExtracurriculars(): void
     {
         $ekskuls = [
-            ['Tahfizh Qur\'an', self::ICON_BOOK, 'Senin - Kamis, 16.00', 'Ust. Ahmad Fauzi, Lc.'],
+            ['Hadroh', self::ICON_MUSIC, 'Jumat, 16.00', 'Ust. Muhammad Ilham'],
+            ['Silat', self::ICON_TROPHY, 'Sabtu, 14.00', 'Kang Deden'],
+            ['Arabic Club', self::ICON_GLOBE, 'Selasa & Kamis, 15.30', 'Ustd. Hana Yusuf'],
             ['Futsal', self::ICON_BOLT, 'Jumat, 15.00', 'Yusuf Ramadhan, S.Or.'],
-            ['Pramuka', self::ICON_HEART, 'Sabtu, 08.00', 'Rina Marlina, S.Pd.'],
-            ['Paskibra', self::ICON_TROPHY, 'Sabtu, 13.00', 'Dimas Prasetyo, S.Pd.'],
-            ['Hadrah & Nasyid', self::ICON_MUSIC, 'Jumat, 16.00', 'Ust. Muhammad Ilham'],
-            ['Rohis', self::ICON_SPARKLE, 'Sabtu, 10.00', 'Ustd. Siti Rahma, Lc.'],
-            ['Basket', self::ICON_BOLT, 'Rabu, 15.00', 'Andi Saputra, S.Pd.'],
-            ['English Club', self::ICON_GLOBE, 'Kamis, 15.30', 'Lia Amalia, S.Pd.'],
-            ['Robotik', self::ICON_CODE, 'Sabtu, 14.00', 'Taufik Hidayat, S.Kom.'],
-            ['Seni Kaligrafi', self::ICON_CAMERA, 'Sabtu, 09.00', 'Ustd. Hana Yusuf'],
+            ['Tenis Meja', self::ICON_CAMERA, 'Rabu, 15.00', 'Taufik Hidayat, S.Kom.'],
+            ['Renang', self::ICON_BEAKER, 'Kamis, 15.30', 'Rina Marlina, S.Pd.'],
+            ['Voli', self::ICON_TROPHY, 'Sabtu, 13.00', 'Andi Saputra, S.Pd.'],
+            ['Matematika', self::ICON_ACADEMIC, 'Kamis, 15.30', 'Lia Amalia, S.Pd.'],
+            ['MHQ & MTQ', self::ICON_BOOK, 'Sabtu, 09.00', 'Ust. Ahmad Fauzi, Lc.'],
         ];
 
         foreach ($ekskuls as [$name, $icon, $schedule, $advisor]) {
@@ -164,22 +164,28 @@ class DemoSeeder extends Seeder
     protected function seedTeachers(): void
     {
         $teachers = [
-            ['H. Abdul Aziz, S.Ag., M.Pd.', 'Kepala Sekolah', 'Tahfizh'],
-            ['Ust. Ahmad Fauzi, Lc.', 'Wakil Kepala Bidang Kurikulum', 'Al-Qur\'an'],
-            ['Rina Marlina, S.Pd.', 'Wakil Kepala Bidang Kesiswaan', 'Bahasa Indonesia'],
-            ['Dimas Prasetyo, S.Pd.', 'Guru Matematika', 'Matematika'],
-            ['Lia Amalia, S.Pd.', 'Guru Bahasa Inggris', 'Bahasa Inggris'],
-            ['Ust. Muhammad Ilham', 'Pembina Tahfizh', 'Tahfizh'],
-            ['Taufik Hidayat, S.Kom.', 'Guru TIK & Robotik', 'Informatika'],
-            ['Yusuf Ramadhan, S.Or.', 'Guru PJOK', 'PJOK'],
-            ['Andi Saputra, S.Pd.', 'Guru IPA', 'IPA'],
-            ['Ustd. Hana Yusuf', 'Guru PAI', 'Pendidikan Agama Islam'],
+            ['Ilham Dwitama Haeba, Ph.D.', 'Kepala Sekolah', 'Tahfizh', 'ilham-dwitama', '198005122005011001', 'S3 Pendidikan Islam', 'kepsek@alfatih.sch.id', '081277777001', 0],
+            ['Ust. Ahmad Fauzi, Lc.', 'Wakil Kepala Bidang Kurikulum', "Al-Qur'an", 'ahmad-fauzi', '198311162009021002', 'Lc. Ushuluddin', 'ahmadfauzi@alfatih.sch.id', '081277777002', 1],
+            ['Rina Marlina, S.Pd.', 'Wakil Kepala Bidang Kesiswaan', 'Bahasa Indonesia', 'rina-marlina', '199003152015032003', 'S.Pd. Pendidikan Bahasa Indonesia', 'rinamarlina@alfatih.sch.id', '081277777003', 2],
+            ['Dimas Prasetyo, S.Pd.', 'Guru Matematika', 'Matematika', 'dimas-prasetyo', '199107272019031004', 'S.Pd. Pendidikan Matematika', 'dimasprasetyo@alfatih.sch.id', '081277777004', 3],
+            ['Lia Amalia, S.Pd.', 'Guru Bahasa Inggris', 'Bahasa Inggris', 'lia-amalia', '199204152020122005', 'S.Pd. Pendidikan Bahasa Inggris', 'liaamalia@alfatih.sch.id', '081277777005', 4],
+            ['Ust. Muhammad Ilham', 'Pembina Tahfizh', 'Tahfizh', 'muhammad-ilham', '198809122012011006', 'Tahfizh 30 Juz', 'muhammadilham@alfatih.sch.id', '081277777006', 5],
+            ['Taufik Hidayat, S.Kom.', 'Guru TIK & Robotik', 'Informatika', 'taufik-hidayat', '199403182018041007', 'S.Kom. Informatika', 'taufikhidayat@alfatih.sch.id', '081277777007', 6],
+            ['Yusuf Ramadhan, S.Or.', 'Guru PJOK', 'PJOK', 'yusuf-ramadhan', '199508072017121008', 'S.Or. Pendidikan Jasmani', 'yusuframadhan@alfatih.sch.id', '081277777008', 7],
+            ['Andi Saputra, S.Pd.', 'Guru IPA', 'IPA', 'andi-saputra', '199111202016041009', 'S.Pd. Pendidikan IPA', 'andisaputra@alfatih.sch.id', '081277777009', 8],
+            ['Ustd. Hana Yusuf', 'Guru PAI', 'Pendidikan Agama Islam', 'hana-yusuf', '199602122020122010', 'S.Pd. PAI', 'hanayusuf@alfatih.sch.id', '081277777010', 9],
         ];
 
-        foreach ($teachers as [$name, $position, $subject]) {
-            Teacher::firstOrCreate(['name' => $name], [
+        foreach ($teachers as [$name, $position, $subject, $slug, $nip, $education, $email, $phone, $sort]) {
+            Teacher::updateOrCreate(['name' => $name], [
                 'position' => $position,
                 'subject' => $subject,
+                'photo' => "/img/teachers/{$slug}.svg",
+                'nip' => $nip,
+                'education' => $education,
+                'email' => $email,
+                'phone' => $phone,
+                'sort_order' => $sort,
                 'is_active' => true,
             ]);
         }
@@ -227,16 +233,19 @@ class DemoSeeder extends Seeder
     protected function seedPartners(): void
     {
         $partners = [
-            ['Kemendikbud Ristek', null, 'https://www.kemdikbud.go.id'],
-            ['Kementerian Agama RI', null, 'https://www.kemenag.go.id'],
-            ['LP Ma\'arif NU', null, null],
-            ['Universitas Islam Riau', null, 'https://www.uir.ac.id'],
+            ['Universitas Prima Indonesia', 'partners/unpri.png'],
+            ['Universitas Islam Madinah', 'partners/uim.png'],
+            ['Universitas Riau Indonesia', 'partners/uri.png'],
+            ['Erlangga Buku', 'partners/erlangga.png'],
+            ['Bimbel Brawijaya', 'partners/bimbel.png'],
+            ['Tring Pegadaian', 'partners/tring.png'],
+            ['BRK', 'partners/brk.png'],
         ];
 
-        foreach ($partners as [$name, $logo, $website]) {
+        foreach ($partners as [$name, $logo]) {
             Partner::firstOrCreate(['name' => $name], [
                 'logo' => $logo,
-                'website' => $website,
+                'website' => null,
                 'is_active' => true,
             ]);
         }

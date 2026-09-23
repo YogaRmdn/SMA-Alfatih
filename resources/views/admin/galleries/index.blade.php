@@ -3,12 +3,13 @@
 @section('title', 'Kelola Galeri')
 
 @section('content')
-<x-admin.page-header title="Kelola Galeri" subtitle="Kelola foto dan video dokumentasi kegiatan">
+<x-admin.page-header title="Kelola Galeri" subtitle="Kelola Foto dan Video Dokumentasi Kegiatan">
     <x-slot:button>
         <a href="{{ route('admin.galleries.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Tambah Item
         </a>
+        <x-admin.delete-all :route="'admin.galleries.delete-all'" message="Semua item galeri beserta album terkait akan dihapus permanen. Lanjutkan?" />
     </x-slot:button>
 </x-admin.page-header>
 
@@ -36,7 +37,7 @@
                 @if ($gallery->type === 'video')
                     <div class="relative flex h-40 items-center justify-center bg-slate-900 sm:h-44">
                         <svg class="h-12 w-12 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                        <span class="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">VIDEO</span>
+                        <span class="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[11px] font-medium text-white">VIDEO</span>
                     </div>
                 @else
                     <img src="{{ asset('storage/'.$gallery->image) }}" class="h-40 w-full object-cover sm:h-44" alt="{{ $gallery->title ?? 'Foto galeri' }}" loading="lazy">
@@ -44,7 +45,7 @@
                 <div class="flex items-center justify-between bg-white p-3">
                     <div class="min-w-0">
                         <p class="truncate text-xs font-medium text-slate-700">{{ $gallery->title ?? 'Tanpa judul' }}</p>
-                        <p class="text-[10px] text-slate-400">{{ $gallery->album?->title ?? 'Tanpa album' }}</p>
+                        <p class="text-[11px] text-slate-400">{{ $gallery->album?->title ?? 'Tanpa album' }}</p>
                     </div>
                     <div class="flex gap-1">
                         <a href="{{ route('admin.galleries.edit', $gallery) }}" class="rounded p-1.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600" title="Edit">

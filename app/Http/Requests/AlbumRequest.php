@@ -18,7 +18,7 @@ class AlbumRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('albums', 'slug')->ignore($this->album)],
             'description' => ['nullable', 'string'],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
         ];
     }
 

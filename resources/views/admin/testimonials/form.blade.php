@@ -35,12 +35,12 @@
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="photo" label="Foto" :path="$testimonial->photo ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
+                <x-admin.image-upload name="photo" label="Foto" :path="$testimonial->photo ?? null" hint="JPG/PNG/WebP" />
                 <div class="space-y-4 pt-1">
                     <x-admin.field label="Urutan">
                         <x-admin.input type="number" name="sort_order" :value="$testimonial->sort_order ?? 0" />
                     </x-admin.field>
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$testimonial->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$testimonial->is_active ?? true" />
                 </div>
             </div>
         </div>

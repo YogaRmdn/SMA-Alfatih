@@ -31,7 +31,7 @@
                     <x-admin.input type="number" name="sort_order" :value="$faq->sort_order ?? 0" />
                 </x-admin.field>
                 <div class="pt-1">
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$faq->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$faq->is_active ?? true" />
                 </div>
             </div>
         </div>

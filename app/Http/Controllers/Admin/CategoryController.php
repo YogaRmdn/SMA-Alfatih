@@ -5,9 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
+use App\Traits\HasDeleteAll;
 
 class CategoryController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Category::class;
+    }
     public function index()
     {
         $categories = Category::query()

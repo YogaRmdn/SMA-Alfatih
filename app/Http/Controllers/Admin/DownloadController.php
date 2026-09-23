@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DownloadRequest;
 use App\Models\Download;
+use App\Traits\HasDeleteAll;
 
 class DownloadController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Download::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['file'];
+    }
     public function index()
     {
         $downloads = Download::query()
@@ -32,7 +44,7 @@ class DownloadController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $data['file'] = upload_file($file, 'downloads');
-            $data['file_type'] = $file->getClientOriginalExtension();
+            $data['file_type'] = $file->guessExtension();
             $data['file_size'] = $file->getSize();
         }
 
@@ -54,7 +66,7 @@ class DownloadController extends Controller
             delete_file($download->file);
             $file = $request->file('file');
             $data['file'] = upload_file($file, 'downloads');
-            $data['file_type'] = $file->getClientOriginalExtension();
+            $data['file_type'] = $file->guessExtension();
             $data['file_size'] = $file->getSize();
         } else {
             unset($data['file']);

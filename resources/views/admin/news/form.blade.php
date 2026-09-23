@@ -4,7 +4,7 @@
 
 @section('content')
 <x-admin.page-header title="{{ isset($news) ? 'Edit Berita' : 'Tambah Berita' }}"
-    subtitle="{{ isset($news) ? 'Perbarui informasi berita' : 'Buat berita sekolah baru' }}">
+    subtitle="{{ isset($news) ? 'Perbarui Informasi Berita' : 'Buat Berita Sekolah Baru' }}">
     <x-slot:button>
         <a href="{{ route('admin.news.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -23,12 +23,12 @@
         </div>
         <div class="space-y-5 p-6">
             <x-admin.field label="Judul Berita" name="title" required>
-                <x-admin.input name="title" :value="$news->title ?? ''" placeholder="Contoh: Siswa Al-Fatih Raih Juara OSN" required />
+                <x-admin.input name="title" :value="$news->title ?? ''" placeholder="Contoh: Siswa SMA IT Tahfizh Al-Fatih Pekanbaru Raih Juara OSN" required />
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
                 <x-admin.field label="Kategori">
-                    <x-admin.select name="category_id" :options="$categories->pluck('name', 'id')" :value="$news->category_id ?? null" placeholder="Pilih kategori" />
+                    <x-admin.select name="category_id" :options="$categories->pluck('name', 'id')" :value="$news->category_id ?? null" placeholder="Pilih Kategori" />
                 </x-admin.field>
                 <x-admin.field label="Tanggal Terbit">
                     <x-admin.input type="datetime-local" name="published_at" :value="isset($news) && $news->published_at ? $news->published_at->format('Y-m-d\TH:i') : ''" />
@@ -42,13 +42,13 @@
             <x-admin.field label="Isi Berita" name="content" required>
                 <textarea name="content" id="content" rows="14"
                     class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-                    placeholder="Tulis isi berita di sini..." required>{{ old('content', $news->content ?? '') }}</textarea>
+                    placeholder="Tulis Isi Berita di Sini..." required>{{ old('content', $news->content ?? '') }}</textarea>
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="thumbnail" label="Thumbnail" :path="$news->thumbnail ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
+                <x-admin.image-upload name="thumbnail" label="Thumbnail" :path="$news->thumbnail ?? null" hint="JPG/PNG/WebP" />
                 <div class="space-y-4 pt-1">
-                    <x-admin.checkbox name="is_published" label="Publikasikan berita ini" :checked="$news->is_published ?? true" />
+                    <x-admin.checkbox name="is_published" label="Publikasikan Berita ini" :checked="$news->is_published ?? true" />
                 </div>
             </div>
         </div>

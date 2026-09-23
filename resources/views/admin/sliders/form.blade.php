@@ -19,7 +19,7 @@
         </div>
         <div class="space-y-5 p-6">
             <x-admin.field label="Judul">
-                <x-admin.input name="title" :value="$slider->title ?? ''" placeholder="Contoh: Selamat Datang di Al-Fatih" />
+                <x-admin.input name="title" :value="$slider->title ?? ''" placeholder="Contoh: Selamat Datang di SMA IT Tahfizh Al-Fatih Pekanbaru" />
             </x-admin.field>
 
             <x-admin.field label="Sub Judul">
@@ -36,12 +36,12 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar Slider" :path="$slider->image ?? null" hint="Disarankan 1920x800, JPG/PNG/WebP, maks 8 MB" />
+                <x-admin.image-upload name="image" label="Gambar Slider" :path="$slider->image ?? null" hint="Disarankan 1920x800, JPG/PNG/WebP" />
                 <div class="space-y-4 pt-1">
                     <x-admin.field label="Urutan">
                         <x-admin.input type="number" name="sort_order" :value="$slider->sort_order ?? 0" />
                     </x-admin.field>
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$slider->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$slider->is_active ?? true" />
                 </div>
             </div>
         </div>

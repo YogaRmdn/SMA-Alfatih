@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="{{ $settings['site_description'] ?? '' }}">
     <meta name="keywords" content="{{ $settings['meta_keywords'] ?? '' }}">
-    <link rel="icon" href="{{ img_url($settings['favicon'] ?? null, 'img/Logo SMK fix 4.png') }}">
+    <link rel="icon" href="{{ img_url($settings['favicon'] ?? null, 'img/sma.png') }}">
     <title>@yield('title') — {{ $settings['site_name'] ?? config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -15,10 +15,19 @@
             100% { transform: translateX(-100%); }
         }
         .animate-marquee { animation: marquee 30s linear infinite; }
+        @keyframes site-name-marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .site-name-marquee { animation: site-name-marquee 14s linear infinite; }
+        .site-name-marquee:hover { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
             .animate-marquee { animation: none; }
         }
     </style>
+    <noscript>
+        <style>.reveal { opacity: 1 !important; transform: none !important; transition: none !important; }</style>
+    </noscript>
 </head>
 <body class="min-h-screen bg-white font-sans text-slate-700 antialiased" x-data="{ mobileOpen: false }">
 
@@ -31,19 +40,19 @@
         $maps = $contact?->maps_embed ?? $settings['maps_embed'] ?? null;
         $waLink = $whatsapp ? 'https://wa.me/'.preg_replace('/\D+/', '', $whatsapp) : '#';
         $nav = [
-            ['label' => 'Beranda', 'href' => '#beranda'],
-            ['label' => 'Profil', 'href' => '#profil'],
-            ['label' => 'Program', 'href' => '#program'],
-            ['label' => 'Fasilitas', 'href' => '#fasilitas'],
-            ['label' => 'Ekstrakurikuler', 'href' => '#ekskul'],
-            ['label' => 'Prestasi', 'href' => '#prestasi'],
-            ['label' => 'Berita', 'href' => '#berita'],
-            ['label' => 'Kontak', 'href' => '#kontak'],
+            ['label' => 'Beranda', 'href' => route('home').'#beranda'],
+            ['label' => 'Profil', 'href' => route('home').'#profil'],
+            ['label' => 'Program', 'href' => route('home').'#program'],
+            ['label' => 'Fasilitas', 'href' => route('home').'#fasilitas'],
+            ['label' => 'Ekstrakurikuler', 'href' => route('home').'#ekskul'],
+            ['label' => 'Prestasi', 'href' => route('home').'#prestasi'],
+            ['label' => 'Berita', 'href' => route('news.index')],
+            ['label' => 'Kontak', 'href' => route('home').'#kontak'],
         ];
     @endphp
 
     {{-- Topbar --}}
-    <div class="hidden bg-emerald-950 text-emerald-100 md:block">
+    <div class="hidden animate-flow-x bg-[linear-gradient(90deg,#04331f,#0c6b52,#0f766e,#115e59,#6b3a10)] text-emerald-100 md:block">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs lg:px-6">
             <div class="flex items-center gap-6">
                 <a href="mailto:{{ $email }}" class="flex items-center gap-1.5 transition hover:text-white">
@@ -76,31 +85,36 @@
     </div>
 
     {{-- Navbar --}}
-    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-        <div class="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 lg:h-20 lg:px-6">
-            <a href="#beranda" class="flex shrink-0 items-center gap-3">
-                <img src="{{ img_url($settings['logo'] ?? null, 'img/Logo SMK fix 4.png') }}" alt="{{ $siteName }}" class="h-11 w-11 rounded-xl object-contain lg:h-13 lg:w-13">
-                <span class="leading-tight">
-                    <span class="block text-sm font-extrabold text-emerald-900 lg:text-base">{{ $siteName }}</span>
-                    <span class="block text-[11px] font-medium text-amber-600">{{ $settings['site_tagline'] ?? 'Sekolah Islam Terpadu' }}</span>
+    <header class="glass sticky top-0 z-50 border-b border-white/60 shadow-lg shadow-emerald-900/5">
+        <div class="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-4 lg:h-20 lg:px-6">
+            <a href="#beranda" class="flex min-w-0 items-center gap-2 sm:gap-3" title="{{ $siteName }}" aria-label="{{ $siteName }}">
+                <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="{{ $siteName }}" class="h-10 w-10 shrink-0 rounded-xl object-contain sm:h-11 sm:w-11 lg:h-12 lg:w-12">
+                <span class="block max-w-[150px] overflow-hidden sm:max-w-[260px] lg:max-w-[340px]">
+                    <span class="site-name-marquee inline-flex whitespace-nowrap text-sm font-extrabold text-emerald-900 sm:text-base">
+                        <span class="site-name-text pr-6">{{ $siteName }}</span>
+                        <span class="site-name-text site-name-dupe pr-6" aria-hidden="true">{{ $siteName }}</span>
+                    </span>
                 </span>
             </a>
 
-            <nav class="ml-auto hidden items-center gap-1 xl:flex">
+            <nav class="ml-auto hidden items-center gap-0.5 xl:flex xl:gap-1">
                 @foreach ($nav as $item)
-                    <a href="{{ $item['href'] }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-800">{{ $item['label'] }}</a>
+                    <a href="{{ $item['href'] }}" class="whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-800 xl:px-3">{{ $item['label'] }}</a>
                 @endforeach
             </nav>
 
-            <div class="ml-auto flex items-center gap-2 xl:ml-4">
-                <a href="{{ $waLink }}" target="_blank" rel="noopener" class="hidden rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-emerald-950 shadow-sm transition hover:bg-amber-400 sm:inline-flex">
+            <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 xl:ml-4">
+                <a href="{{ route('ppdb.register') }}" class="sheen hidden whitespace-nowrap rounded-lg bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-3 py-2.5 text-xs font-bold text-emerald-950 shadow-md shadow-amber-500/30 transition hover:brightness-105 sm:inline-flex sm:px-4 sm:text-sm">
                     Daftar PPDB
                 </a>
-                <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                    Masuk Admin
+                <a href="{{ route('ppdb.status') }}" class="hidden whitespace-nowrap rounded-lg border border-emerald-700 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white md:inline-flex md:px-4 md:text-sm">
+                    Cek Status
                 </a>
-                <button @click="mobileOpen = !mobileOpen" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden">
+                <a href="{{ route('login') }}" class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-700 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white xl:inline-flex sm:gap-2 sm:px-4 sm:text-sm">
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    Login
+                </a>
+                <button @click="mobileOpen = !mobileOpen" class="shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden">
                     <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     <svg x-show="mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -108,23 +122,40 @@
         </div>
 
         {{-- Mobile menu --}}
-        <div x-show="mobileOpen" x-cloak x-transition class="border-t border-slate-200 bg-white px-4 py-3 xl:hidden">
+        <div x-show="mobileOpen" x-cloak x-transition class="glass border-t border-white/60 px-4 py-3 xl:hidden">
             <nav class="grid gap-1">
                 @foreach ($nav as $item)
                     <a href="{{ $item['href'] }}" @click="mobileOpen = false" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800">{{ $item['label'] }}</a>
                 @endforeach
             </nav>
+            <div class="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <a href="{{ route('ppdb.register') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
+                    Daftar PPDB
+                </a>
+                <a href="{{ route('ppdb.status') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
+                    Cek Status
+                </a>
+            </div>
+            <div class="mt-2 border-t border-slate-100 pt-3">
+                <a href="{{ route('login') }}" @click="mobileOpen = false" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                    Login
+                </a>
+            </div>
         </div>
     </header>
 
     @yield('content')
 
     {{-- Footer --}}
-    <footer class="bg-emerald-950 text-emerald-100">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
+    <footer class="relative animate-flow-y overflow-hidden bg-[linear-gradient(160deg,#04271a,#0b4f3a_30%,#115e59_55%,#052e16_80%,#3d2308)] text-emerald-100">
+        <div class="aurora -left-24 top-10 h-80 w-80 bg-teal-400/20"></div>
+        <div class="aurora right-0 top-1/3 h-96 w-96 bg-amber-400/15" style="animation-delay:-9s"></div>
+        <div class="aurora bottom-0 left-1/3 h-72 w-72 bg-emerald-400/20" style="animation-delay:-15s"></div>
+        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
             <div class="sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center gap-3">
-                    <img src="{{ img_url($settings['logo'] ?? null, 'img/Logo SMK fix 4.png') }}" alt="{{ $siteName }}" class="h-12 w-12 rounded-xl bg-white object-contain p-1">
+                    <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="{{ $siteName }}" class="h-12 w-12 rounded-xl bg-white object-contain p-1">
                     <span class="text-sm font-bold leading-tight">{{ $siteName }}</span>
                 </div>
                 <p class="mt-4 text-sm leading-relaxed text-emerald-200/90">{{ $settings['site_description'] ?? '' }}</p>
@@ -145,7 +176,9 @@
                     @foreach ($nav as $item)
                         <li><a href="{{ $item['href'] }}" class="text-emerald-200/90 transition hover:text-amber-400">{{ $item['label'] }}</a></li>
                     @endforeach
-                    <li><a href="{{ route('login') }}" class="text-emerald-200/90 transition hover:text-amber-400">Login Admin</a></li>
+                    <li><a href="{{ route('ppdb.register') }}" class="text-emerald-200/90 transition hover:text-amber-400">Daftar PPDB</a></li>
+                    <li><a href="{{ route('ppdb.status') }}" class="text-emerald-200/90 transition hover:text-amber-400">Cek Status Pendaftaran</a></li>
+                    <li><a href="{{ route('login') }}" class="text-emerald-200/90 transition hover:text-amber-400">Login</a></li>
                 </ul>
             </div>
 
@@ -184,17 +217,21 @@
                 <p class="mt-4 text-sm leading-relaxed text-emerald-200/90">
                     Pendaftaran Peserta Didik Baru telah dibuka. Segera daftarkan putra/putri Anda untuk bergabung bersama keluarga besar {{ $siteName }}.
                 </p>
-                <a href="{{ $waLink }}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
-                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                <a href="{{ route('ppdb.register') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Daftar Sekarang
+                </a>
+                <a href="{{ route('ppdb.status') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    Cek Status Pendaftaran
                 </a>
             </div>
         </div>
 
-        <div class="border-t border-white/10">
+        <div class="relative border-t border-white/10">
             <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-emerald-300/80 sm:flex-row lg:px-6">
                 <span>&copy; {{ date('Y') }} {{ $siteName }} — Hak Cipta Dilindungi.</span>
-                <span>Dibangun dengan <span class="font-semibold text-amber-400">Laravel</span></span>
+                <span>Develop by <span class="font-semibold text-amber-400">Pandev</span></span>
             </div>
         </div>
     </footer>
@@ -202,9 +239,12 @@
     {{-- Floating WhatsApp --}}
     @if ($whatsapp)
         <a href="{{ $waLink }}" target="_blank" rel="noopener" aria-label="Chat WhatsApp"
-           class="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 transition hover:scale-105 hover:bg-emerald-600">
+           class="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-600/40 transition hover:scale-105 hover:shadow-emerald-500/60">
+            <span class="absolute -inset-1 -z-10 animate-ping rounded-full bg-emerald-500/40"></span>
             <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
         </a>
     @endif
+
+    <x-flash-toasts />
 </body>
 </html>

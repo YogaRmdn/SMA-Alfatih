@@ -3,7 +3,11 @@
 @section('title', 'Kelola Komentar')
 
 @section('content')
-<x-admin.page-header title="Kelola Komentar" subtitle="Moderasi komentar pengunjung"></x-admin.page-header>
+<x-admin.page-header title="Kelola Komentar" subtitle="Moderasi Komentar Pengunjung">
+    <x-slot:button>
+        <x-admin.delete-all :route="'admin.comments.delete-all'" message="Semua komentar pengunjung akan dihapus secara permanen dan tidak dapat dikembalikan. Lanjutkan?" />
+    </x-slot:button>
+</x-admin.page-header>
 
 <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="border-b border-slate-100 p-4">

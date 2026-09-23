@@ -6,9 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TeacherRequest;
 use App\Models\Staff;
 use App\Models\Teacher;
+use App\Traits\HasDeleteAll;
 
 class TeacherController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Teacher::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['photo'];
+    }
     public function index()
     {
         $teachers = Teacher::query()

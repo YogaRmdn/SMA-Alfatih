@@ -24,7 +24,7 @@
             <x-admin.field label="Deskripsi">
                 <x-admin.textarea name="description" rows="3" :value="$album->description ?? ''" />
             </x-admin.field>
-            <x-admin.image-upload name="cover" label="Cover Album" :path="$album->cover ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
+            <x-admin.image-upload name="cover" label="Cover Album" :path="$album->cover ?? null" hint="JPG/PNG/WebP" />
         </div>
     </div>
 

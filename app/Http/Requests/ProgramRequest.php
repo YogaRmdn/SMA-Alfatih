@@ -19,7 +19,7 @@ class ProgramRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('programs', 'slug')->ignore($this->program)],
             'type' => ['required', 'in:unggulan,tahfizh,akademik,it'],
             'icon' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

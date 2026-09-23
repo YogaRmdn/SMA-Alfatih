@@ -28,7 +28,7 @@
             </div>
 
             <x-admin.field label="Ringkasan (Excerpt)">
-                <x-admin.textarea name="excerpt" rows="2" :value="$program->excerpt ?? ''" placeholder="Ringkasan singkat program" />
+                <x-admin.textarea name="excerpt" rows="2" :value="$program->excerpt ?? ''" placeholder="Ringkasan Singkat Program" />
             </x-admin.field>
 
             <x-admin.field label="Deskripsi Lengkap">
@@ -36,12 +36,12 @@
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar Program" :path="$program->image ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
+                <x-admin.image-upload name="image" label="Gambar Program" :path="$program->image ?? null" hint="JPG/PNG/WebP" />
                 <div class="space-y-4 pt-1">
                     <x-admin.field label="Urutan">
                         <x-admin.input type="number" name="sort_order" :value="$program->sort_order ?? 0" />
                     </x-admin.field>
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$program->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$program->is_active ?? true" />
                 </div>
             </div>
         </div>

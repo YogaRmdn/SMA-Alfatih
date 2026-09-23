@@ -16,7 +16,7 @@ class StaffRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'position' => ['required', 'string', 'max:255'],
             'education' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],

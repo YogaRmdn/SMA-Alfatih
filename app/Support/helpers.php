@@ -1,10 +1,25 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+const UPLOAD_ALLOWED_EXTENSIONS = [
+    'jpg', 'jpeg', 'png', 'webp', 'avif', 'gif',
+    'ico', 'mp4', 'webm',
+    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip',
+];
+
 if (! function_exists('upload_file')) {
     /**
-     * Simpan file upload ke storage dan kembalikan path.
+     * Simpan file upload ke storage dengan ekstensi aman (dari whitelist server-side)
+     * dan kembalikan path.
      *
-     * @param  \Illuminate\Http\UploadedFile|string|null  $file
+     * Ekstensi file selalu ditentukan ulang di sisi server (guessExtension),
+     * bukan dari nama file yang dikirim klien, untuk mencegah eksekusi
+     * script berbahaya (mis. polyglot yang dikirim sebagai .php).
+     *
+     * @param  UploadedFile|string|null  $file
      */
     function upload_file(mixed $file, string $directory, string $disk = 'public'): ?string
     {
@@ -12,15 +27,23 @@ if (! function_exists('upload_file')) {
             return $file;
         }
 
-        return $file->store($directory, $disk);
+        $extension = strtolower((string) ($file->guessExtension() ?? $file->getClientOriginalExtension()));
+
+        if (! in_array($extension, UPLOAD_ALLOWED_EXTENSIONS, true)) {
+            throw new InvalidArgumentException('Jenis file tidak diizinkan untuk diunggah.');
+        }
+
+        $filename = Str::random(40).'.'.$extension;
+
+        return $file->storeAs($directory, $filename, $disk);
     }
 }
 
 if (! function_exists('delete_file')) {
     function delete_file(?string $path, string $disk = 'public'): void
     {
-        if ($path && \Illuminate\Support\Facades\Storage::disk($disk)->exists($path)) {
-            \Illuminate\Support\Facades\Storage::disk($disk)->delete($path);
+        if ($path && Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
         }
     }
 }

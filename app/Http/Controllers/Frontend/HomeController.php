@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Achievement;
 use App\Models\Album;
 use App\Models\Announcement;
+use App\Models\Banner;
 use App\Models\Contact;
 use App\Models\Extracurricular;
 use App\Models\Facility;
 use App\Models\News;
+use App\Models\Page;
 use App\Models\Partner;
 use App\Models\Program;
-use App\Models\Slider;
 use App\Models\Teacher;
 use App\Models\Testimonial;
 
@@ -22,8 +22,9 @@ class HomeController extends Controller
     {
         $contact = Contact::first();
 
-        $sliders = Slider::query()
+        $heroBanners = Banner::query()
             ->where('is_active', true)
+            ->where('position', 'hero')
             ->orderBy('sort_order')
             ->get();
 
@@ -47,12 +48,6 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $achievements = Achievement::query()
-            ->where('is_active', true)
-            ->orderBy('year', 'desc')
-            ->limit(8)
-            ->get();
-
         $testimonials = Testimonial::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -74,26 +69,47 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        $stats = [
-            'teachers' => Teacher::query()->where('is_active', true)->count(),
-            'achievements' => Achievement::query()->where('is_active', true)->count(),
-            'extracurriculars' => Extracurricular::query()->where('is_active', true)->count(),
-            'students' => 600,
-        ];
+        $prestasiPhotos = collect(range(1, 11))->map(fn (int $n): array => [
+            'url' => "/img/{$n}.jpeg",
+            'caption' => 'Dokumentasi Prestasi Siswa',
+        ])->all();
+
+        $headmaster = Teacher::query()
+            ->where('is_active', true)
+            ->where('position', 'LIKE', '%Kepala Sekolah%')
+            ->latest()
+            ->first();
+
+        if (! $headmaster) {
+            $headmaster = (object) ['name' => 'Ilham Dwitama Haeba, Ph.D.', 'photo' => null];
+        }
+
+        $teachers = Teacher::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $profilPages = Page::query()
+            ->whereIn('slug', ['tentang-sejarah', 'visi-misi', 'struktur-organisasi', 'sambutan-kepala-sekolah'])
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('slug');
 
         return view('frontend.home', compact(
             'contact',
-            'sliders',
+            'heroBanners',
             'announcements',
             'programs',
             'facilities',
             'extracurriculars',
-            'achievements',
             'testimonials',
             'partners',
             'news',
             'albums',
-            'stats'
+            'prestasiPhotos',
+            'headmaster',
+            'teachers',
+            'profilPages'
         ));
     }
 }

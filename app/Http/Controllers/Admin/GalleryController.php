@@ -6,9 +6,40 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GalleryRequest;
 use App\Models\Album;
 use App\Models\Gallery;
+use App\Traits\HasDeleteAll;
 
 class GalleryController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Gallery::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
+
+    public function deleteAll()
+    {
+        Album::query()->chunkById(200, function ($albums) {
+            foreach ($albums as $album) {
+                delete_file($album->cover);
+                $album->forceDelete();
+            }
+        });
+
+        Gallery::query()->chunkById(200, function ($galleries) {
+            foreach ($galleries as $gallery) {
+                delete_file($gallery->image);
+                $gallery->forceDelete();
+            }
+        });
+
+        return back()->with('success', 'Semua galeri & album berhasil dihapus.');
+    }
     public function index()
     {
         $galleries = Gallery::query()
@@ -63,6 +94,9 @@ class GalleryController extends Controller
         }
 
         if ($data['type'] !== 'photo') {
+            if ($gallery->image) {
+                delete_file($gallery->image);
+            }
             $data['image'] = null;
         }
 

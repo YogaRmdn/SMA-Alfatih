@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementRequest;
 use App\Models\Announcement;
+use App\Traits\HasDeleteAll;
 
 class AnnouncementController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Announcement::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['attachment'];
+    }
     public function index()
     {
         $announcements = Announcement::query()

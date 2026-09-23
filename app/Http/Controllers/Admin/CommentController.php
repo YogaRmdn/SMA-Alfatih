@@ -4,10 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Traits\HasDeleteAll;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Comment::class;
+    }
     public function index()
     {
         $comments = Comment::query()

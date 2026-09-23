@@ -18,7 +18,7 @@ class AchievementRequest extends FormRequest
             'category' => ['nullable', 'string', 'max:255'],
             'rank' => ['nullable', 'string', 'max:255'],
             'year' => ['nullable', 'integer', 'min:1990', 'max:' . (now()->year + 1)],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],

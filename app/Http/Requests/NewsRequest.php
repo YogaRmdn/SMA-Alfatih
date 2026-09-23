@@ -20,7 +20,7 @@ class NewsRequest extends FormRequest
             'category_id' => ['nullable', 'exists:categories,id'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
-            'thumbnail' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'thumbnail' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'is_published' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
         ];
@@ -32,7 +32,6 @@ class NewsRequest extends FormRequest
             'title.required' => 'Judul berita wajib diisi.',
             'content.required' => 'Isi berita wajib diisi.',
             'thumbnail.image' => 'Thumbnail harus berupa gambar.',
-            'thumbnail.max' => 'Ukuran thumbnail maksimal 4 MB.',
         ];
     }
 }

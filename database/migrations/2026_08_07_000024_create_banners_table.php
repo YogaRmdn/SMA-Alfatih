@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->string('image');
             $table->string('link')->nullable();
-            $table->string('position')->default('top'); // top | bottom | side
+            $table->string('position')->default('top'); // top | hero | bottom | side
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

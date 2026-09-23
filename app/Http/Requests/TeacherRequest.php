@@ -17,7 +17,7 @@ class TeacherRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'subject' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
             'education' => ['nullable', 'string', 'max:255'],

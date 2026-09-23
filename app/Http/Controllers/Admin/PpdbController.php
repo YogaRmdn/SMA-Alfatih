@@ -4,11 +4,31 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ppdb;
+use App\Traits\HasDeleteAll;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class PpdbController extends Controller
 {
+    use HasDeleteAll;
+
+    public function deleteAll()
+    {
+        Ppdb::query()->chunkById(200, function ($registrations) {
+            foreach ($registrations as $ppdb) {
+                foreach ($ppdb->documents as $document) {
+                    delete_file($document->file_path, 'local');
+                    $document->delete();
+                }
+
+                delete_file($ppdb->photo, 'local');
+                $ppdb->forceDelete();
+            }
+        });
+
+        return back()->with('success', 'Semua data pendaftar PPDB beserta dokumennya berhasil dihapus.');
+    }
     public function index()
     {
         $registrations = Ppdb::query()
@@ -53,14 +73,31 @@ class PpdbController extends Controller
         return back()->with('success', "Status pendaftaran {$ppdb->full_name} berhasil diubah menjadi {$ppdb->statusLabel()}.");
     }
 
+    public function document(Ppdb $ppdb, string $type)
+    {
+        $allowed = ['photo', 'kk', 'birth_certificate', 'diploma', 'report_card'];
+
+        abort_unless(in_array($type, $allowed, true), 404);
+
+        $disk = Storage::disk('local');
+
+        $path = $type === 'photo'
+            ? $ppdb->photo
+            : $ppdb->documents()->where('type', $type)->value('file_path');
+
+        abort_unless($path && $disk->exists($path), 404);
+
+        return $disk->response($path);
+    }
+
     public function destroy(Ppdb $ppdb)
     {
         foreach ($ppdb->documents as $document) {
-            delete_file($document->file_path);
+            delete_file($document->file_path, 'local');
             $document->delete();
         }
 
-        delete_file($ppdb->photo);
+        delete_file($ppdb->photo, 'local');
         $ppdb->delete();
 
         return redirect()->route('admin.ppdb.index')->with('success', 'Data pendaftaran berhasil dihapus.');

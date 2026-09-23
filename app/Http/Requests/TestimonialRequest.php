@@ -17,7 +17,7 @@ class TestimonialRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
             'alumni_year' => ['nullable', 'integer', 'min:1980', 'max:' . now()->year],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'content' => ['required', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],

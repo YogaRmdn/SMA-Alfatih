@@ -16,7 +16,7 @@ class FacilityRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'icon' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],

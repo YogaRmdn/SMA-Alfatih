@@ -3,12 +3,13 @@
 @section('title', 'Kelola Album')
 
 @section('content')
-<x-admin.page-header title="Kelola Album" subtitle="Kelompokkan foto dan video ke dalam album">
+<x-admin.page-header title="Kelola Album" subtitle="Kelompokkan Foto dan Video ke dalam Album">
     <x-slot:button>
         <a href="{{ route('admin.albums.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Tambah Album
         </a>
+        <x-admin.delete-all :route="'admin.albums.delete-all'" message="Semua album beserta foto/video galeri di dalamnya akan dihapus permanen. Lanjutkan?" />
     </x-slot:button>
 </x-admin.page-header>
 

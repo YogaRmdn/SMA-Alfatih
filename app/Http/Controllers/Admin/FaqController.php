@@ -5,9 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FaqRequest;
 use App\Models\Faq;
+use App\Traits\HasDeleteAll;
 
 class FaqController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Faq::class;
+    }
     public function index()
     {
         $faqs = Faq::query()

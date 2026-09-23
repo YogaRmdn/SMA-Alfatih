@@ -17,7 +17,7 @@ class GalleryRequest extends FormRequest
             'album_id' => ['nullable', 'exists:albums,id'],
             'title' => ['nullable', 'string', 'max:255'],
             'type' => ['required', 'in:photo,video'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'video_url' => ['nullable', 'url', 'max:500'],
             'description' => ['nullable', 'string', 'max:500'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

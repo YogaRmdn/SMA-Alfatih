@@ -6,9 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\NewsRequest;
 use App\Models\Category;
 use App\Models\News;
+use App\Traits\HasDeleteAll;
 
 class NewsController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return News::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['thumbnail'];
+    }
     public function index()
     {
         $news = News::query()

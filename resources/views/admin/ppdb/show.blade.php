@@ -22,7 +22,7 @@
             <div class="grid gap-4 p-6 sm:grid-cols-2">
                 <div class="flex items-center gap-4 sm:col-span-2">
                     @if ($ppdb->photo)
-                        <img src="{{ asset('storage/'.$ppdb->photo) }}" class="h-20 w-20 rounded-xl object-cover" alt="Foto {{ $ppdb->full_name }}">
+                        <img src="{{ route('admin.ppdb.document', [$ppdb, 'photo']) }}" class="h-20 w-20 rounded-xl object-cover" alt="Foto {{ $ppdb->full_name }}">
                     @else
                         <span class="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-100 text-2xl font-bold text-slate-400">{{ mb_substr($ppdb->full_name, 0, 1) }}</span>
                     @endif
@@ -75,7 +75,7 @@
                         <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
                             <span class="text-sm font-medium text-slate-700">{{ $label }}</span>
                             @if (isset($documents[$type]))
-                                <a href="{{ asset('storage/'.$documents[$type]) }}" target="_blank"
+                                <a href="{{ route('admin.ppdb.document', [$ppdb, $type]) }}" target="_blank"
                                    class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                     Unduh
@@ -88,13 +88,13 @@
                 @endforeach
                 @if ($ppdb->documents->where('type', '!=', 'kk')->where('type', '!=', 'birth_certificate')->where('type', '!=', 'diploma')->where('type', '!=', 'report_card')->count())
                     <div class="mt-2 rounded-xl border border-dashed border-slate-200 p-3">
-                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Dokumen lain</p>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Dokumen Lain</p>
                         <div class="space-y-2">
                             @foreach ($ppdb->documents as $doc)
                                 @if (!in_array($doc->type, ['kk', 'birth_certificate', 'diploma', 'report_card']))
                                     <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                                         <span class="text-sm text-slate-600">{{ $doc->name }}</span>
-                                        <a href="{{ asset('storage/'.$doc->file_path) }}" target="_blank" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">Unduh</a>
+                                        <a href="{{ route('admin.ppdb.document', [$ppdb, $doc->type]) }}" target="_blank" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">Unduh</a>
                                     </div>
                                 @endif
                             @endforeach
@@ -123,7 +123,7 @@
                     ]" :value="$ppdb->status" />
                 </x-admin.field>
                 <x-admin.field label="Catatan Admin">
-                    <x-admin.textarea name="admin_notes" rows="3" :value="$ppdb->admin_notes ?? ''" placeholder="Catatan untuk pendaftar (opsional)" />
+                    <x-admin.textarea name="admin_notes" rows="3" :value="$ppdb->admin_notes ?? ''" placeholder="Catatan untuk Pendaftar (Opsional)" />
                 </x-admin.field>
                 <button type="submit" class="w-full rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">Simpan Status</button>
             </form>

@@ -15,9 +15,9 @@ class BannerRequest extends FormRequest
     {
         return [
             'title' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'link' => ['nullable', 'string', 'max:500'],
-            'position' => ['required', 'in:top,bottom,side'],
+            'position' => ['required', 'in:top,hero,bottom,side'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ];

@@ -23,7 +23,7 @@
                     <x-admin.input name="title" :value="$banner->title ?? ''" />
                 </x-admin.field>
                 <x-admin.field label="Posisi" name="position" required>
-                    <x-admin.select name="position" :options="['top' => 'Atas', 'bottom' => 'Bawah', 'side' => 'Samping']" :value="$banner->position ?? 'top'" />
+                    <x-admin.select name="position" :options="['top' => 'Atas', 'hero' => 'Hero (Slider Kanan Halaman Utama)', 'bottom' => 'Bawah', 'side' => 'Samping']" :value="$banner->position ?? 'top'" />
                 </x-admin.field>
             </div>
 
@@ -32,12 +32,12 @@
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar Banner" :path="$banner->image ?? null" hint="JPG/PNG/WebP, maks 8 MB" />
+                <x-admin.image-upload name="image" label="Gambar Banner" :path="$banner->image ?? null" hint="JPG/PNG/WebP" />
                 <div class="space-y-4 pt-1">
                     <x-admin.field label="Urutan">
                         <x-admin.input type="number" name="sort_order" :value="$banner->sort_order ?? 0" />
                     </x-admin.field>
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$banner->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$banner->is_active ?? true" />
                 </div>
             </div>
         </div>

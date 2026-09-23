@@ -26,7 +26,7 @@
                     <x-admin.input name="title" :value="$page->title ?? ''" placeholder="Contoh: Visi & Misi" required />
                 </x-admin.field>
                 <x-admin.field label="Bagian" name="section" required>
-                    <x-admin.select name="section" :options="['profile' => 'Profil', 'akademik' => 'Akademik', 'lainnya' => 'Lainnya']" :value="$page->section ?? null" placeholder="Pilih bagian" required />
+                    <x-admin.select name="section" :options="['profile' => 'Profil', 'akademik' => 'Akademik', 'lainnya' => 'Lainnya']" :value="$page->section ?? null" placeholder="Pilih Bagian" required />
                 </x-admin.field>
             </div>
 
@@ -37,13 +37,13 @@
             <x-admin.field label="Isi Halaman">
                 <textarea name="content" rows="14"
                     class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-                    placeholder="Tulis isi halaman di sini...">{{ old('content', $page->content ?? '') }}</textarea>
+                    placeholder="Tulis Isi Halaman di Sini...">{{ old('content', $page->content ?? '') }}</textarea>
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar" :path="$page->image ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
+                <x-admin.image-upload name="image" label="Gambar" :path="$page->image ?? null" hint="JPG/PNG/WebP" />
                 <div class="pt-1">
-                    <x-admin.checkbox name="is_active" label="Tampilkan di website" :checked="$page->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Tampilkan di Website" :checked="$page->is_active ?? true" />
                 </div>
             </div>
         </div>

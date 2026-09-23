@@ -23,10 +23,10 @@
         <div class="space-y-5 p-6">
             <div class="grid gap-5 md:grid-cols-2">
                 <x-admin.field label="Nama Lengkap" name="name" required>
-                    <x-admin.input name="name" :value="$user->name ?? ''" placeholder="Nama lengkap user" required />
+                    <x-admin.input name="name" :value="$user->name ?? ''" placeholder="Nama Lengkap User" required />
                 </x-admin.field>
                 <x-admin.field label="Role" name="role_id" required>
-                    <x-admin.select name="role_id" :options="$roles->pluck('name', 'id')" :value="$user->role_id ?? null" placeholder="Pilih role" required />
+                    <x-admin.select name="role_id" :options="$roles->pluck('name', 'id')" :value="$user->role_id ?? null" placeholder="Pilih Role" required />
                 </x-admin.field>
             </div>
 

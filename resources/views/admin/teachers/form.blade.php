@@ -54,8 +54,8 @@
                 </x-admin.field>
             </div>
 
-            <x-admin.image-upload name="photo" label="Foto Guru" :path="$teacher->photo ?? null" hint="JPG/PNG/WebP, maks 4 MB" />
-            <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$teacher->is_active ?? true" />
+            <x-admin.image-upload name="photo" label="Foto Guru" :path="$teacher->photo ?? null" hint="JPG/PNG/WebP" />
+            <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$teacher->is_active ?? true" />
         </div>
     </div>
 

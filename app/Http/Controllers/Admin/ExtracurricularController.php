@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExtracurricularRequest;
 use App\Models\Extracurricular;
+use App\Traits\HasDeleteAll;
 
 class ExtracurricularController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Extracurricular::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
     public function index()
     {
         $extracurriculars = Extracurricular::query()

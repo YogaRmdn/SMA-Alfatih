@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramRequest;
 use App\Models\Program;
+use App\Traits\HasDeleteAll;
 
 class ProgramController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Program::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
     public function index()
     {
         $programs = Program::query()

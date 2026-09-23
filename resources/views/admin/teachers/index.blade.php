@@ -3,12 +3,13 @@
 @section('title', 'Data Guru')
 
 @section('content')
-<x-admin.page-header title="Data Guru" subtitle="Kelola data guru dan tenaga pendidik">
+<x-admin.page-header title="Data Guru" subtitle="Kelola Data Guru dan Tenaga Pendidik">
     <x-slot:button>
         <a href="{{ route('admin.teachers.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Tambah Guru
         </a>
+        <x-admin.delete-all :route="'admin.teachers.delete-all'" message="Semua data guru beserta fotonya akan dihapus secara permanen. Lanjutkan?" />
     </x-slot:button>
 </x-admin.page-header>
 

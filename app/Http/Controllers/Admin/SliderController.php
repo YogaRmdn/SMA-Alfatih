@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SliderRequest;
 use App\Models\Slider;
+use App\Traits\HasDeleteAll;
 
 class SliderController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Slider::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
     public function index()
     {
         $sliders = Slider::query()

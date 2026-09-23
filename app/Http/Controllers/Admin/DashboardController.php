@@ -17,6 +17,16 @@ class DashboardController extends Controller
     {
         $tableExists = fn (string $table) => Schema::hasTable($table);
 
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+
+        $dateFormat = function (string $column, string $fmt, string $alias) use ($isSqlite) {
+            if ($isSqlite) {
+                return DB::raw(sprintf("strftime('%s', %s) as %s", $fmt, $column, $alias));
+            }
+
+            return DB::raw(sprintf('DATE_FORMAT(%s, "%s") as %s', $column, $fmt, $alias));
+        };
+
         $stats = [
             'news' => $tableExists('news') ? News::count() : 0,
             'teachers' => $tableExists('teachers') ? Teacher::count() : 0,
@@ -27,23 +37,41 @@ class DashboardController extends Controller
 
         $ppdbChart = $tableExists('ppdb')
             ? Ppdb::query()
-                ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
-                ->where('created_at', '>=', now()->subMonths(6))
+                ->select($dateFormat('created_at', '%Y-%m', 'month'), DB::raw('count(*) as total'))
+                ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
                 ->groupBy('month')
                 ->orderBy('month')
                 ->pluck('total', 'month')
                 ->toArray()
             : [];
 
+        // Pastikan semua 6 bulan terakhir muncul di grafik, diisi 0 bila kosong
+        if ($tableExists('ppdb')) {
+            for ($i = 5; $i >= 0; $i--) {
+                $key = now()->subMonths($i)->format('Y-m');
+                $ppdbChart[$key] = $ppdbChart[$key] ?? 0;
+            }
+            ksort($ppdbChart);
+        }
+
         $visitorChart = $tableExists('visitor_logs')
             ? VisitorLog::query()
-                ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") as day'), DB::raw('count(*) as total'))
-                ->where('created_at', '>=', now()->subDays(14))
+                ->select($dateFormat('created_at', '%Y-%m-%d', 'day'), DB::raw('count(*) as total'))
+                ->where('created_at', '>=', now()->subDays(6)->startOfDay())
                 ->groupBy('day')
                 ->orderBy('day')
                 ->pluck('total', 'day')
                 ->toArray()
             : [];
+
+        // Pastikan semua 7 hari terakhir muncul di grafik, diisi 0 bila kosong
+        if ($tableExists('visitor_logs')) {
+            for ($i = 6; $i >= 0; $i--) {
+                $key = now()->subDays($i)->format('Y-m-d');
+                $visitorChart[$key] = $visitorChart[$key] ?? 0;
+            }
+            ksort($visitorChart);
+        }
 
         $ppdbByStatus = $tableExists('ppdb')
             ? Ppdb::query()

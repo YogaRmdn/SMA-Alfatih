@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PartnerRequest;
 use App\Models\Partner;
+use App\Traits\HasDeleteAll;
 
 class PartnerController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Partner::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['logo'];
+    }
     public function index()
     {
         $partners = Partner::query()

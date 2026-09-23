@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Ppdb extends Model
 {
@@ -15,6 +16,7 @@ class Ppdb extends Model
 
     protected $fillable = [
         'registration_number',
+        'access_code',
         'full_name',
         'gender',
         'birth_place',
@@ -73,10 +75,10 @@ class Ppdb extends Model
     {
         return match ($this->status) {
             'pending' => 'bg-amber-100 text-amber-700',
-            'verified' => 'bg-sky-100 text-sky-700',
-            'lulus_administrasi' => 'bg-indigo-100 text-indigo-700',
+            'verified' => 'bg-emerald-100 text-emerald-700',
+            'lulus_administrasi' => 'bg-orange-100 text-orange-700',
             'rejected' => 'bg-red-100 text-red-700',
-            'accepted' => 'bg-emerald-100 text-emerald-700',
+            'accepted' => 'bg-emerald-600 text-white',
             default => 'bg-slate-100 text-slate-700',
         };
     }
@@ -84,13 +86,20 @@ class Ppdb extends Model
     public static function generateRegistrationNumber(): string
     {
         $year = now()->format('Y');
-        $last = static::query()
+        $prefix = 'PPDB-'.$year.'-';
+
+        $latest = static::query()
             ->whereYear('created_at', $year)
             ->orderByDesc('id')
             ->value('registration_number');
 
-        $seq = $last ? ((int) substr($last, -4)) + 1 : 1;
+        $sequence = $latest ? ((int) substr($latest, strlen($prefix))) + 1 : 1;
 
-        return 'PPDB-'.$year.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    public static function generateAccessCode(): string
+    {
+        return strtoupper(Str::random(8));
     }
 }

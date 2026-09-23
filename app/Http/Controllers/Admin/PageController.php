@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PageRequest;
 use App\Models\Page;
+use App\Traits\HasDeleteAll;
 
 class PageController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Page::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
     public function index()
     {
         $pages = Page::query()

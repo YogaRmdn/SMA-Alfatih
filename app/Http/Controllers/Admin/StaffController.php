@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StaffRequest;
 use App\Models\Staff;
+use App\Traits\HasDeleteAll;
 
 class StaffController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Staff::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['photo'];
+    }
     public function index()
     {
         $staffs = Staff::query()

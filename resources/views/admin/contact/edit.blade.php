@@ -3,7 +3,7 @@
 @section('title', 'Pengaturan Kontak')
 
 @section('content')
-<x-admin.page-header title="Pengaturan Kontak" subtitle="Kelola informasi kontak dan lokasi sekolah"></x-admin.page-header>
+<x-admin.page-header title="Pengaturan Kontak" subtitle="Kelola Informasi Kontak dan Lokasi Sekolah"></x-admin.page-header>
 
 <form method="POST" action="{{ route('admin.contact.update', $contact) }}" class="mx-auto max-w-3xl space-y-6">
     @csrf

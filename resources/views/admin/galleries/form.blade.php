@@ -3,13 +3,16 @@
 @section('title', isset($gallery) ? 'Edit Item Galeri' : 'Tambah Item Galeri')
 
 @section('content')
+@php
+    $galleryType = in_array(old('type', $gallery->type ?? 'photo'), ['photo', 'video'], true) ? old('type', $gallery->type ?? 'photo') : 'photo';
+@endphp
 <x-admin.page-header title="{{ isset($gallery) ? 'Edit Item Galeri' : 'Tambah Item Galeri' }}">
     <x-slot:button>
         <a href="{{ route('admin.galleries.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Kembali</a>
     </x-slot:button>
 </x-admin.page-header>
 
-<form method="POST" action="{{ isset($gallery) ? route('admin.galleries.update', $gallery) : route('admin.galleries.store') }}" enctype="multipart/form-data" class="mx-auto max-w-2xl space-y-6" x-data="{ type: '{{ old('type', $gallery->type ?? 'photo') }}' }">
+<form method="POST" action="{{ isset($gallery) ? route('admin.galleries.update', $gallery) : route('admin.galleries.store') }}" enctype="multipart/form-data" class="mx-auto max-w-2xl space-y-6" x-data="{ type: @js($galleryType) }">
     @csrf
     @isset($gallery) @method('PUT') @endisset
 
@@ -38,7 +41,7 @@
             </x-admin.field>
 
             <div x-show="type === 'photo'" x-cloak>
-                <x-admin.image-upload name="image" label="File Foto" :path="$gallery->image ?? null" hint="JPG/PNG/WebP, maks 8 MB" />
+                <x-admin.image-upload name="image" label="File Foto" :path="$gallery->image ?? null" hint="JPG/PNG/WebP" />
             </div>
 
             <div x-show="type === 'video'" x-cloak>
@@ -56,7 +59,7 @@
                     <x-admin.input type="number" name="sort_order" :value="$gallery->sort_order ?? 0" />
                 </x-admin.field>
                 <div class="pt-1">
-                    <x-admin.checkbox name="is_active" label="Aktif tampil di website" :checked="$gallery->is_active ?? true" />
+                    <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$gallery->is_active ?? true" />
                 </div>
             </div>
         </div>

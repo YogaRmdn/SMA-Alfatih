@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FacilityRequest;
 use App\Models\Facility;
+use App\Traits\HasDeleteAll;
 
 class FacilityController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Facility::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['image'];
+    }
     public function index()
     {
         $facilities = Facility::query()

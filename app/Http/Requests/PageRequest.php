@@ -19,7 +19,7 @@ class PageRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('pages', 'slug')->ignore($this->page)],
             'section' => ['required', 'in:profile,akademik,lainnya'],
             'content' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

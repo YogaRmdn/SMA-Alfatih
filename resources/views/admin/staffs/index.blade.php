@@ -3,17 +3,46 @@
 @section('title', 'Data Staff')
 
 @section('content')
-<x-admin.page-header title="Data Staff" subtitle="Kelola data staff tata usaha dan administrasi">
+<x-admin.page-header title="Data Staff" subtitle="Kelola Data Staff Tata Usaha dan Administrasi">
     <x-slot:button>
         <a href="{{ route('admin.staffs.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Tambah Staff
         </a>
+        <x-admin.delete-all :route="'admin.staffs.delete-all'" message="Semua data staff beserta fotonya akan dihapus secara permanen. Lanjutkan?" />
     </x-slot:button>
 </x-admin.page-header>
 
 <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div class="overflow-x-auto">
+    <div class="divide-y divide-slate-100 lg:hidden">
+        @forelse ($staffs as $staff)
+            <div class="flex items-center gap-3 p-4">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-50 text-sm font-bold text-emerald-700">
+                    @if ($staff->photo)
+                        <img src="{{ asset('storage/'.$staff->photo) }}" class="h-full w-full object-cover" alt="{{ $staff->name }}" loading="lazy">
+                    @else
+                        {{ strtoupper(substr($staff->name, 0, 1)) }}
+                    @endif
+                </span>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-semibold text-slate-800">{{ $staff->name }}</p>
+                    <p class="text-xs text-slate-500">{{ $staff->position }} {{ $staff->education ? '&middot; '.$staff->education : '' }}</p>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                    @if ($staff->is_active)
+                        <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[12px] font-semibold text-emerald-700">Aktif</span>
+                    @else
+                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[12px] font-semibold text-slate-600">Nonaktif</span>
+                    @endif
+                    <x-admin.actions :item="$staff" route-prefix="admin.staffs" />
+                </div>
+            </div>
+        @empty
+            <div class="px-5 py-12 text-center text-sm text-slate-400">Belum ada data staff.</div>
+        @endforelse
+    </div>
+
+    <div class="hidden overflow-x-auto lg:block">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wider text-slate-500">

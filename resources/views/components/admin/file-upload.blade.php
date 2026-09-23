@@ -1,7 +1,7 @@
-@props(['name', 'label', 'value' => null, 'path' => null, 'accept' => '*', 'hint' => null])
+@props(['name', 'label', 'value' => null, 'path' => null, 'accept' => '*', 'hint' => null, 'required' => false])
 
 <div>
-    <label class="mb-1.5 block text-sm font-medium text-slate-700">{{ $label }}</label>
+    <label for="{{ $name }}" class="mb-1.5 block text-sm font-medium text-slate-700">{{ $label }} @if ($required)<span class="text-red-500">*</span>@endif</label>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
         @if ($value || $path)
             <a href="{{ $path ? asset('storage/'.$path) : (is_string($value) ? asset('storage/'.$value) : '#') }}" target="_blank"

@@ -3,19 +3,20 @@
 @section('title', 'Kelola Program')
 
 @section('content')
-<x-admin.page-header title="Kelola Program" subtitle="Kelola program unggulan, tahfizh, akademik, dan IT">
+<x-admin.page-header title="Kelola Program" subtitle="Kelola Program Unggulan, Tahfizh, Akademik, dan IT">
     <x-slot:button>
         <a href="{{ route('admin.programs.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
             Tambah Program
         </a>
+        <x-admin.delete-all :route="'admin.programs.delete-all'" message="Semua program beserta gambarnya akan dihapus secara permanen. Lanjutkan?" />
     </x-slot:button>
 </x-admin.page-header>
 
 <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <div class="border-b border-slate-100 p-4">
         <form method="GET" class="flex flex-col gap-3 md:flex-row md:items-center">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari program..."
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari Program..."
                    class="rounded-lg border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 md:w-64">
             <select name="type" class="rounded-lg border-slate-300 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                 <option value="">Semua Tipe</option>
@@ -28,7 +29,38 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="divide-y divide-slate-100 lg:hidden">
+        @forelse ($programs as $program)
+            <div class="flex items-start gap-3 p-4">
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-slate-800">
+                        <a href="{{ route('admin.programs.edit', $program) }}" class="hover:text-emerald-700">{{ $program->name }}</a>
+                    </p>
+                    @if ($program->image)
+                        <img src="{{ asset('storage/'.$program->image) }}" class="mt-2 h-20 w-28 rounded-lg object-cover" alt="{{ $program->name }}" loading="lazy">
+                    @endif
+                    @php
+                        $typeColors = ['unggulan' => 'bg-amber-100 text-amber-700', 'tahfizh' => 'bg-emerald-100 text-emerald-700', 'akademik' => 'bg-sky-100 text-sky-700', 'it' => 'bg-violet-100 text-violet-700'];
+                    @endphp
+                    <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span class="rounded-full px-2.5 py-0.5 text-[12px] font-semibold capitalize {{ $typeColors[$program->type] ?? 'bg-slate-100 text-slate-600' }}">{{ $program->type }}</span>
+                        @if ($program->is_active)
+                            <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[12px] font-semibold text-emerald-700">Aktif</span>
+                        @else
+                            <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[12px] font-semibold text-slate-600">Nonaktif</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex shrink-0 items-center gap-1.5">
+                    <x-admin.actions :item="$program" route-prefix="admin.programs" />
+                </div>
+            </div>
+        @empty
+            <div class="px-5 py-12 text-center text-sm text-slate-400">Belum ada program.</div>
+        @endforelse
+    </div>
+
+    <div class="hidden overflow-x-auto lg:block">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-slate-100 text-left text-xs uppercase tracking-wider text-slate-500">

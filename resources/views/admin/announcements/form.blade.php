@@ -26,14 +26,14 @@
                 <x-admin.field label="Tanggal Terbit">
                     <x-admin.input type="datetime-local" name="published_at" :value="isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : ''" />
                 </x-admin.field>
-                <x-admin.file-upload name="attachment" label="Lampiran PDF" :path="$announcement->attachment ?? null" accept=".pdf,.doc,.docx" hint="PDF/DOC/DOCX, maks 10 MB" />
+                <x-admin.file-upload name="attachment" label="Lampiran PDF" :path="$announcement->attachment ?? null" accept=".pdf,.doc,.docx" hint="PDF/DOC/DOCX" />
             </div>
 
             <x-admin.field label="Isi Pengumuman" name="content" required>
                 <x-admin.textarea name="content" rows="6" :value="$announcement->content ?? ''" required />
             </x-admin.field>
 
-            <x-admin.checkbox name="is_published" label="Publikasikan pengumuman ini" :checked="$announcement->is_published ?? true" />
+            <x-admin.checkbox name="is_published" label="Publikasikan Pengumuman ini" :checked="$announcement->is_published ?? true" />
         </div>
     </div>
 

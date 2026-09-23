@@ -16,7 +16,7 @@ class PasswordController extends Controller
     public function update(ChangePasswordRequest $request)
     {
         auth()->user()->update([
-            'password' => Hash::make($request->validated('current_password')),
+            'password' => Hash::make($request->validated('password')),
         ]);
 
         return back()->with('success', 'Password berhasil diubah.');

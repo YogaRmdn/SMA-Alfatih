@@ -5,9 +5,41 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AlbumRequest;
 use App\Models\Album;
+use App\Models\Gallery;
+use App\Traits\HasDeleteAll;
 
 class AlbumController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Album::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['cover'];
+    }
+
+    public function deleteAll()
+    {
+        Gallery::query()->chunkById(200, function ($galleries) {
+            foreach ($galleries as $gallery) {
+                delete_file($gallery->image);
+                $gallery->forceDelete();
+            }
+        });
+
+        Album::query()->chunkById(200, function ($albums) {
+            foreach ($albums as $album) {
+                delete_file($album->cover);
+                $album->forceDelete();
+            }
+        });
+
+        return back()->with('success', 'Semua album & galeri berhasil dihapus.');
+    }
     public function index()
     {
         $albums = Album::query()
