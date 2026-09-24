@@ -30,7 +30,7 @@
         <style>.reveal { opacity: 1 !important; transform: none !important; transition: none !important; }</style>
     </noscript>
 </head>
-<body class="min-h-screen bg-white font-sans text-slate-700 antialiased" x-data="{ mobileOpen: false }">
+<body class="min-h-screen bg-white font-sans text-slate-700 antialiased" x-data="{ mobileOpen: false, openSub: null }">
 
     @php
         $siteName = $settings['site_name'] ?? config('app.name');
@@ -143,7 +143,7 @@
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                     Login
                 </a>
-                <button @click="mobileOpen = !mobileOpen" class="shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden">
+                <button @click="mobileOpen = !mobileOpen; if (!mobileOpen) openSub = null" class="shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 xl:hidden">
                     <svg x-show="!mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     <svg x-show="mobileOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -155,10 +155,21 @@
             <nav class="grid gap-1">
                 @foreach ($nav as $item)
                     @if (!empty($item['children']))
-                        <div class="px-3 pb-1 pt-2 text-xs font-bold uppercase tracking-wider text-emerald-700">{{ $item['label'] }}</div>
-                        @foreach ($item['children'] as $child)
-                            <a href="{{ $child['href'] }}" @click="mobileOpen = false" class="rounded-lg px-3 py-2.5 pl-6 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800">{{ $child['label'] }}</a>
-                        @endforeach
+                        <div class="overflow-hidden rounded-xl">
+                            <button type="button"
+                                    @click="openSub = openSub === {{ $loop->index }} ? null : {{ $loop->index }}"
+                                    :aria-expanded="openSub === {{ $loop->index }} ? 'true' : 'false'"
+                                    :class="openSub === {{ $loop->index }} ? 'bg-emerald-50 text-emerald-800' : 'text-slate-800'"
+                                    class="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition hover:bg-emerald-50 hover:text-emerald-800">
+                                {{ $item['label'] }}
+                                <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200" :class="openSub === {{ $loop->index }} ? 'rotate-180 text-emerald-700' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            <div x-show="openSub === {{ $loop->index }}" x-cloak x-transition origin-top class="grid gap-0.5 pb-1.5">
+                                @foreach ($item['children'] as $child)
+                                    <a href="{{ $child['href'] }}" @click="mobileOpen = false; openSub = null" class="rounded-lg px-4 py-2.5 pl-6 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-800">{{ $child['label'] }}</a>
+                                @endforeach
+                            </div>
+                        </div>
                     @else
                         <a href="{{ $item['href'] }}" @click="mobileOpen = false" class="rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800">{{ $item['label'] }}</a>
                     @endif
