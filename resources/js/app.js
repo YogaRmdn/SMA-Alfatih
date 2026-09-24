@@ -72,14 +72,19 @@ Alpine.data('teachersCarousel', () => ({
             return;
         }
 
-        while ((track.scrollWidth / 2) < container.clientWidth * 1.1 && track.children.length < 40) {
+        const setW = Math.round(firstSet.getBoundingClientRect().width) || 1;
+        const viewW = container.clientWidth;
+
+        const needed = Math.max(2, Math.ceil((setW + viewW) / setW));
+
+        while (track.children.length < needed && track.children.length < 40) {
             const clone = firstSet.cloneNode(true);
             clone.setAttribute('aria-hidden', 'true');
             track.appendChild(clone);
         }
 
         this.track = track;
-        this.setW = Math.round(firstSet.getBoundingClientRect().width + 24);
+        this.setW = setW;
 
         this.play();
     },
