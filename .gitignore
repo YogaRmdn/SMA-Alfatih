@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# File sementara & dump DB (jangan masuk repo)
+sma_alfatih.sql
+/storage/framework/lsp-*.php
