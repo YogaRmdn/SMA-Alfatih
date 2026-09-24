@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Serve /storage files directly from storage/app/public as a fallback
+    # when the symlink from `artisan storage:link` is unavailable or not
+    # followed by the web server (common on shared hosting).
+    RewriteRule ^storage/(.+)$ ../storage/app/public/$1 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
