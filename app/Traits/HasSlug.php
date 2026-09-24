@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 trait HasSlug
@@ -13,6 +14,22 @@ trait HasSlug
                 $model->slug = static::uniqueSlug($model);
             }
         });
+
+        static::updating(function ($model) {
+            if (! in_array('slug', $model->getFillable(), true)) {
+                return;
+            }
+
+            $incoming = $model->slug;
+
+            if ($incoming === null || trim((string) $incoming) === '') {
+                $model->slug = $model->getOriginal('slug');
+
+                if (empty($model->slug)) {
+                    $model->slug = static::uniqueSlug($model);
+                }
+            }
+        });
     }
 
     protected static function uniqueSlug($model): string
@@ -21,11 +38,22 @@ trait HasSlug
         $slug = $base ?: Str::random(8);
         $count = 2;
 
-        while (static::where('slug', $slug)->exists()) {
+        while (static::slugExists($slug)) {
             $slug = $base.'-'.$count++;
         }
 
         return $slug;
+    }
+
+    protected static function slugExists(string $slug): bool
+    {
+        $query = static::where('slug', $slug);
+
+        if (in_array(SoftDeletes::class, class_uses_recursive(static::class), true)) {
+            $query->withTrashed();
+        }
+
+        return $query->exists();
     }
 
     public function getRouteKeyName(): string

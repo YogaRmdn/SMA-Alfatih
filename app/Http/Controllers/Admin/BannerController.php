@@ -23,7 +23,6 @@ class BannerController extends Controller
     public function index()
     {
         $banners = Banner::query()
-            ->orderBy('position')
             ->orderBy('sort_order')
             ->paginate(10)
             ->withQueryString();
@@ -39,6 +38,7 @@ class BannerController extends Controller
     public function store(BannerRequest $request)
     {
         $data = $request->validated();
+        $data['position'] = $data['position'] ?? 'hero';
         $data['is_active'] = $request->boolean('is_active');
         $data['image'] = upload_file($request->file('image'), 'banners');
 
@@ -64,6 +64,7 @@ class BannerController extends Controller
         }
 
         $data['is_active'] = $request->boolean('is_active');
+        $data['position'] = $data['position'] ?? ($banner->position ?? 'hero');
         $banner->update($data);
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner berhasil diperbarui.');

@@ -9,6 +9,7 @@ use App\Models\Ppdb;
 use App\Models\PpdbDocument;
 use App\Models\Setting;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PpdbController extends Controller
@@ -77,6 +78,8 @@ class PpdbController extends Controller
         $ppdb = null;
         $exception = null;
 
+        DB::beginTransaction();
+
         for ($attempt = 0; $attempt < 5; $attempt++) {
             $data['registration_number'] = Ppdb::generateRegistrationNumber();
 
@@ -93,6 +96,7 @@ class PpdbController extends Controller
         }
 
         if (! $ppdb) {
+            DB::rollBack();
             delete_file($data['photo'], self::PRIVATE_DISK);
             foreach ($documentPaths as $path) {
                 delete_file($path, self::PRIVATE_DISK);
@@ -110,6 +114,8 @@ class PpdbController extends Controller
                 'file_path' => $path,
             ]);
         }
+
+        DB::commit();
 
         session(['ppdb_registration_id' => $ppdb->id]);
 

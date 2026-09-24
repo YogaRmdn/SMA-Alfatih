@@ -18,25 +18,28 @@
             <h3 class="font-semibold text-slate-800">Detail Banner</h3>
         </div>
         <div class="space-y-5 p-6">
-            <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.field label="Judul">
-                    <x-admin.input name="title" :value="$banner->title ?? ''" />
-                </x-admin.field>
-                <x-admin.field label="Posisi" name="position" required>
-                    <x-admin.select name="position" :options="['top' => 'Atas', 'hero' => 'Hero (Slider Kanan Halaman Utama)', 'bottom' => 'Bawah', 'side' => 'Samping']" :value="$banner->position ?? 'top'" />
-                </x-admin.field>
-            </div>
+            <x-admin.field label="Judul">
+                <x-admin.input name="title" :value="$banner->title ?? ''" />
+            </x-admin.field>
 
-            <x-admin.field label="Link Tujuan">
-                <x-admin.input name="link" :value="$banner->link ?? ''" placeholder="https://..." />
+            <x-admin.field label="Link (opsional)" name="link" hint="URL tujuan saat banner diklik, mis. https://ppdb.alfatih.sch.id">
+                <x-admin.input type="url" name="link" :value="$banner->link ?? ''" placeholder="https://..." />
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar Banner" :path="$banner->image ?? null" hint="JPG/PNG/WebP" />
+                <x-admin.field label="Posisi" name="position">
+                    <x-admin.select name="position" :options="['hero' => 'Hero (Slider Utama)', 'top' => 'Top (Paling Atas)', 'bottom' => 'Bottom (Paling Bawah)', 'side' => 'Side (Samping)']" :value="$banner->position ?? 'hero'" />
+                </x-admin.field>
                 <div class="space-y-4 pt-1">
                     <x-admin.field label="Urutan">
                         <x-admin.input type="number" name="sort_order" :value="$banner->sort_order ?? 0" />
                     </x-admin.field>
+                </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.image-upload name="image" label="Gambar Banner" :path="$banner->image ?? null" hint="JPG/PNG/WebP" />
+                <div class="space-y-4 pt-1">
                     <x-admin.checkbox name="is_active" label="Aktif Tampil di Website" :checked="$banner->is_active ?? true" />
                 </div>
             </div>

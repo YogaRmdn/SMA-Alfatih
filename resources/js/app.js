@@ -125,6 +125,87 @@ Alpine.data('teachersCarousel', () => ({
     },
 }));
 
+Alpine.data('prestasiSlider', (photos) => ({
+    photos,
+    page: 0,
+    offset: 0,
+    perView: 1,
+    viewportWidth: 0,
+    paused: false,
+    timer: null,
+    startX: 0,
+
+    get pages() {
+        return Math.max(1, Math.ceil(this.photos.length / this.perView));
+    },
+
+    init() {
+        this.measure();
+        this.start();
+        window.addEventListener('resize', () => this.measure(), { passive: true });
+    },
+
+    onTouchStart(e) {
+        this.startX = e.changedTouches[0].clientX;
+    },
+
+    onTouchEnd(e) {
+        const dx = e.changedTouches[0].clientX - this.startX;
+        if (Math.abs(dx) < 40) return;
+        if (dx < 0) this.next(); else this.prev();
+    },
+
+    measure() {
+        const viewport = this.$refs.viewport;
+        if (!viewport) return;
+        this.viewportWidth = viewport.clientWidth;
+        this.perView = this.computePerView();
+        this.page = Math.min(this.page, this.pages - 1);
+        this.refreshOffset();
+    },
+
+    computePerView() {
+        const w = window.innerWidth;
+        if (w >= 1280) return 4;
+        if (w >= 1024) return 3;
+        if (w >= 640) return 2;
+        return 1;
+    },
+
+    next() {
+        this.page = this.page < this.pages - 1 ? this.page + 1 : 0;
+        this.refreshOffset();
+    },
+
+    prev() {
+        this.page = this.page > 0 ? this.page - 1 : this.pages - 1;
+        this.refreshOffset();
+    },
+
+    go(i) {
+        this.page = i;
+        this.refreshOffset();
+    },
+
+    refreshOffset() {
+        this.offset = this.page * (this.viewportWidth / this.perView);
+    },
+
+    start() {
+        this.stop();
+        this.timer = setInterval(() => {
+            if (!this.paused) this.next();
+        }, 4200);
+    },
+
+    stop() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+    },
+}));
+
 Alpine.start();
 
 const revealElements = () => document.querySelectorAll('.reveal:not(.reveal-shown)');

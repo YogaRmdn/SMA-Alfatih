@@ -19,7 +19,7 @@ class PageRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('pages', 'slug')->ignore($this->page)],
             'section' => ['required', 'in:profile,akademik,lainnya'],
             'content' => ['nullable', 'string'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }
@@ -29,6 +29,7 @@ class PageRequest extends FormRequest
         return [
             'title.required' => 'Judul halaman wajib diisi.',
             'section.required' => 'Bagian halaman wajib dipilih.',
+            'image.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

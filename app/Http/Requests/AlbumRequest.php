@@ -18,7 +18,7 @@ class AlbumRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('albums', 'slug')->ignore($this->album)],
             'description' => ['nullable', 'string'],
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
         ];
     }
 
@@ -26,6 +26,7 @@ class AlbumRequest extends FormRequest
     {
         return [
             'title.required' => 'Judul album wajib diisi.',
+            'cover.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

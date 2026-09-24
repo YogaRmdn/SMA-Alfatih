@@ -80,8 +80,8 @@
             <x-admin.field label="YouTube">
                 <x-admin.input type="url" name="youtube" :value="$settings['youtube'] ?? ''" placeholder="https://youtube.com/..." />
             </x-admin.field>
-            <x-admin.field label="Twitter / X">
-                <x-admin.input type="url" name="twitter" :value="$settings['twitter'] ?? ''" placeholder="https://twitter.com/..." />
+            <x-admin.field label="TikTok">
+                <x-admin.input type="url" name="tiktok" :value="$settings['tiktok'] ?? ''" placeholder="https://tiktok.com/@..." />
             </x-admin.field>
             <x-admin.field label="Link Video Profil" name="video_profile" hint="URL video profil (YouTube/Drive) untuk halaman profil.">
                 <x-admin.input type="url" name="video_profile" :value="$settings['video_profile'] ?? ''" placeholder="https://youtube.com/embed/..." />
@@ -128,6 +128,10 @@
                     <x-admin.field label="Paragraf Profil">
                         <x-admin.textarea name="profil_text" rows="3" :value="$settings['profil_text'] ?? ''" placeholder="Deskripsi singkat tentang sekolah..." />
                     </x-admin.field>
+                </div>
+                <div class="mt-5 grid gap-5 md:grid-cols-2">
+                    <x-admin.image-upload name="profil_photo_1" label="Foto Gedung Kiri" :path="$settings['profil_photo_1'] ?? null" hint="Foto kiri pada bagian 'Selamat Datang' di beranda." fit="1200x1200" />
+                    <x-admin.image-upload name="profil_photo_2" label="Foto Gedung Kanan" :path="$settings['profil_photo_2'] ?? null" hint="Foto kanan pada bagian 'Selamat Datang' di beranda." fit="1200x1200" />
                 </div>
             </div>
 

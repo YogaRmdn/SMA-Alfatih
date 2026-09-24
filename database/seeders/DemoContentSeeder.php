@@ -12,7 +12,6 @@ use App\Models\Gallery;
 use App\Models\News;
 use App\Models\Partner;
 use App\Models\Program;
-use App\Models\Slider;
 use App\Models\Teacher;
 use App\Models\Testimonial;
 use Illuminate\Database\Seeder;
@@ -32,7 +31,6 @@ class DemoContentSeeder extends Seeder
         $this->seedPartners();
         $this->seedAlbums();
         $this->seedTeachers();
-        $this->seedSliders();
     }
 
     protected function seedCategories(): void
@@ -295,28 +293,6 @@ class DemoContentSeeder extends Seeder
                     'position' => $position,
                     'subject' => $subject,
                     'education' => 'S1/S2',
-                    'sort_order' => $sort,
-                    'is_active' => true,
-                ]
-            );
-        }
-    }
-
-    protected function seedSliders(): void
-    {
-        $items = [
-            ['Selamat Datang di SMA IT Tahfizh Al-Fatih', 'Mencetak generasi Qur\'ani, berprestasi & berkarakter', 'img/Siang 3.0.png'],
-            ['Program Tahfizh 30 Juz', 'Gabung dan wujudkan impian bersama kami', 'img/Siang 3.0. Kanan.png'],
-        ];
-
-        foreach ($items as $sort => [$title, $subtitle, $image]) {
-            Slider::updateOrCreate(
-                ['title' => $title],
-                [
-                    'subtitle' => $subtitle,
-                    'image' => $image,
-                    'button_text' => 'Daftar PPDB',
-                    'button_link' => '/ppdb',
                     'sort_order' => $sort,
                     'is_active' => true,
                 ]

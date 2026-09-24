@@ -33,7 +33,7 @@
             </x-admin.field>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.image-upload name="image" label="Gambar" :path="$page->image ?? null" hint="JPG/PNG/WebP" />
+                <x-admin.image-upload name="image" label="Gambar" :path="$page->image ?? null" hint="JPG/PNG/WebP - foto diskalakan otomatis (maks. 1600x1200)." fit="1600x1200" />
                 <div class="pt-1">
                     <x-admin.checkbox name="is_active" label="Tampilkan di Website" :checked="$page->is_active ?? true" />
                 </div>

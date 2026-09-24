@@ -48,6 +48,7 @@ class NewsController extends Controller
     public function store(NewsRequest $request)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
 
         $data['user_id'] = auth()->id();
         $data['is_published'] = $request->boolean('is_published');
@@ -71,6 +72,7 @@ class NewsController extends Controller
     public function update(NewsRequest $request, News $news)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
 
         if ($request->hasFile('thumbnail')) {
             delete_file($news->thumbnail);
@@ -91,6 +93,7 @@ class NewsController extends Controller
 
     public function destroy(News $news)
     {
+        delete_file($news->thumbnail);
         $news->delete();
 
         return redirect()->route('admin.news.index')->with('success', 'Berita berhasil dihapus.');

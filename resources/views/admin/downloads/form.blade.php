@@ -31,7 +31,7 @@
                 <x-admin.textarea name="description" rows="3" :value="$download->description ?? ''" />
             </x-admin.field>
 
-            <x-admin.file-upload name="file" label="File" required :path="$download->file ?? null" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" hint="PDF/DOC/JPG/PNG/XLS" />
+            <x-admin.file-upload name="file" label="File" required :path="$download->file ?? null" accept=".pdf" hint="Khusus file PDF" />
         </div>
     </div>
 

@@ -22,27 +22,29 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
         ]);
 
-        $superAdmin = Role::where('slug', 'super_admin')->first();
-        $admin = Role::where('slug', 'admin')->first();
+        $superAdminRoleId = Role::where('slug', 'super_admin')->value('id');
+        $adminRoleId = Role::where('slug', 'admin')->value('id');
 
-        User::updateOrCreate(
+        $superAdmin = User::updateOrCreate(
             ['email' => 'superadmin@alfatih.sch.id'],
             [
-                'role_id' => $superAdmin->id,
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );
+        $superAdmin->role_id = $superAdminRoleId;
+        $superAdmin->save();
 
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@alfatih.sch.id'],
             [
-                'role_id' => $admin->id,
                 'name' => 'Admin Sekolah',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );
+        $admin->role_id = $adminRoleId;
+        $admin->save();
     }
 }

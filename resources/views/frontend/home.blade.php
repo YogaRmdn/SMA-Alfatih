@@ -32,7 +32,6 @@
     $heroSlides = $heroBanners->map(fn ($b) => [
         'url' => img_url($b->image),
         'caption' => $b->title,
-        'link' => $b->link,
     ])->values()->all();
 @endphp
 
@@ -103,13 +102,7 @@
                      :style="'transform: translateX(-' + (current * 100) + '%)'">
                     @foreach ($heroSlides as $i => $slide)
                         <div class="relative h-full w-full shrink-0">
-                            @if (! empty($slide['link']))
-                                <a href="{{ $slide['link'] }}" target="_blank" rel="noopener" aria-label="{{ $slide['caption'] }}" class="block h-full w-full">
-                                    <img src="{{ $slide['url'] }}" alt="{{ $slide['caption'] }}" loading="lazy" class="h-full w-full object-cover">
-                                </a>
-                            @else
-                                <img src="{{ $slide['url'] }}" alt="{{ $slide['caption'] }}" loading="lazy" class="h-full w-full object-cover">
-                            @endif
+                            <img src="{{ $slide['url'] }}" alt="{{ $slide['caption'] }}" loading="lazy" class="h-full w-full object-cover">
                         </div>
                     @endforeach
                 </div>
@@ -168,8 +161,8 @@
         <x-reveal type="left">
             <div class="relative">
                 <div class="grid grid-cols-2 gap-4">
-                    <img src="{{ asset('img/Siang 3.0. Kiri.png') }}" alt="Gedung {{ $siteName }}" class="h-64 w-full rounded-2xl object-cover shadow-xl lg:h-80">
-                    <img src="{{ asset('img/Siang 3.0. Kanan.png') }}" alt="Gedung {{ $siteName }}" class="mt-10 h-64 w-full rounded-2xl object-cover shadow-xl lg:h-80">
+                    <img src="{{ img_url($settings['profil_photo_1'] ?? null, 'img/Siang 3.0. Kiri.png') }}" alt="Gedung {{ $siteName }}" class="h-64 w-full rounded-2xl object-cover shadow-xl lg:h-80">
+                    <img src="{{ img_url($settings['profil_photo_2'] ?? null, 'img/Siang 3.0. Kanan.png') }}" alt="Gedung {{ $siteName }}" class="mt-10 h-64 w-full rounded-2xl object-cover shadow-xl lg:h-80">
                 </div>
                 <div class="absolute -bottom-6 left-6 flex items-center gap-3 rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 px-5 py-4 text-white shadow-xl">
                     <svg class="h-8 w-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
@@ -188,12 +181,6 @@
             <p class="mt-5 text-sm leading-relaxed text-slate-600 sm:text-base">
                 {{ $settings['site_description'] ?? '' }}
             </p>
-            @php
-                    $profileAbout = $profilPages['tentang-sejarah'] ?? null;
-                @endphp
-            <p class="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600 sm:text-base">
-                {{ $profileAbout?->content ? str_replace('{site_name}', $siteName, $profileAbout->content) : ($settings['profil_text'] ?? 'Kami berkomitmen mencetak generasi Qur\'ani yang berprestasi, berkarakter, dan siap menghadapi tantangan zaman. Dengan perpaduan kurikulum nasional dan pendidikan tahfizh Al-Qur\'an, setiap peserta didik dibina secara holistik — intelektual, spiritual, dan sosial.') }}
-            </p>
             <ul class="mt-6 space-y-3">
                 @foreach ([
                     'Pembinaan Tahfizh Al-Qur\'an intensif',
@@ -209,10 +196,16 @@
                     </li>
                 @endforeach
             </ul>
-            <a href="#program" class="sheen mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-700/30 transition hover:brightness-110">
-                Kenali Program Kami
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </a>
+            <div class="mt-8 flex flex-wrap items-center gap-4">
+                <a href="#program" class="sheen inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-700/30 transition hover:brightness-110">
+                    Kenali Program Kami
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="{{ route('profil.tentang') }}" class="inline-flex items-center gap-2 rounded-xl border border-emerald-700 px-6 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
+                    Baca Selengkapnya
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H8m9 0v9" /></svg>
+                </a>
+            </div>
             </div>
         </x-reveal>
     </div>
@@ -544,19 +537,22 @@
 
 {{-- ============ FASILITAS ============ --}}
 @if ($facilities->isNotEmpty())
-    <section id="fasilitas" class="bg-white py-20 lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 lg:px-6">
+    <section id="fasilitas" class="relative overflow-hidden bg-cover bg-center py-20 lg:py-24 lg:bg-fixed" style="background-image: url('{{ asset('img/16.jpeg') }}')">
+        <div class="absolute inset-0 bg-gradient-to-b from-emerald-950/90 via-emerald-950/80 to-emerald-950/95"></div>
+        <div class="aurora -left-16 top-10 h-72 w-72 bg-emerald-400/20"></div>
+        <div class="aurora -right-16 bottom-10 h-80 w-80 bg-amber-400/15" style="animation-delay:-8s"></div>
+        <div class="relative mx-auto max-w-7xl px-4 lg:px-6">
             <x-reveal>
             <div class="mx-auto max-w-2xl text-center">
-                <span class="text-gradient text-xs font-bold uppercase tracking-widest">{{ $settings['fasilitas_eyebrow'] ?? 'Sarana & Prasarana' }}</span>
-                <h2 class="text-gradient mt-2 text-3xl font-extrabold lg:text-4xl">{{ $settings['fasilitas_title'] ?? 'Fasilitas Sekolah' }}</h2>
-                <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ $settings['fasilitas_subtitle'] ?? 'Fasilitas lengkap untuk mendukung kenyamanan dan keberhasilan belajar peserta didik.' }}</p>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400">{{ $settings['fasilitas_eyebrow'] ?? 'Sarana & Prasarana' }}</span>
+                <h2 class="text-gradient-light mt-2 text-3xl font-extrabold lg:text-4xl">{{ $settings['fasilitas_title'] ?? 'Fasilitas Sekolah' }}</h2>
+                <p class="mt-4 text-sm leading-relaxed text-emerald-50/90">{{ $settings['fasilitas_subtitle'] ?? 'Fasilitas lengkap untuk mendukung kenyamanan dan keberhasilan belajar peserta didik.' }}</p>
             </div>
         </x-reveal>
             <div class="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 sm:gap-6">
                 @foreach ($facilities as $facility)
-                    <x-reveal :delay="$loop->index * 90" class="h-full">
-                    <div class="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-200 text-center transition duration-300 hover:shadow-xl {{ $facility->image ? 'px-4 py-8 sm:px-8 sm:py-12' : 'bg-slate-50 px-4 py-6 hover:border-emerald-600 hover:bg-white hover:shadow-lg sm:px-8 sm:py-10' }}">
+                        <x-reveal :delay="$loop->index * 90" class="h-full {{ $loop->last && $facilities->count() % 2 !== 0 ? 'col-span-full' : '' }}">
+                            <div class="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-slate-200 text-center transition duration-300 hover:shadow-xl {{ $facility->image ? 'px-4 py-8 sm:px-8 sm:py-12' : 'glass px-4 py-6 hover:border-emerald-300 hover:bg-white/95 hover:shadow-lg sm:px-8 sm:py-10' }}">
                         @if ($facility->image)
                             <div class="absolute inset-0 scale-105 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-110" style="background-image: url('{{ img_url($facility->image) }}')"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40"></div>
@@ -590,9 +586,26 @@
                 <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ $settings['ekskul_subtitle'] ?? 'Wadah pengembangan bakat, minat, dan soft skill peserta didik di luar jam pelajaran.' }}</p>
             </div>
         </x-reveal>
-            <div class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:gap-5">
+            @php
+                $ekskulCount = $extracurriculars->count();
+                $ekskulRem2 = $ekskulCount % 2;
+                $ekskulRem3 = $ekskulCount % 3;
+            @endphp
+            <div class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-6 lg:gap-5">
                 @foreach ($extracurriculars as $ekskul)
-                    <x-reveal :delay="$loop->index * 70">
+                    @php
+                        $ekskulLast = $loop->last;
+                        $ekskulSecondLast = $loop->index === $ekskulCount - 2;
+                        $ekskulSpan = ($ekskulLast && $ekskulRem2 !== 0) ? 'col-span-full ' : '';
+                        if ($ekskulRem3 === 1 && $ekskulLast) {
+                            $ekskulSpan .= 'md:col-span-full';
+                        } elseif ($ekskulRem3 === 2 && ($ekskulLast || $ekskulSecondLast)) {
+                            $ekskulSpan .= 'md:col-span-3';
+                        } else {
+                            $ekskulSpan .= 'md:col-span-2';
+                        }
+                    @endphp
+                    <x-reveal :delay="$loop->index * 70" class="h-full {{ $ekskulSpan }}">
                     <div class="group flex h-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3.5 transition hover:border-amber-400 hover:shadow-md sm:px-4">
                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-emerald-950 shadow-sm shadow-amber-500/30 transition group-hover:from-amber-300 group-hover:to-orange-400 sm:h-10 sm:w-10">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ekskul->icon ?: $defaultIcon }}" /></svg>
@@ -636,21 +649,47 @@
                     <h3 class="text-gradient mt-2 text-2xl font-extrabold lg:text-3xl">{{ $settings['prestasi_title'] ?? 'Galeri Prestasi' }}</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ $content('prestasi_subtitle', 'Momen kebanggaan siswa-siswi {site_name} dalam berbagai ajang perlombaan.') }}</p>
                 </div>
-            </x-reveal>
-                <div class="mt-10 flex flex-wrap justify-center gap-3">
-                    @foreach ($prestasiPhotos as $i => $photo)
-                        <x-reveal :delay="$i * 70" type="zoom"
-                                  class="w-[calc(50%-0.375rem)] sm:w-[calc(33.333%-0.5rem)] lg:w-[calc(25%-0.5625rem)]">
-                        <button type="button" @click="open({{ $i }})"
-                                class="group relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm transition hover:-translate-y-1 hover:shadow-lg" aria-label="{{ $photo['caption'] }}">
-                            <img src="{{ asset($photo['url']) }}" alt="{{ $photo['caption'] }}" loading="lazy"
-                                 class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
-                            <span class="absolute inset-0 grid place-items-center bg-emerald-950/0 transition group-hover:bg-emerald-950/30">
-                                <svg class="h-8 w-8 text-white opacity-0 transition group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6" /></svg>
-                            </span>
-                        </button>
-                        </x-reveal>
-                    @endforeach
+                </x-reveal>
+
+                <div x-data="prestasiSlider({{ Js::from($prestasiPhotos) }})" @mouseenter="paused = true" @mouseleave="paused = false"
+                     class="relative mt-10">
+                    <div x-ref="viewport" class="overflow-hidden" @touchstart.passive="onTouchStart($event)" @touchend.passive="onTouchEnd($event)">
+                        <div x-ref="track" :style="'transform: translateX(-' + offset + 'px)'"
+                             class="flex transition-transform duration-700 ease-out">
+                            <template x-for="(photo, i) in photos" :key="i">
+                                <div class="w-full shrink-0 px-2.5 sm:w-1/2 lg:w-1/3 xl:w-1/4">
+                                    <button type="button" @click="open(i)"
+                                            class="group relative aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm transition hover:-translate-y-1 hover:shadow-lg" :aria-label="photo.caption">
+                                        <img :src="photo.url" :alt="photo.caption" loading="lazy"
+                                             class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                        <span class="absolute inset-0 grid place-items-center bg-emerald-950/0 transition group-hover:bg-emerald-950/30">
+                                            <svg class="h-8 w-8 text-white opacity-0 transition group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6" /></svg>
+                                        </span>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <template x-if="pages > 1">
+                        <div>
+                            <button type="button" @click="prev()"
+                                    class="absolute -left-4 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 p-2.5 text-slate-600 shadow-lg backdrop-blur transition hover:bg-emerald-600 hover:text-white lg:flex" aria-label="Sebelumnya">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+                            <button type="button" @click="next()"
+                                    class="absolute -right-4 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/90 p-2.5 text-slate-600 shadow-lg backdrop-blur transition hover:bg-emerald-600 hover:text-white lg:flex" aria-label="Berikutnya">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                            <div class="mt-6 flex justify-center gap-2">
+                                <template x-for="(dot, d) in Array.from({ length: pages })" :key="d">
+                                    <button type="button" @click="go(d)"
+                                            class="h-2 rounded-full transition-all duration-300"
+                                            :class="d === page ? 'w-7 bg-emerald-600' : 'w-2 bg-slate-300 hover:bg-slate-400'" :aria-label="'Halaman ' + (d + 1)"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
                 </div>
 
                 <div x-show="show" x-cloak x-transition.opacity.duration.200ms
@@ -753,11 +792,32 @@
                 <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ $settings['galeri_subtitle'] ?? 'Momen-momen berharga dalam kehidupan sekolah kami.' }}</p>
             </div>
         </x-reveal>
+            @php
+                $gIdx = 0;
+                $gTotal = $albums->sum(fn ($album) => $album->galleries->count() > 8 ? 8 : $album->galleries->count());
+                $smRem = $gTotal % 2;
+                $mdRem = $gTotal % 4;
+            @endphp
             <div class="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4">
                 @foreach ($albums as $album)
                     @foreach ($album->galleries->take($album->galleries->count() > 8 ? 8 : $album->galleries->count()) as $gallery)
-                        <x-reveal type="zoom" :delay="$loop->index * 80">
-                        <div class="group relative aspect-square overflow-hidden rounded-2xl">
+                        @php
+                            $gIdx++;
+                            $span = '';
+                            if ($smRem === 1 && $gIdx === $gTotal) {
+                                $span .= ' col-span-2';
+                            }
+                            if ($mdRem > 0 && $gIdx > $gTotal - $mdRem) {
+                                $span .= match ($mdRem) {
+                                    1 => ' md:col-span-4',
+                                    2 => ' md:col-span-2',
+                                    3 => $gIdx === $gTotal - 2 ? ' md:col-span-2' : '',
+                                    default => '',
+                                };
+                            }
+                        @endphp
+                        <x-reveal type="zoom" :delay="$loop->index * 80" class="{{ $span }}">
+                        <div class="group relative aspect-video overflow-hidden rounded-2xl">
                             <img src="{{ img_url($gallery->image, 'img/Siang 3.0.png') }}" alt="{{ $gallery->title ?? $album->title }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-110">
                             <div class="absolute inset-0 flex items-end bg-gradient-to-t from-emerald-950/80 via-transparent to-transparent p-3 opacity-0 transition group-hover:opacity-100">
                                 <span class="text-xs font-semibold text-white">{{ $gallery->title ?? $album->title }}</span>

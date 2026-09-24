@@ -16,7 +16,7 @@ class StaffRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'position' => ['required', 'string', 'max:255'],
             'education' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
@@ -31,6 +31,7 @@ class StaffRequest extends FormRequest
         return [
             'name.required' => 'Nama staff wajib diisi.',
             'position.required' => 'Jabatan staff wajib diisi.',
+            'photo.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

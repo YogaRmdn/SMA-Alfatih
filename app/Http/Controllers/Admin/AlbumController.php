@@ -24,21 +24,18 @@ class AlbumController extends Controller
 
     public function deleteAll()
     {
-        Gallery::query()->chunkById(200, function ($galleries) {
-            foreach ($galleries as $gallery) {
-                delete_file($gallery->image);
-                $gallery->forceDelete();
-            }
-        });
+        if (Gallery::exists()) {
+            return back()->with('error', 'Tidak dapat menghapus semua album karena masih ada foto/video di dalam galeri. Hapus galeri terlebih dahulu.');
+        }
 
         Album::query()->chunkById(200, function ($albums) {
             foreach ($albums as $album) {
                 delete_file($album->cover);
-                $album->forceDelete();
+                $album->delete();
             }
         });
 
-        return back()->with('success', 'Semua album & galeri berhasil dihapus.');
+        return back()->with('success', 'Semua album berhasil dihapus.');
     }
     public function index()
     {

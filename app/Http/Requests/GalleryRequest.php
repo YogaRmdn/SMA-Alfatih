@@ -17,7 +17,7 @@ class GalleryRequest extends FormRequest
             'album_id' => ['nullable', 'exists:albums,id'],
             'title' => ['nullable', 'string', 'max:255'],
             'type' => ['required', 'in:photo,video'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'video_url' => ['nullable', 'url', 'max:500'],
             'description' => ['nullable', 'string', 'max:500'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -30,6 +30,7 @@ class GalleryRequest extends FormRequest
         return [
             'type.required' => 'Tipe galeri wajib dipilih.',
             'video_url.url' => 'URL video tidak valid.',
+            'image.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

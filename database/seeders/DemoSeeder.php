@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Achievement;
 use App\Models\Album;
 use App\Models\Announcement;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Extracurricular;
@@ -55,6 +56,7 @@ class DemoSeeder extends Seeder
     {
         $this->seedContact();
         $this->seedCategories();
+        $this->seedBanners();
         $this->seedPrograms();
         $this->seedFacilities();
         $this->seedExtracurriculars();
@@ -83,6 +85,25 @@ class DemoSeeder extends Seeder
     {
         foreach (['Akademik', 'Tahfizh & Tahsin', 'Kegiatan', 'Prestasi', 'PPDB'] as $name) {
             Category::firstOrCreate(['name' => $name]);
+        }
+    }
+
+    protected function seedBanners(): void
+    {
+        $banners = [
+            ['Foto Utama Sekolah', '/img/12.png', 'hero', 1],
+            ['Suasana Belajar', '/img/13.jpeg', 'hero', 2],
+            ['Kegiatan Tahfizh', '/img/14.png', 'hero', 3],
+            ['Lingkungan Asrama', '/img/15.png', 'hero', 4],
+        ];
+
+        foreach ($banners as [$title, $image, $position, $sort]) {
+            Banner::firstOrCreate(['title' => $title], [
+                'image' => $image,
+                'position' => $position,
+                'sort_order' => $sort,
+                'is_active' => true,
+            ]);
         }
     }
 
@@ -180,7 +201,7 @@ class DemoSeeder extends Seeder
             Teacher::updateOrCreate(['name' => $name], [
                 'position' => $position,
                 'subject' => $subject,
-                'photo' => "/img/teachers/{$slug}.svg",
+                'photo' => null,
                 'nip' => $nip,
                 'education' => $education,
                 'email' => $email,
@@ -233,18 +254,18 @@ class DemoSeeder extends Seeder
     protected function seedPartners(): void
     {
         $partners = [
-            ['Universitas Prima Indonesia', 'partners/unpri.png'],
-            ['Universitas Islam Madinah', 'partners/uim.png'],
-            ['Universitas Riau Indonesia', 'partners/uri.png'],
-            ['Erlangga Buku', 'partners/erlangga.png'],
-            ['Bimbel Brawijaya', 'partners/bimbel.png'],
-            ['Tring Pegadaian', 'partners/tring.png'],
-            ['BRK', 'partners/brk.png'],
+            ['Universitas Prima Indonesia', 'unpri'],
+            ['Universitas Islam Madinah', 'uim'],
+            ['Universitas Riau Indonesia', 'uri'],
+            ['Erlangga Buku', 'erlangga'],
+            ['Bimbel Brawijaya', 'bimbel'],
+            ['Tring Pegadaian', 'tring'],
+            ['BRK', 'brk'],
         ];
 
-        foreach ($partners as [$name, $logo]) {
+        foreach ($partners as [$name, $slug]) {
             Partner::firstOrCreate(['name' => $name], [
-                'logo' => $logo,
+                'logo' => "/img/partners/{$slug}.svg",
                 'website' => null,
                 'is_active' => true,
             ]);

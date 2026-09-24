@@ -19,7 +19,7 @@ class ProgramRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('programs', 'slug')->ignore($this->program)],
             'type' => ['required', 'in:unggulan,tahfizh,akademik,it'],
             'icon' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -32,6 +32,7 @@ class ProgramRequest extends FormRequest
         return [
             'name.required' => 'Nama program wajib diisi.',
             'type.required' => 'Tipe program wajib dipilih.',
+            'image.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

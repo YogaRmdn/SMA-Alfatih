@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\PasswordController;
+use App\Http\Controllers\Frontend\DownloadController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\NewsController;
 use App\Http\Controllers\Frontend\PpdbController;
+use App\Http\Controllers\Frontend\ProfilePageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,13 @@ Route::get('berita/{news:slug}', [NewsController::class, 'show'])->name('news.sh
 Route::post('berita/{news:slug}/komentar', [NewsController::class, 'comment'])
     ->middleware('throttle:10,1')
     ->name('news.comment');
+
+Route::get('unduhan', [DownloadController::class, 'index'])->name('downloads.index');
+Route::get('unduhan/{download}/unduh', [DownloadController::class, 'download'])->name('downloads.download');
+
+Route::get('tentang-sejarah', [ProfilePageController::class, 'tentang'])->name('profil.tentang');
+Route::get('visi-misi', [ProfilePageController::class, 'visiMisi'])->name('profil.visi-misi');
+Route::get('struktur-organisasi', [ProfilePageController::class, 'struktur'])->name('profil.struktur');
 
 Route::middleware('throttle:20,1')->group(function () {
     Route::get('ppdb', [PpdbController::class, 'create'])->name('ppdb.register');

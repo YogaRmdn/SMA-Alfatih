@@ -34,13 +34,15 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-        User::create([
-            'role_id' => $request->role_id,
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
             'email_verified_at' => now(),
         ]);
+
+        $user->role_id = $request->role_id;
+        $user->save();
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
@@ -54,17 +56,19 @@ class UserController extends Controller
 
     public function update(UserRequest $request, User $user)
     {
-        $data = [
-            'role_id' => $request->role_id,
-            'name' => $request->name,
-            'email' => $request->email,
-        ];
-
-        if ($request->filled('password')) {
-            $data['password'] = $request->password;
+        if ($this->roleChangeLocksOutEveryone($user, (int) $request->role_id)) {
+            return back()->with('error', 'Tidak dapat menghapus atau menurunkan jabatan super admin terakhir.');
         }
 
-        $user->update($data);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role_id = $request->role_id;
+
+        if ($request->filled('password')) {
+            $user->password = $request->password;
+        }
+
+        $user->save();
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
@@ -75,8 +79,33 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
+        if ($this->roleChangeLocksOutEveryone($user, null)) {
+            return back()->with('error', 'Tidak dapat menghapus akun super admin terakhir.');
+        }
+
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
+    }
+
+    /**
+     * Cegah penguncian total: jangan biarkan super admin terakhir
+     * dihapus atau diturunkan jabatannya.
+     */
+    private function roleChangeLocksOutEveryone(User $user, ?int $newRoleId): bool
+    {
+        if (! $user->isSuperAdmin()) {
+            return false;
+        }
+
+        $superAdminRoleId = Role::where('slug', 'super_admin')->value('id');
+
+        if ($superAdminRoleId === $newRoleId) {
+            return false;
+        }
+
+        $totalSuperAdmins = User::where('role_id', $superAdminRoleId)->count();
+
+        return $totalSuperAdmins <= 1;
     }
 }

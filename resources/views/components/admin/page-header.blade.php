@@ -14,7 +14,7 @@
             @endif
         </div>
         @if ($button)
-            <div class="flex shrink-0 flex-wrap items-center gap-2 rounded-2xl bg-white/95 p-2 shadow-sm">
+            <div class="grid w-full gap-2 rounded-2xl bg-white/95 p-2 shadow-sm [&>*]:w-full [&>*]:justify-center sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:[&>*]:w-auto sm:[&>*]:justify-start">
                 {{ $button }}
             </div>
         @endif

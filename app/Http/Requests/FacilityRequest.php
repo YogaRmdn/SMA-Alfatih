@@ -16,7 +16,7 @@ class FacilityRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'icon' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
@@ -27,6 +27,7 @@ class FacilityRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama fasilitas wajib diisi.',
+            'image.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

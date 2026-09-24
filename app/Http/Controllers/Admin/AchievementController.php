@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AchievementRequest;
 use App\Models\Achievement;
+use App\Traits\HasDeleteAll;
 
 class AchievementController extends Controller
 {
+    use HasDeleteAll;
+
+    protected function deleteAllModel(): string
+    {
+        return Achievement::class;
+    }
+
+    protected function deleteAllFileColumns(): array
+    {
+        return ['photo'];
+    }
     public function index()
     {
         $achievements = Achievement::query()

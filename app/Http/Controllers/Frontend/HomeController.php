@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Achievement;
 use App\Models\Album;
 use App\Models\Announcement;
 use App\Models\Banner;
@@ -69,10 +70,19 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        $prestasiPhotos = collect(range(1, 11))->map(fn (int $n): array => [
-            'url' => "/img/{$n}.jpeg",
-            'caption' => 'Dokumentasi Prestasi Siswa',
-        ])->all();
+        $prestasiPhotos = Achievement::query()
+            ->where('is_active', true)
+            ->whereNotNull('photo')
+            ->orderByDesc('year')
+            ->orderBy('sort_order')
+            ->limit(12)
+            ->get()
+            ->map(fn (Achievement $achievement): array => [
+                'url' => asset('storage/'.$achievement->photo),
+                'caption' => $achievement->title,
+            ])
+            ->values()
+            ->all();
 
         $headmaster = Teacher::query()
             ->where('is_active', true)

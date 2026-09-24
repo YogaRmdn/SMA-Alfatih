@@ -9,12 +9,23 @@ use App\Traits\HasDeleteAll;
 
 class CategoryController extends Controller
 {
-    use HasDeleteAll;
+    use HasDeleteAll {
+        deleteAll as traitDeleteAll;
+    }
 
     protected function deleteAllModel(): string
     {
         return Category::class;
     }
+    public function deleteAll()
+    {
+        if (Category::whereHas('news')->exists()) {
+            return back()->with('error', 'Tidak dapat menghapus semua kategori karena masih ada berita yang menggunakan kategori tersebut.');
+        }
+
+        return $this->traitDeleteAll();
+    }
+
     public function index()
     {
         $categories = Category::query()

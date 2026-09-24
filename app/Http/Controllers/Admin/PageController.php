@@ -11,6 +11,13 @@ class PageController extends Controller
 {
     use HasDeleteAll;
 
+    protected const RESERVED_SLUGS = [
+        'tentang-sejarah',
+        'visi-misi',
+        'struktur-organisasi',
+        'sambutan-kepala-sekolah',
+    ];
+
     protected function deleteAllModel(): string
     {
         return Page::class;
@@ -41,6 +48,7 @@ class PageController extends Controller
     public function store(PageRequest $request)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
         $data['is_active'] = $request->boolean('is_active');
         $data['image'] = upload_file($request->file('image'), 'pages');
 
@@ -57,6 +65,11 @@ class PageController extends Controller
     public function update(PageRequest $request, Page $page)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
+
+        if (in_array($page->getOriginal('slug'), self::RESERVED_SLUGS, true)) {
+            $data['slug'] = $page->getOriginal('slug');
+        }
 
         if ($request->hasFile('image')) {
             delete_file($page->image);

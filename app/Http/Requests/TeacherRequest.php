@@ -17,7 +17,7 @@ class TeacherRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nip' => ['nullable', 'string', 'max:50'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'subject' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
             'education' => ['nullable', 'string', 'max:255'],
@@ -32,6 +32,7 @@ class TeacherRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama guru wajib diisi.',
+            'photo.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

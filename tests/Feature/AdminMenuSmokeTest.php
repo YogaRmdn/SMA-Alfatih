@@ -20,13 +20,13 @@ use App\Models\Ppdb;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\Setting;
-use App\Models\Slider;
 use App\Models\Staff;
 use App\Models\Teacher;
 use App\Models\Testimonial;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminMenuSmokeTest extends TestCase
@@ -89,8 +89,6 @@ class AdminMenuSmokeTest extends TestCase
             'extracurriculars.create' => '/admin/extracurriculars/create',
             'programs.index' => '/admin/programs',
             'programs.create' => '/admin/programs/create',
-            'sliders.index' => '/admin/sliders',
-            'sliders.create' => '/admin/sliders/create',
             'banners.index' => '/admin/banners',
             'banners.create' => '/admin/banners/create',
             'downloads.index' => '/admin/downloads',
@@ -110,7 +108,6 @@ class AdminMenuSmokeTest extends TestCase
             'profile.about' => '/admin/profil/tentang-sejarah',
             'profile.visi' => '/admin/profil/visi-misi',
             'profile.structure' => '/admin/profil/struktur-organisasi',
-            'profile.sambutan' => '/admin/profil/sambutan',
             'users.index' => '/admin/users',
             'users.create' => '/admin/users/create',
         ];
@@ -157,8 +154,7 @@ class AdminMenuSmokeTest extends TestCase
         $this->get('/admin')
             ->assertSee('/admin/profil/tentang-sejarah')
             ->assertSee('/admin/profil/visi-misi')
-            ->assertSee('/admin/profil/struktur-organisasi')
-            ->assertSee('/admin/profil/sambutan');
+            ->assertSee('/admin/profil/struktur-organisasi');
     }
 
     public function test_profil_sekolah_sections_create_and_update_pages(): void
@@ -199,8 +195,10 @@ class AdminMenuSmokeTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get('/')->assertSee('SEJARAH-TENTANG-UNIK')
-            ->assertSee('SAMBUTAN-UNIK-KEPALA-SEKOLAH');
+        $this->get('/')
+            ->assertDontSee('SEJARAH-TENTANG-UNIK')
+            ->assertSee('SAMBUTAN-UNIK-KEPALA-SEKOLAH')
+            ->assertSee(route('profil.tentang'));
     }
 
     public function test_teachers_carousel_renders_on_public_home(): void
@@ -215,6 +213,52 @@ class AdminMenuSmokeTest extends TestCase
             ->assertSee('Dewan Guru')
             ->assertSee('Bapak Guru Uji')
             ->assertSee('Guru Matematika');
+    }
+
+    public function test_facility_uploaded_photo_becomes_card_background_on_home(): void
+    {
+        Storage::fake('public');
+
+        Storage::disk('public')->put(
+            'facilities/fasilitas-uji.jpg',
+            file_get_contents(public_path('img/16.jpeg'))
+        );
+
+        Facility::create([
+            'name' => 'Asrama Putra & Putri',
+            'image' => 'facilities/fasilitas-uji.jpg',
+            'is_active' => true,
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Asrama Putra & Putri')
+            ->assertSee('storage/facilities/fasilitas-uji.jpg');
+    }
+
+    public function test_profile_welcome_photos_can_be_set_from_settings(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->superAdmin());
+
+        $this->put('/admin/settings', [
+            'site_name' => 'SMA IT Tahfizh Al-Fatih',
+            'profil_photo_1' => new \Illuminate\Http\UploadedFile(
+                public_path('img/16.jpeg'),
+                'gedung-kiri.jpg',
+                'image/jpeg',
+                null,
+                true
+            ),
+        ])->assertRedirect('/admin/settings');
+
+        $photo = Setting::get('profil_photo_1');
+        $this->assertNotNull($photo);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('storage/settings/'.basename($photo));
     }
 
     /**
@@ -236,7 +280,6 @@ class AdminMenuSmokeTest extends TestCase
             'facilities' => [Facility::class, ['name' => 'Fasilitas Uji']],
             'extracurriculars' => [Extracurricular::class, ['name' => 'Ekskul Uji']],
             'programs' => [Program::class, ['name' => 'Program Uji', 'type' => 'unggulan']],
-            'sliders' => [Slider::class, ['title' => 'Slider Uji']],
             'banners' => [Banner::class, ['title' => 'Banner Uji', 'position' => 'hero']],
             'downloads' => [Download::class, ['title' => 'Unduhan Uji']],
             'testimonials' => [Testimonial::class, ['name' => 'Testimoni Uji', 'content' => 'Isi testimoni uji.']],

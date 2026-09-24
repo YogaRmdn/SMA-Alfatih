@@ -41,7 +41,7 @@
             </x-admin.field>
 
             <div x-show="type === 'photo'" x-cloak>
-                <x-admin.image-upload name="image" label="File Foto" :path="$gallery->image ?? null" hint="JPG/PNG/WebP" />
+                <x-admin.image-upload name="image" label="File Foto" :path="$gallery->image ?? null" hint="JPG/PNG/WebP" resize="1920x1080" />
             </div>
 
             <div x-show="type === 'video'" x-cloak>

@@ -8,10 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('sliders', function (Blueprint $table) {
-            $table->string('image')->nullable()->change();
-        });
-
         Schema::table('banners', function (Blueprint $table) {
             $table->string('image')->nullable()->change();
         });
@@ -19,10 +15,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('sliders', function (Blueprint $table) {
-            $table->string('image')->nullable(false)->change();
-        });
-
         Schema::table('banners', function (Blueprint $table) {
             $table->string('image')->nullable(false)->change();
         });

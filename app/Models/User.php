@@ -20,10 +20,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'role_id',
         'name',
         'email',
         'password',
+        'avatar',
     ];
 
     public function role(): BelongsTo
@@ -44,6 +44,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->hasRole('super_admin', 'admin');
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        return img_url($this->avatar);
     }
 
     /**

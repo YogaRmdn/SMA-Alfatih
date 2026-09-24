@@ -24,21 +24,14 @@ class GalleryController extends Controller
 
     public function deleteAll()
     {
-        Album::query()->chunkById(200, function ($albums) {
-            foreach ($albums as $album) {
-                delete_file($album->cover);
-                $album->forceDelete();
-            }
-        });
-
         Gallery::query()->chunkById(200, function ($galleries) {
             foreach ($galleries as $gallery) {
                 delete_file($gallery->image);
-                $gallery->forceDelete();
+                $gallery->delete();
             }
         });
 
-        return back()->with('success', 'Semua galeri & album berhasil dihapus.');
+        return back()->with('success', 'Semua item galeri berhasil dihapus.');
     }
     public function index()
     {

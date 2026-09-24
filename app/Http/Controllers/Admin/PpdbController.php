@@ -23,7 +23,7 @@ class PpdbController extends Controller
                 }
 
                 delete_file($ppdb->photo, 'local');
-                $ppdb->forceDelete();
+                $ppdb->delete();
             }
         });
 

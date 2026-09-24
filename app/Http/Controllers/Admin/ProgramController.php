@@ -41,6 +41,7 @@ class ProgramController extends Controller
     public function store(ProgramRequest $request)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
         $data['is_active'] = $request->boolean('is_active');
         $data['image'] = upload_file($request->file('image'), 'programs');
 
@@ -57,6 +58,7 @@ class ProgramController extends Controller
     public function update(ProgramRequest $request, Program $program)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
 
         if ($request->hasFile('image')) {
             delete_file($program->image);

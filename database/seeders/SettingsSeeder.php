@@ -22,7 +22,7 @@ class SettingsSeeder extends Seeder
             'instagram' => 'https://www.instagram.com/smaittahfizhalfatih?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==',
             'facebook' => 'https://facebook.com/smaitalfatih',
             'youtube' => 'https://youtube.com/@smaittahfizhal-fatih?si=hziCHzXtdjZSCGL0',
-            'twitter' => null,
+            'tiktok' => null,
             'maps_embed' => null,
             'operational_hours' => 'Senin - Jumat: 07.00 - 16.00 WIB',
             'ppdb_open' => '1',
@@ -38,6 +38,8 @@ class SettingsSeeder extends Seeder
             'profil_title_prefix' => 'Selamat Datang di',
             'profil_badge_1' => 'Al-Qur\'an',
             'profil_badge_2' => 'Sebagai Jantung Kehidupan',
+            'profil_photo_1' => null,
+            'profil_photo_2' => null,
             'profil_text' => 'Kami berkomitmen mencetak generasi Qur\'ani yang berprestasi, berkarakter, dan siap menghadapi tantangan zaman. Dengan perpaduan kurikulum nasional dan pendidikan tahfizh Al-Qur\'an, setiap peserta didik dibina secara holistik — intelektual, spiritual, dan sosial.',
 
             'sambutan_eyebrow' => 'Sambutan',

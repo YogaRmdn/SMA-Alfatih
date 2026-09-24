@@ -26,6 +26,14 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'avatar' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'avatar.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

@@ -20,7 +20,6 @@ use App\Http\Controllers\Admin\PpdbController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SchoolProfileController;
-use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\TestimonialController;
@@ -48,7 +47,6 @@ Route::middleware(['auth', 'verified', 'role:super_admin,admin'])
         Route::delete('facilities/delete-all', [FacilityController::class, 'deleteAll'])->name('facilities.delete-all');
         Route::delete('extracurriculars/delete-all', [ExtracurricularController::class, 'deleteAll'])->name('extracurriculars.delete-all');
         Route::delete('programs/delete-all', [ProgramController::class, 'deleteAll'])->name('programs.delete-all');
-        Route::delete('sliders/delete-all', [SliderController::class, 'deleteAll'])->name('sliders.delete-all');
         Route::delete('banners/delete-all', [BannerController::class, 'deleteAll'])->name('banners.delete-all');
         Route::delete('downloads/delete-all', [DownloadController::class, 'deleteAll'])->name('downloads.delete-all');
         Route::delete('testimonials/delete-all', [TestimonialController::class, 'deleteAll'])->name('testimonials.delete-all');
@@ -69,7 +67,6 @@ Route::middleware(['auth', 'verified', 'role:super_admin,admin'])
         Route::resource('facilities', FacilityController::class)->except('show');
         Route::resource('extracurriculars', ExtracurricularController::class)->except('show');
         Route::resource('programs', ProgramController::class)->except('show');
-        Route::resource('sliders', SliderController::class)->except('show');
         Route::resource('banners', BannerController::class)->except('show');
         Route::resource('downloads', DownloadController::class)->except('show');
         Route::resource('testimonials', TestimonialController::class)->except('show');

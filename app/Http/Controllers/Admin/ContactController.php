@@ -17,6 +17,8 @@ class ContactController extends Controller
 
     public function update(Request $request, Contact $contact)
     {
+        $contact = Contact::query()->firstOrCreate(['id' => 1]);
+
         $validated = $request->validate([
             'address' => ['nullable', 'string', 'max:500'],
             'phone' => ['nullable', 'string', 'max:50'],

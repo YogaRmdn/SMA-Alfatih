@@ -18,7 +18,7 @@ class AnnouncementRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('announcements', 'slug')->ignore($this->announcement)],
             'content' => ['required', 'string'],
-            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx'],
+            'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
             'is_published' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
         ];

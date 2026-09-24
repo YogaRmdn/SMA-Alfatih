@@ -15,7 +15,7 @@ class PartnerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'website' => ['nullable', 'url', 'max:500'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -27,6 +27,7 @@ class PartnerRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama partner wajib diisi.',
+            'logo.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
 }

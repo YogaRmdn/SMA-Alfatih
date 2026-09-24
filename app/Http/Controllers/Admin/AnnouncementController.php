@@ -42,6 +42,7 @@ class AnnouncementController extends Controller
     public function store(AnnouncementRequest $request)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
 
         $data['user_id'] = auth()->id();
         $data['is_published'] = $request->boolean('is_published');
@@ -63,6 +64,7 @@ class AnnouncementController extends Controller
     public function update(AnnouncementRequest $request, Announcement $announcement)
     {
         $data = $request->validated();
+        $data['content'] = sanitize_html($data['content'] ?? null);
 
         if ($request->hasFile('attachment')) {
             delete_file($announcement->attachment);

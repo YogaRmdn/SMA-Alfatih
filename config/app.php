@@ -107,6 +107,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public Registration
+    |--------------------------------------------------------------------------
+    |
+    | Controls whether unauthenticated visitors are allowed to create a new
+    | account via the public /register route. School/staff accounts should be
+    | created by an administrator instead, so this is disabled by default.
+    |
+    */
+
+    'allow_public_registration' => (bool) env('ALLOW_PUBLIC_REGISTRATION', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |

@@ -19,7 +19,8 @@ class DownloadRequest extends FormRequest
             'file' => [
                 $this->isMethod('put') || $this->isMethod('patch') ? 'nullable' : 'required',
                 'file',
-                'mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx',
+                'mimes:pdf',
+                'max:10240',
             ],
             'category' => ['nullable', 'string', 'max:255'],
         ];
@@ -30,7 +31,7 @@ class DownloadRequest extends FormRequest
         return [
             'title.required' => 'Judul file wajib diisi.',
             'file.required' => 'File wajib diunggah.',
-            'file.mimes' => 'File harus berupa PDF, DOC, JPG, atau PNG.',
+            'file.mimes' => 'File harus berupa PDF.',
         ];
     }
 }

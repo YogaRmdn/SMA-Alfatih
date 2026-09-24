@@ -11,7 +11,6 @@
             ['label' => 'Fasilitas', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'route' => 'admin.facilities.index', 'slug' => 'facilities'],
             ['label' => 'Ekstrakurikuler', 'icon' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', 'route' => 'admin.extracurriculars.index', 'slug' => 'extracurriculars'],
             ['label' => 'Program', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'route' => 'admin.programs.index', 'slug' => 'programs'],
-            ['label' => 'Slider', 'icon' => 'M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 0l.5 6 3.5-3.5L11 11l-3 3m14-2l-5-5m0 0L16 7', 'route' => 'admin.sliders.index', 'slug' => 'sliders'],
             ['label' => 'Banner', 'icon' => 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9', 'route' => 'admin.banners.index', 'slug' => 'banners'],
             ['label' => 'Testimoni', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', 'route' => 'admin.testimonials.index', 'slug' => 'testimonials'],
             ['label' => 'Partner', 'icon' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'route' => 'admin.partners.index', 'slug' => 'partners'],
@@ -26,8 +25,6 @@
             ['label' => 'Tentang & Sejarah', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', 'route' => 'admin.profile.edit', 'slug' => 'profile'],
             ['label' => 'Visi Misi', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'route' => 'admin.visi.edit', 'slug' => 'visi'],
             ['label' => 'Struktur Organisasi', 'icon' => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 10V7a2 2 0 012-2h14a2 2 0 012 2v3M3 10h18', 'route' => 'admin.structure.edit', 'slug' => 'structure'],
-            ['label' => 'Sambutan Kepala Sekolah', 'icon' => 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z', 'route' => 'admin.welcome.edit', 'slug' => 'welcome'],
-            ['label' => 'Data Guru & Staff', 'icon' => 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2', 'route' => 'admin.teachers.index', 'slug' => 'teachers'],
         ]],
         'contact' => ['label' => 'Kontak', 'icon' => 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', 'children' => [
             ['label' => 'Data Kontak', 'icon' => 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z', 'route' => 'admin.contact.edit', 'slug' => 'contact'],
@@ -150,8 +147,12 @@
                 {{-- User menu --}}
                 <div class="relative">
                     <button @click="userMenu = !userMenu" class="flex items-center gap-2 rounded-lg p-1.5 transition hover:bg-slate-100">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        <span class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-emerald-700 text-sm font-bold text-white">
+                            @if (auth()->user()->avatar)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
+                            @else
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            @endif
                         </span>
                         <span class="hidden text-left sm:block">
                             <span class="block text-sm font-semibold text-slate-800">{{ auth()->user()->name }}</span>
@@ -162,9 +163,18 @@
 
                     <div x-show="userMenu" x-cloak x-transition
                          class="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                        <div class="border-b border-slate-100 px-3 py-2">
-                            <p class="text-sm font-semibold text-slate-800">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-slate-500">{{ auth()->user()->email }}</p>
+                        <div class="flex items-center gap-3 border-b border-slate-100 px-3 py-2">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-emerald-700 text-sm font-bold text-white">
+                                @if (auth()->user()->avatar)
+                                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
+                                @else
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                @endif
+                            </span>
+                            <span class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-slate-800">{{ auth()->user()->name }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ auth()->user()->email }}</p>
+                            </span>
                         </div>
                         <a href="{{ route('profile.edit') }}" class="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -218,6 +228,91 @@
             };
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function resizeAndPreviewImage(input, previewId, width, height) {
+        const file = input.files && input.files[0];
+        const preview = document.getElementById(previewId);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-cover" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+
+        if (!file.type.startsWith('image/')) return;
+
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            const ratio = width / height;
+            const imgRatio = img.width / img.height;
+            let sx = 0, sy = 0, sw = img.width, sh = img.height;
+            if (imgRatio > ratio) {
+                sw = Math.round(img.height * ratio);
+                sx = Math.round((img.width - sw) / 2);
+            } else {
+                sh = Math.round(img.width / ratio);
+                sy = Math.round((img.height - sh) / 2);
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height);
+            URL.revokeObjectURL(url);
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const resized = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(resized);
+                input.files = dt.files;
+            }, 'image/jpeg', 0.9);
+        };
+        img.onerror = () => URL.revokeObjectURL(url);
+        img.src = url;
+    }
+
+    function fitImageAndPreviewImage(input, previewId, maxWidth, maxHeight) {
+        const file = input.files && input.files[0];
+        const preview = document.getElementById(previewId);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-cover" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+
+        if (!file.type.startsWith('image/')) return;
+
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+            const width = Math.max(1, Math.round(img.width * scale));
+            const height = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+            URL.revokeObjectURL(url);
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const resized = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(resized);
+                input.files = dt.files;
+            }, 'image/jpeg', 0.85);
+        };
+        img.onerror = () => URL.revokeObjectURL(url);
+        img.src = url;
     }
 </script>
 <x-flash-toasts />
