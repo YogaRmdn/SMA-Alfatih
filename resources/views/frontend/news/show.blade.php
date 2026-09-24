@@ -1,6 +1,31 @@
 @extends('frontend.layouts.app')
 
 @section('title', $newsTitle)
+@section('description', $news->excerpt)
+@section('og_type', 'article')
+@section('og_image', $news->thumbnail ? img_url($news->thumbnail) : '')
+
+@push('head')
+@php
+    $newsSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'NewsArticle',
+        'headline' => $news->title,
+        'description' => $news->excerpt,
+        'datePublished' => $news->published_at?->toIso8601String(),
+        'dateModified' => $news->updated_at?->toIso8601String(),
+        'inLanguage' => 'id-ID',
+        'image' => $news->thumbnail ? img_url($news->thumbnail) : null,
+        'author' => ['@type' => 'Organization', 'name' => $siteName],
+        'publisher' => ['@type' => 'EducationalOrganization', 'name' => $siteName],
+        'mainEntityOfPage' => url()->current(),
+    ];
+    $newsSchema = array_filter($newsSchema, fn ($value) => $value !== null);
+@endphp
+<script type="application/ld+json">
+{!! json_encode($newsSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+@endpush
 
 @section('content')
 

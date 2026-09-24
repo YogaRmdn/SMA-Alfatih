@@ -1,13 +1,117 @@
 <!DOCTYPE html>
+@php
+    $siteName = $settings['site_name'] ?? config('app.name');
+    $address = $contact?->address ?? $settings['address'] ?? null;
+    $phone = $contact?->phone ?? $settings['phone'] ?? null;
+    $whatsapp = $contact?->whatsapp ?? $settings['whatsapp'] ?? null;
+    $email = $contact?->email ?? $settings['email'] ?? null;
+    $maps = $contact?->maps_embed ?? $settings['maps_embed'] ?? null;
+    $waLink = $whatsapp ? 'https://wa.me/'.preg_replace('/\D+/', '', $whatsapp) : '#';
+    $nav = [
+        ['label' => 'Beranda', 'href' => route('home').'#beranda'],
+        [
+            'label' => 'Profil Sekolah',
+            'children' => [
+                ['label' => 'Tentang & Sejarah', 'href' => route('profil.tentang')],
+                ['label' => 'Visi Misi', 'href' => route('profil.visi-misi')],
+                ['label' => 'Struktur Organisasi', 'href' => route('profil.struktur')],
+                ['label' => 'Program', 'href' => route('home').'#program'],
+                ['label' => 'Fasilitas', 'href' => route('home').'#fasilitas'],
+                ['label' => 'Ekstrakurikuler', 'href' => route('home').'#ekskul'],
+                ['label' => 'Prestasi', 'href' => route('home').'#prestasi'],
+            ],
+        ],
+        ['label' => 'Berita', 'href' => route('news.index')],
+        [
+            'label' => 'Informasi',
+            'children' => [
+                ['label' => 'Unduhan', 'href' => route('downloads.index')],
+                ['label' => 'Kontak', 'href' => route('home').'#kontak'],
+            ],
+        ],
+    ];
+
+    $orgSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'EducationalOrganization',
+        'name' => $siteName,
+        'alternateName' => $settings['site_tagline'] ?? null,
+        'url' => url('/'),
+        'logo' => img_url($settings['logo'] ?? null, 'img/sma.png'),
+        'description' => $settings['site_description'] ?? null,
+        'foundingDate' => is_numeric($settings['stat_1_value'] ?? null) ? (string) $settings['stat_1_value'] : null,
+    ];
+
+    $sameAs = [];
+    foreach (['instagram', 'facebook', 'youtube', 'tiktok'] as $key) {
+        if (!empty($settings[$key])) {
+            $sameAs[] = $settings[$key];
+        }
+    }
+    if ($sameAs) {
+        $orgSchema['sameAs'] = $sameAs;
+    }
+
+    if ($address) {
+        $orgSchema['address'] = [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $address,
+            'addressLocality' => str_contains($address, 'Pekanbaru') ? 'Pekanbaru' : null,
+            'addressRegion' => str_contains($address, 'Riau') ? 'Riau' : null,
+            'addressCountry' => 'ID',
+        ];
+        $orgSchema['address'] = array_filter($orgSchema['address']);
+    }
+
+    $telDigits = preg_replace('/\D+/', '', (string) ($whatsapp ?? $phone));
+    if ($telDigits && str_starts_with($telDigits, '0')) {
+        $telDigits = '62'.substr($telDigits, 1);
+    }
+    if ($telDigits) {
+        $orgSchema['telephone'] = '+'.$telDigits;
+    }
+
+    if ($email) {
+        $orgSchema['email'] = $email;
+    }
+
+    if (!empty($settings['operational_hours'])
+        && preg_match('/(\d{2})[.:](\d{2})\s*[-–]\s*(\d{2})[.:](\d{2})/', $settings['operational_hours'], $hm)) {
+        $orgSchema['openingHours'] = ['Mo-Fr '.$hm[1].':'.$hm[2].'-'.$hm[3].':'.$hm[4]];
+    }
+
+    $orgSchema = array_filter($orgSchema, fn ($value) => $value !== null);
+    $defaultOgImage = img_url($settings['logo'] ?? null, 'img/sma.png');
+@endphp
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="{{ $settings['site_description'] ?? '' }}">
+    <meta name="description" content="@yield('description', $settings['site_description'] ?? '')">
     <meta name="keywords" content="{{ $settings['meta_keywords'] ?? '' }}">
     <link rel="icon" href="{{ img_url($settings['favicon'] ?? null, 'img/sma.png') }}">
-    <title>@yield('title') — {{ $settings['site_name'] ?? config('app.name') }}</title>
+    <link rel="canonical" href="{{ url()->current() }}">
+    <title>@yield('title') — {{ $siteName }}</title>
+
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:title" content="@yield('title') — {{ $siteName }}">
+    <meta property="og:description" content="@yield('description', $settings['site_description'] ?? '')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="@yield('og_image', $defaultOgImage)">
+    <meta property="og:locale" content="id_ID">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title') — {{ $siteName }}">
+    <meta name="twitter:description" content="@yield('description', $settings['site_description'] ?? '')">
+    <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
+
+    @stack('head')
+
+    <script type="application/ld+json">
+{!! json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         @keyframes marquee {
@@ -31,39 +135,6 @@
     </noscript>
 </head>
 <body class="min-h-screen bg-white font-sans text-slate-700 antialiased" x-data="{ mobileOpen: false, openSub: null }">
-
-    @php
-        $siteName = $settings['site_name'] ?? config('app.name');
-        $address = $contact?->address ?? $settings['address'] ?? null;
-        $phone = $contact?->phone ?? $settings['phone'] ?? null;
-        $whatsapp = $contact?->whatsapp ?? $settings['whatsapp'] ?? null;
-        $email = $contact?->email ?? $settings['email'] ?? null;
-        $maps = $contact?->maps_embed ?? $settings['maps_embed'] ?? null;
-        $waLink = $whatsapp ? 'https://wa.me/'.preg_replace('/\D+/', '', $whatsapp) : '#';
-        $nav = [
-            ['label' => 'Beranda', 'href' => route('home').'#beranda'],
-            [
-                'label' => 'Profil Sekolah',
-                'children' => [
-                    ['label' => 'Tentang & Sejarah', 'href' => route('profil.tentang')],
-                    ['label' => 'Visi Misi', 'href' => route('profil.visi-misi')],
-                    ['label' => 'Struktur Organisasi', 'href' => route('profil.struktur')],
-                    ['label' => 'Program', 'href' => route('home').'#program'],
-                    ['label' => 'Fasilitas', 'href' => route('home').'#fasilitas'],
-                    ['label' => 'Ekstrakurikuler', 'href' => route('home').'#ekskul'],
-                    ['label' => 'Prestasi', 'href' => route('home').'#prestasi'],
-                ],
-            ],
-            ['label' => 'Berita', 'href' => route('news.index')],
-            [
-                'label' => 'Informasi',
-                'children' => [
-                    ['label' => 'Unduhan', 'href' => route('downloads.index')],
-                    ['label' => 'Kontak', 'href' => route('home').'#kontak'],
-                ],
-            ],
-        ];
-    @endphp
 
     {{-- Topbar --}}
     <div class="hidden animate-flow-x bg-[linear-gradient(90deg,#04331f,#0c6b52,#0f766e,#115e59,#6b3a10)] text-emerald-100 md:block">
