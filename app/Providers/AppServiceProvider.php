@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\ActivityLog;
 use App\Models\Contact;
 use App\Models\Setting;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
@@ -34,6 +39,31 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('frontend.*', function ($view) {
             $view->with('contact', Contact::first());
+        });
+
+        $this->registerAuthActivityListeners();
+    }
+
+    /**
+     * Catat aktivitas autentikasi (login, logout, percobaan login gagal)
+     * ke tabel activity_logs.
+     */
+    protected function registerAuthActivityListeners(): void
+    {
+        Event::listen(Login::class, function (Login $event) {
+            $request = request();
+            ActivityLog::record('login', $event->user, 'Berhasil login ke sistem', $request->ip(), $request->userAgent());
+        });
+
+        Event::listen(Logout::class, function (Logout $event) {
+            $request = request();
+            ActivityLog::record('logout', $event->user, 'Logout dari sistem', $request->ip(), $request->userAgent());
+        });
+
+        Event::listen(Failed::class, function (Failed $event) {
+            $request = request();
+            $email = $event->credentials['email'] ?? 'tidak diketahui';
+            ActivityLog::record('login_failed', null, 'Percobaan login gagal (email: '.$email.')', $request->ip(), $request->userAgent());
         });
     }
 

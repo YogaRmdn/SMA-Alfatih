@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AchievementController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AlbumController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\BannerController;
@@ -100,5 +101,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin,admin'])
 
         Route::middleware('role:super_admin')->group(function () {
             Route::resource('users', UserController::class)->except('show');
+
+            Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+            Route::delete('activity-logs/clear', [ActivityLogController::class, 'clearAll'])->name('activity-logs.clear');
+            Route::delete('activity-logs/{activityLog}', [ActivityLogController::class, 'destroy'])->name('activity-logs.destroy');
         });
     });
