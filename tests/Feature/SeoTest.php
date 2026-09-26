@@ -187,6 +187,35 @@ class SeoTest extends TestCase
         $this->assertSame(180, $h);
     }
 
+    public function test_no_raw_blade_syntax_leaks_into_output(): void
+    {
+        // Blok @php yang tidak tertutup membuat Blade mengeluarkan kode PHP
+        // sebagai teks mentah, dan teks itu tampil di layar pengguna.
+        $leaks = [
+            '@php',
+            '@endphp',
+            '@section',
+            '@endsection',
+            'array_filter',
+            'fn (',
+            '!== null',
+            '{{',
+            '{!!',
+        ];
+
+        foreach (['/', '/berita', '/unduhan', '/ppdb', '/ppdb/status', '/tentang-sejarah'] as $path) {
+            $html = $this->get($path)->assertSuccessful()->getContent();
+
+            foreach ($leaks as $needle) {
+                $this->assertStringNotContainsString(
+                    $needle,
+                    $html,
+                    "Sintaks Blade mentah '{$needle}' bocor ke output di {$path}"
+                );
+            }
+        }
+    }
+
     public function test_icon_links_are_cache_busted(): void
     {
         // Hostinger mengirim max-age=604800 untuk aset statis, jadi favicon

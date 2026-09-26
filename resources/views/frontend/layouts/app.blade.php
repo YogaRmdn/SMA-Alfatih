@@ -212,8 +212,6 @@
     <script type="application/ld+json">
 {!! json_encode($siteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
-    ], fn ($value) => $value !== null);
-@endphp
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
