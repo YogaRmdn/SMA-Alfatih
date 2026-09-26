@@ -3,28 +3,44 @@
 @section('title', $newsTitle)
 @section('description', $news->excerpt)
 @section('og_type', 'article')
-@section('og_image', $news->thumbnail ? img_url($news->thumbnail) : '')
+@section('og_image', $news->thumbnail ? img_url_absolute($news->thumbnail) : '')
 
 @push('head')
 @php
-    $newsSchema = [
+    $siteName = $settings['site_name'] ?? config('app.name');
+    $newsImage = $news->thumbnail ? img_url_absolute($news->thumbnail) : img_url_absolute(null, 'img/og-default.png');
+    $newsSchema = array_filter([
         '@context' => 'https://schema.org',
         '@type' => 'NewsArticle',
-        'headline' => $news->title,
-        'description' => $news->excerpt,
+        '@id' => url()->current().'#artikel',
+        'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url()->current()],
+        'headline' => meta_text($news->title, 110),
+        'description' => meta_text($news->excerpt, 300),
         'datePublished' => $news->published_at?->toIso8601String(),
         'dateModified' => $news->updated_at?->toIso8601String(),
         'inLanguage' => 'id-ID',
-        'image' => $news->thumbnail ? img_url($news->thumbnail) : null,
-        'author' => ['@type' => 'Organization', 'name' => $siteName],
-        'publisher' => ['@type' => 'EducationalOrganization', 'name' => $siteName],
-        'mainEntityOfPage' => url()->current(),
-    ];
-    $newsSchema = array_filter($newsSchema, fn ($value) => $value !== null);
+        'image' => [$newsImage],
+        'articleSection' => $news->category?->name,
+        'wordCount' => max(1, str_word_count(strip_tags((string) $news->content))),
+        'author' => ['@type' => 'Organization', 'name' => $siteName, 'url' => url('/')],
+        'publisher' => ['@id' => url('/').'#sekolah'],
+    ], fn ($value) => $value !== null);
+
+    $breadcrumbSchema = breadcrumb_schema([
+        ['name' => 'Beranda', 'url' => route('home')],
+        ['name' => 'Berita & Kegiatan', 'url' => route('news.index')],
+        ['name' => meta_text($news->title, 110)],
+    ]);
 @endphp
-<script type="application/ld+json">
+    <meta property="article:published_time" content="{{ $news->published_at?->toIso8601String() }}">
+    <meta property="article:modified_time" content="{{ $news->updated_at?->toIso8601String() }}">
+    @if ($news->category)
+        <meta property="article:section" content="{{ $news->category->name }}">
+    @endif
+    <script type="application/ld+json">
 {!! json_encode($newsSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
+    {!! $breadcrumbSchema !!}
 @endpush
 
 @section('content')

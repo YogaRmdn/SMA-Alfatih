@@ -1,6 +1,14 @@
 @extends('frontend.layouts.app')
 
 @section('title', $settings['berita_title'] ?? 'Berita & Kegiatan')
+@section('seo_description', 'Kabar terbaru, kegiatan, prestasi, dan pengumuman resmi dari '.($settings['site_name'] ?? config('app.name')).' Pekanbaru.')
+
+@push('head')
+{!! breadcrumb_schema([
+    ['name' => 'Beranda', 'url' => route('home')],
+    ['name' => $settings['berita_title'] ?? 'Berita & Kegiatan'],
+]) !!}
+@endpush
 
 @section('content')
 

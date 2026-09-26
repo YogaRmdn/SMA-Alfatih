@@ -1,6 +1,16 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Pendaftaran PPDB')
+@section('seo_title', 'PPDB '.($settings['ppdb_tahun_ajaran'] ?? '2026/2027').' — '.($settings['site_name'] ?? config('app.name')))
+@section('seo_description', 'Pendaftaran Peserta Didik Baru '.($settings['ppdb_tahun_ajaran'] ?? '2026/2027').' '.($settings['site_name'] ?? config('app.name')).' Pekanbaru sudah dibuka. Pendaftaran online gratis, cepat, dan mudah. Daftar sekarang!')
+@section('robots', 'index, follow, max-image-preview:large, max-snippet:-1')
+
+@push('head')
+{!! breadcrumb_schema([
+    ['name' => 'Beranda', 'url' => route('home')],
+    ['name' => 'PPDB'],
+]) !!}
+@endpush
 
 @section('content')
 

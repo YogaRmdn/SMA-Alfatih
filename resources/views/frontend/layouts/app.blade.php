@@ -7,6 +7,37 @@
     $email = $contact?->email ?? $settings['email'] ?? null;
     $maps = $contact?->maps_embed ?? $settings['maps_embed'] ?? null;
     $waLink = $whatsapp ? 'https://wa.me/'.preg_replace('/\D+/', '', $whatsapp) : '#';
+
+    // ===== Aset brands =====
+    $brandLogo = img_url_absolute($settings['logo'] ?? null, 'img/sma.png');
+    $defaultOgImage = img_url_absolute($settings['og_image'] ?? null, 'img/og-default.png');
+    $defaultOgImageAlt = $siteName.' — '.($settings['site_tagline'] ?? 'Sekolah Islam Terpadu & Tahfizh Al-Qur\'an di Pekanbaru');
+
+    // ===== Metadata SEO =====
+    // Catatan: startSection() memanggil e() pada nilai `@section('nama', $nilai)`,
+    // jadi yieldContent() mengembalikan teks yang sudah ter-escape. Semua
+    // pembacaan section di bawah dinormalisasi lewat meta_raw() supaya
+    // dicetak dengan {{ }} hanya meng-escape satu kali.
+    $pageTitle = meta_raw($__env->yieldContent('title'));
+    $fullTitle = meta_raw($__env->yieldContent('seo_title'))
+        ?: ($pageTitle !== '' && $pageTitle !== $siteName ? $pageTitle.' — '.$siteName : $siteName);
+    $metaDescription = meta_text(
+        meta_raw($__env->yieldContent('seo_description'))
+            ?: (meta_raw($__env->yieldContent('description')) ?: ($settings['site_description'] ?? '')),
+        160
+    );
+    $metaKeywords = meta_text($settings['meta_keywords'] ?? '', 180);
+    $metaRobots = meta_raw($__env->yieldContent('robots'))
+        ?: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+    $ogType = meta_raw($__env->yieldContent('og_type')) ?: 'website';
+    $ogImageOverride = meta_raw($__env->yieldContent('og_image'));
+    $ogImage = $ogImageOverride !== '' ? $ogImageOverride : $defaultOgImage;
+
+    // ===== Sinyal SEO lokal =====
+    $geoRegion = $settings['meta_geo_region'] ?? 'ID-RI';
+    $geoPlacename = $settings['meta_geo_placename'] ?? 'Pekanbaru';
+    $geoPosition = $settings['meta_geo_position'] ?? '0.507073;101.447779';
+
     $nav = [
         ['label' => 'Beranda', 'href' => route('home').'#beranda'],
         [
@@ -34,12 +65,33 @@
     $orgSchema = [
         '@context' => 'https://schema.org',
         '@type' => 'EducationalOrganization',
+        '@id' => url('/').'#sekolah',
         'name' => $siteName,
-        'alternateName' => $settings['site_tagline'] ?? null,
+        'alternateName' => array_values(array_filter([
+            'SMA Tahfizh Al-Fatih',
+            'SMA IT Tahfizh Al-Fatih',
+            'SMAIT Tahfizh Al-Fatih Pekanbaru',
+            'Tahfizh Al-Fatih Pekanbaru',
+            'Sekolah Tahfizh Pekanbaru',
+        ])),
         'url' => url('/'),
-        'logo' => img_url($settings['logo'] ?? null, 'img/sma.png'),
+        'logo' => [
+            '@type' => 'ImageObject',
+            '@id' => url('/').'#logo',
+            'url' => $brandLogo,
+            'width' => 512,
+            'height' => 512,
+            'caption' => $siteName,
+        ],
+        'image' => ['@id' => url('/').'#logo', $defaultOgImage],
         'description' => $settings['site_description'] ?? null,
         'foundingDate' => is_numeric($settings['stat_1_value'] ?? null) ? (string) $settings['stat_1_value'] : null,
+        'areaServed' => [
+            '@type' => 'City',
+            'name' => $geoPlacename,
+            'containedInPlace' => ['@type' => 'State', 'name' => 'Riau'],
+        ],
+        'keywords' => $metaKeywords,
     ];
 
     $sameAs = [];
@@ -81,36 +133,87 @@
     }
 
     $orgSchema = array_filter($orgSchema, fn ($value) => $value !== null);
-    $defaultOgImage = img_url($settings['logo'] ?? null, 'img/sma.png');
+
+    // Schema WebSite (untuk sinyal nama resmi situs di hasil pencarian)
+    $siteSchema = array_filter([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        '@id' => url('/').'#website',
+        'url' => url('/'),
+        'name' => $siteName,
+        'description' => $metaDescription,
+        'inLanguage' => 'id-ID',
+        'publisher' => ['@id' => url('/').'#sekolah'],
+    ], fn ($value) => $value !== null);
 @endphp
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="@yield('description', $settings['site_description'] ?? '')">
-    <meta name="keywords" content="{{ $settings['meta_keywords'] ?? '' }}">
-    <link rel="icon" href="{{ img_url($settings['favicon'] ?? null, 'img/sma.png') }}">
-    <link rel="canonical" href="{{ url()->current() }}">
-    <title>@yield('title') — {{ $siteName }}</title>
 
-    <meta property="og:type" content="@yield('og_type', 'website')">
+    {{-- ============ SEO dasar ============ --}}
+    <title>{{ $fullTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
+    @if ($metaKeywords)
+        <meta name="keywords" content="{{ $metaKeywords }}">
+    @endif
+    <meta name="author" content="{{ $siteName }}">
+    <meta name="publisher" content="{{ $siteName }}">
+    <meta name="robots" content="{{ $metaRobots }}">
+    <meta name="googlebot" content="{{ $metaRobots }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- ============ Sinyal SEO lokal (Pekanbaru / Riau) ============ --}}
+    <meta name="geo.region" content="{{ $geoRegion }}">
+    <meta name="geo.placename" content="{{ $geoPlacename }}">
+    <meta name="geo.position" content="{{ $geoPosition }}">
+    <meta name="ICBM" content="{{ str_replace(';', ', ', $geoPosition) }}">
+
+    {{-- ============ Favicon & ikon aplikasi ============ --}}
+    @if (!empty($settings['favicon']))
+        <link rel="icon" href="{{ img_url($settings['favicon'], 'favicon.ico') }}">
+    @endif
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('favicon-48x48.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="mask-icon" href="{{ asset('favicon-32x32.png') }}" color="#02482b">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#02482b">
+    <meta name="apple-mobile-web-app-title" content="{{ $siteName }}">
+    <meta name="application-name" content="{{ $siteName }}">
+
+    {{-- ============ Open Graph / Twitter Card ============ --}}
+    <meta property="og:type" content="{{ $ogType }}">
     <meta property="og:site_name" content="{{ $siteName }}">
-    <meta property="og:title" content="@yield('title') — {{ $siteName }}">
-    <meta property="og:description" content="@yield('description', $settings['site_description'] ?? '')">
+    <meta property="og:title" content="{{ $fullTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="@yield('og_image', $defaultOgImage)">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $defaultOgImageAlt }}">
     <meta property="og:locale" content="id_ID">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="@yield('title') — {{ $siteName }}">
-    <meta name="twitter:description" content="@yield('description', $settings['site_description'] ?? '')">
-    <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
+    <meta name="twitter:title" content="{{ $fullTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="{{ $defaultOgImageAlt }}">
 
     @stack('head')
 
     <script type="application/ld+json">
 {!! json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
+    <script type="application/ld+json">
+{!! json_encode($siteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+    ], fn ($value) => $value !== null);
+@endphp
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>

@@ -1,6 +1,14 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Unduhan')
+@section('seo_description', 'Download Berkas '.($settings['site_name'] ?? config('app.name')).': prospectus, formulir pendaftaran, dan dokumen resmi sekolah.')
+
+@push('head')
+{!! breadcrumb_schema([
+    ['name' => 'Beranda', 'url' => route('home')],
+    ['name' => 'Unduhan'],
+]) !!}
+@endpush
 
 @section('content')
 

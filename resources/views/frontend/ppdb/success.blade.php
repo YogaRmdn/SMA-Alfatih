@@ -1,6 +1,7 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Pendaftaran Berhasil')
+@section('robots', 'noindex, nofollow')
 
 @section('content')
 <section class="relative animate-flow-x overflow-hidden bg-[linear-gradient(150deg,#022c1c,#065f46,#0f766e,#134e4a,#6b3a10)] py-20 lg:py-28">

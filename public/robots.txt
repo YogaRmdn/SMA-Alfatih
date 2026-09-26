@@ -1,5 +1,24 @@
 User-agent: *
-Disallow: /admin
 Allow: /
+
+# Panel admin & area autentikasi
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /confirm-password
+Disallow: /profile
+
+# Dokumen pendaftar (privasi data calon siswa)
+Disallow: /ppdb/dokumen/
+Disallow: /ppdb/success/
+
+# Aset & berkas uploaded pengguna
+Disallow: /storage/
+
+# Hasil pencarian internal tidak perlu diindeks
+Disallow: /*?q=
 
 Sitemap: https://smaittahfizhalfatih.sch.id/sitemap.xml

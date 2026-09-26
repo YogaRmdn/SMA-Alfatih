@@ -2,6 +2,9 @@
 
 @section('title', 'Beranda')
 
+@section('seo_title', $settings['seo_home_title'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu & Tahfizh Al-Qur\'an')
+@section('seo_description', $settings['seo_home_description'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru adalah sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau. PPDB tahun ajaran 2026/2027 sedang dibuka. Daftar sekarang!')
+
 @php
     $siteName = $settings['site_name'] ?? config('app.name');
     $heroTitleLines = preg_split('/\s+(?=Al-)/i', $siteName) ?: [$siteName];

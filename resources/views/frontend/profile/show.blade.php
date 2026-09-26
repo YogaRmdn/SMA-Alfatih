@@ -1,6 +1,14 @@
 @extends('frontend.layouts.app')
 
 @section('title', $page?->title ?? $meta['label'])
+@section('seo_description', $page?->excerpt ?: ($meta['label'].' '.($settings['site_name'] ?? config('app.name')).' — profil, sejarah, visi misi, dan struktur organisasi sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau.'))
+
+@push('head')
+{!! breadcrumb_schema([
+    ['name' => 'Beranda', 'url' => route('home')],
+    ['name' => $page?->title ?? $meta['label']],
+]) !!}
+@endpush
 
 @section('content')
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\News;
 
 class SitemapController extends Controller
@@ -29,13 +30,19 @@ class SitemapController extends Controller
         $add('ppdb', 'monthly', '0.9');
         $add('ppdb/status', 'monthly', '0.5');
 
+        Category::query()
+            ->whereHas('news', fn ($query) => $query->published())
+            ->orderBy('name')
+            ->get(['slug'])
+            ->each(fn ($category) => $add('berita?kategori='.$category->slug, 'weekly', '0.7'));
+
         News::query()
             ->published()
             ->latest('published_at')
-            ->select(['slug', 'published_at'])
+            ->select(['slug', 'published_at', 'updated_at'])
             ->take(500)
             ->get()
-            ->each(fn ($news) => $add('berita/'.$news->slug, 'weekly', '0.8', $news->published_at));
+            ->each(fn ($news) => $add('berita/'.$news->slug, 'weekly', '0.8', $news->updated_at ?? $news->published_at));
 
         return response()
             ->view('frontend.sitemap', compact('urls'))

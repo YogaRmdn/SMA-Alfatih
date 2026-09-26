@@ -1,6 +1,15 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Cek Status Pendaftaran')
+@section('seo_description', 'Cek status pendaftaran PPDB '.($settings['site_name'] ?? config('app.name')).' Pekanbaru menggunakan kode akses dan tanggal lahir calon peserta didik.')
+
+@push('head')
+{!! breadcrumb_schema([
+    ['name' => 'Beranda', 'url' => route('home')],
+    ['name' => 'PPDB', 'url' => route('ppdb.register')],
+    ['name' => 'Cek Status'],
+]) !!}
+@endpush
 
 @section('content')
 

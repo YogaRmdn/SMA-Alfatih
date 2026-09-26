@@ -1,6 +1,7 @@
 @extends('frontend.layouts.app')
 
 @section('title', 'Pendaftaran Ditutup')
+@section('robots', 'noindex, follow')
 
 @section('content')
 <section class="bg-slate-50 py-20 lg:py-28">

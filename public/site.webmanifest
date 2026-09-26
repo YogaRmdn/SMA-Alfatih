@@ -1,0 +1,74 @@
+{
+    "name": "SMA IT Tahfizh Al-Fatih Pekanbaru",
+    "short_name": "SMAIT Al-Fatih",
+    "description": "Sekolah menengah atas Islam terpadu tahfizh Al-Qur'an di Pekanbaru yang mencetak generasi unggul, berakhlak mulia, dan berprestasi.",
+    "lang": "id-ID",
+    "dir": "ltr",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#02482b",
+    "categories": ["education"],
+    "icons": [
+        {
+            "src": "/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/favicon-48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "PPDB Online",
+            "short_name": "PPDB",
+            "url": "/ppdb",
+            "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Cek Status Pendaftaran",
+            "short_name": "Cek Status",
+            "url": "/ppdb/status",
+            "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Berita & Kegiatan",
+            "short_name": "Berita",
+            "url": "/berita",
+            "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+        }
+    ]
+}
