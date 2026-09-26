@@ -56,7 +56,7 @@ class SeoTest extends TestCase
         $this->assertStringContainsString('<meta name="geo.placename" content="Pekanbaru">', $html);
 
         // Ikon
-        $this->assertStringContainsString('href="http://localhost/favicon.ico"', $html);
+        $this->assertStringContainsString('href="'.asset_v('favicon.ico').'"', $html);
         $this->assertStringContainsString('sizes="16x16"', $html);
         $this->assertStringContainsString('sizes="180x180"', $html);
         $this->assertStringContainsString('rel="manifest"', $html);
@@ -187,6 +187,25 @@ class SeoTest extends TestCase
         $this->assertSame(180, $h);
     }
 
+    public function test_icon_links_are_cache_busted(): void
+    {
+        // Hostinger mengirim max-age=604800 untuk aset statis, jadi favicon
+        // 0 byte lama bisa tertahan 7 hari di cache browser.
+        $url = asset_v('favicon.ico');
+        $this->assertStringContainsString('/favicon.ico?v=', $url, 'favicon.ico belum di-cache-bust');
+
+        $expected = substr((string) filemtime(public_path('favicon.ico')), -6);
+        $this->assertStringEndsWith('?v='.$expected, $url, 'Query version tidak mengikuti mtime file');
+
+        $response = $this->get('/');
+        foreach (['favicon-16x16.png', 'favicon-32x32.png', 'favicon-48x48.png', 'apple-touch-icon.png'] as $icon) {
+            $response->assertSee($icon.'?v=', false);
+        }
+
+        // Aset yang tidak ada tetap harus aman (tidak fatal).
+        $this->assertStringContainsString('?v=0', asset_v('tidak-ada-xyz.png'));
+    }
+
     public function test_robots_txt_blocks_sensitive_paths(): void
     {
         $robots = file_get_contents(public_path('robots.txt'));
@@ -210,7 +229,7 @@ class SeoTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('name="robots" content="noindex, nofollow"', $html);
-        $this->assertStringContainsString('rel="icon" href="http://localhost/favicon.ico"', $html);
+        $this->assertStringContainsString('rel="icon" href="'.asset_v('favicon.ico').'"', $html);
     }
 
     private function assertJsonLdValid(string $html, string $path): void

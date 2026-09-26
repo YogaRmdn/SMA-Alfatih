@@ -1,3 +1,9 @@
+<IfModule mod_mime.c>
+    # Hostinger secara default menyajikan .webmanifest sebagai text/plain.
+    # Chrome butuh application/manifest+json agar PWA bisa di-install.
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

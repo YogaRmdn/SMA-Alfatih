@@ -93,6 +93,32 @@ if (! function_exists('img_url_absolute')) {
     }
 }
 
+if (! function_exists('asset_v')) {
+    /**
+     * URL aset publik dengan query version dari mtime file.
+     *
+     * Dipakai untuk favicon/apple-touch-icon. Hostinger (dan sebagian besar
+     * CDN) mengirim Cache-Control max-age=604800 untuk aset statis, jadi
+     * browser yang pernah menerima favicon 0 byte akan menahannya 7 hari.
+     * Memakai mtime membuat URL berubah otomatis begitu file di-replace,
+     * tanpa perlu menaikkan nomor versi secara manual.
+     */
+    function asset_v(string $path): string
+    {
+        static $cache = [];
+
+        $file = public_path($path);
+
+        if (! array_key_exists($path, $cache)) {
+            $cache[$path] = is_file($file)
+                ? substr((string) filemtime($file), -6)
+                : '0';
+        }
+
+        return asset($path).'?v='.$cache[$path];
+    }
+}
+
 if (! function_exists('meta_raw')) {
     /**
      * Normalisasi isi section Blade menjadi teks mentah.
