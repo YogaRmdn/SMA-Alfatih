@@ -68,6 +68,9 @@ class SchoolProfileController extends Controller
         $page = Page::query()->firstOrNew(['slug' => $meta['slug']]);
         $page->title = $validated['title'];
         $page->section = 'profile';
+        // Sengaja TIDAK di-sanitize: field ini plain-text (textarea) dan
+        // dirender dengan escaping `{{ }}` di view. Memasang Purify di sini
+        // akan membungkus teks jadi <p> dan tag itu tampil apa adanya.
         $page->content = $validated['content'] ?? null;
         $page->is_active = $request->boolean('is_active');
 
