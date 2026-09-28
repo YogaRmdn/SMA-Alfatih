@@ -7,6 +7,7 @@
     $email = $contact?->email ?? $settings['email'] ?? null;
     $maps = $contact?->maps_embed ?? $settings['maps_embed'] ?? null;
     $waLink = $whatsapp ? 'https://wa.me/'.preg_replace('/\D+/', '', $whatsapp) : '#';
+    $ppdbOpen = ($settings['ppdb_open'] ?? '0') === '1';
 
     // ===== Aset brands =====
     $brandLogo = img_url_absolute($settings['logo'] ?? null, 'img/sma.png');
@@ -305,12 +306,14 @@
             </nav>
 
             <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 xl:ml-4">
+                @if ($ppdbOpen)
                 <a href="{{ route('ppdb.register') }}" class="sheen hidden whitespace-nowrap rounded-lg bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-3 py-2.5 text-xs font-bold text-emerald-950 shadow-md shadow-amber-500/30 transition hover:brightness-105 sm:inline-flex sm:px-4 sm:text-sm">
                     Daftar PPDB
                 </a>
                 <a href="{{ route('ppdb.status') }}" class="hidden whitespace-nowrap rounded-lg border border-emerald-700 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white md:inline-flex md:px-4 md:text-sm">
                     Cek Status
                 </a>
+                @endif
                 <a href="{{ route('login') }}" class="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-700 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white xl:inline-flex sm:gap-2 sm:px-4 sm:text-sm">
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                     Login
@@ -347,6 +350,7 @@
                     @endif
                 @endforeach
             </nav>
+            @if ($ppdbOpen)
             <div class="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                 <a href="{{ route('ppdb.register') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
                     Daftar PPDB
@@ -355,6 +359,7 @@
                     Cek Status
                 </a>
             </div>
+            @endif
             <div class="mt-2 border-t border-slate-100 pt-3">
                 <a href="{{ route('login') }}" @click="mobileOpen = false" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
@@ -401,8 +406,10 @@
                             <li><a href="{{ $item['href'] }}" class="text-emerald-200/90 transition hover:text-amber-400">{{ $item['label'] }}</a></li>
                         @endif
                     @endforeach
+                    @if ($ppdbOpen)
                     <li><a href="{{ route('ppdb.register') }}" class="text-emerald-200/90 transition hover:text-amber-400">Daftar PPDB</a></li>
                     <li><a href="{{ route('ppdb.status') }}" class="text-emerald-200/90 transition hover:text-amber-400">Cek Status Pendaftaran</a></li>
+                    @endif
                     <li><a href="{{ route('login') }}" class="text-emerald-200/90 transition hover:text-amber-400">Login</a></li>
                 </ul>
             </div>
@@ -439,17 +446,23 @@
 
             <div>
                 <h4 class="text-sm font-bold uppercase tracking-wider text-white">PPDB Tahun Ajaran {{ $settings['ppdb_tahun_ajaran'] ?? '2026/2027' }}</h4>
-                <p class="mt-4 text-sm leading-relaxed text-emerald-200/90">
-                    Pendaftaran Peserta Didik Baru telah dibuka. Segera daftarkan putra/putri Anda untuk bergabung bersama keluarga besar {{ $siteName }}.
-                </p>
-                <a href="{{ route('ppdb.register') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Daftar Sekarang
-                </a>
-                <a href="{{ route('ppdb.status') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    Cek Status Pendaftaran
-                </a>
+                @if ($ppdbOpen)
+                    <p class="mt-4 text-sm leading-relaxed text-emerald-200/90">
+                        Pendaftaran Peserta Didik Baru telah dibuka. Segera daftarkan putra/putri Anda untuk bergabung bersama keluarga besar {{ $siteName }}.
+                    </p>
+                    <a href="{{ route('ppdb.register') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 18 0 0114 0z" /></svg>
+                        Daftar Sekarang
+                    </a>
+                    <a href="{{ route('ppdb.status') }}" class="mt-3 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        Cek Status Pendaftaran
+                    </a>
+                @else
+                    <p class="mt-4 text-sm leading-relaxed text-emerald-200/90">
+                        Pendaftaran Peserta Didik Baru sedang ditutup. Silakan pantau halaman berita atau hubungi sekolah untuk informasi jadwal pendaftaran berikutnya.
+                    </p>
+                @endif
             </div>
         </div>
 

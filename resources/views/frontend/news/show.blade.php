@@ -108,10 +108,12 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         Kembali ke Berita
                     </a>
+                    @if (($settings['ppdb_open'] ?? '0') === '1')
                     <a href="{{ route('ppdb.register') }}"
                        class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
                         Daftar PPDB Sekarang
                     </a>
+                    @endif
                 </div>
             </article>
         </div>

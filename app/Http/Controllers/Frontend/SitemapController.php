@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\News;
+use App\Models\Setting;
 
 class SitemapController extends Controller
 {
@@ -27,7 +28,14 @@ class SitemapController extends Controller
         $add('tentang-sejarah', 'monthly', '0.8');
         $add('visi-misi', 'monthly', '0.8');
         $add('struktur-organisasi', 'monthly', '0.7');
-        $add('ppdb', 'monthly', '0.9');
+
+        // Saat pendaftaran ditutup, halaman /ppdb hanya berisi "sedang ditutup"
+        // (sudah noindex), jadi tidak perlu dicantumkan di sitemap. Halaman cek status
+        // tetap dicantumkan karena masih berguna walau pendaftaran ditutup.
+        if (Setting::get('ppdb_open', '0') === '1') {
+            $add('ppdb', 'monthly', '0.9');
+        }
+
         $add('ppdb/status', 'monthly', '0.5');
 
         Category::query()

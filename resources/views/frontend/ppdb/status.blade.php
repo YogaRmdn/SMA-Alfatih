@@ -64,10 +64,12 @@
                     </button>
                 </form>
 
+                @if (($settings['ppdb_open'] ?? '0') === '1')
                 <p class="mt-6 text-center text-sm text-slate-500">
                     Belum mendaftar?
                     <a href="{{ route('ppdb.register') }}" class="font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-800">Daftar sekarang</a>
                 </p>
+                @endif
             </div>
         @endif
 

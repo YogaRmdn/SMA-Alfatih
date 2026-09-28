@@ -18,14 +18,10 @@
                 <x-admin.field label="Nama Website" name="site_name" required>
                     <x-admin.input name="site_name" :value="$settings['site_name'] ?? ''" required />
                 </x-admin.field>
-                <x-admin.field label="Tahun Ajaran PPDB">
-                    <x-admin.input name="ppdb_tahun_ajaran" :value="$settings['ppdb_tahun_ajaran'] ?? ''" placeholder="Contoh: 2026/2027" />
+                <x-admin.field label="Tagline">
+                    <x-admin.input name="site_tagline" :value="$settings['site_tagline'] ?? ''" placeholder="Motto atau Tagline Sekolah" />
                 </x-admin.field>
             </div>
-
-            <x-admin.field label="Tagline">
-                <x-admin.input name="site_tagline" :value="$settings['site_tagline'] ?? ''" placeholder="Motto atau Tagline Sekolah" />
-            </x-admin.field>
 
             <x-admin.field label="Deskripsi Website">
                 <x-admin.textarea name="site_description" rows="3" :value="$settings['site_description'] ?? ''" placeholder="Deskripsi Singkat Sekolah" />
@@ -248,17 +244,55 @@
         </div>
     </div>
 
+    <div class="rounded-2xl border {{ ($settings['ppdb_open'] ?? '0') === '1' ? 'border-emerald-200' : 'border-slate-200' }} bg-white shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-4">
+            <div>
+                <h3 class="font-semibold text-slate-800">Pendaftaran PPDB</h3>
+                <p class="mt-0.5 text-xs text-slate-500">Kontrol tampilan tombol pendaftaran di seluruh website.</p>
+            </div>
+            @if (($settings['ppdb_open'] ?? '0') === '1')
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    Sedang Dibuka
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                    Ditutup
+                </span>
+            @endif
+        </div>
+        <div class="space-y-5 p-6">
+            <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.field label="Tahun Ajaran">
+                    <x-admin.input name="ppdb_tahun_ajaran" :value="$settings['ppdb_tahun_ajaran'] ?? ''" placeholder="Contoh: 2026/2027" />
+                </x-admin.field>
+                <div class="flex items-end pb-2">
+                    <x-admin.checkbox name="ppdb_open" label="Buka pendaftaran PPDB" :checked="($settings['ppdb_open'] ?? '0') === '1'" />
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-semibold text-slate-700">Ketika pendaftaran ditutup:</p>
+                <ul class="mt-2 space-y-1.5 text-xs leading-relaxed text-slate-600">
+                    <li class="flex gap-2"><span class="text-slate-400">&bull;</span> Tombol <strong>Daftar PPDB</strong> disembunyikan di navbar, hero, footer, dan artikel berita.</li>
+                    <li class="flex gap-2"><span class="text-slate-400">&bull;</span> Tombol <strong>Cek Status</strong> ikut disembunyikan.</li>
+                    <li class="flex gap-2"><span class="text-slate-400">&bull;</span> Halaman <strong>/ppdb</strong> menampilkan informasi "Pendaftaran Sedang Ditutup".</li>
+                    <li class="flex gap-2"><span class="text-slate-400">&bull;</span> Halaman <strong>/ppdb</strong> dikeluarkan dari sitemap.xml.</li>
+                    <li class="flex gap-2"><span class="text-slate-400">&bull;</span> Halaman <strong>Berita</strong> dan seluruh konten lain tetap tampil normal.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-4">
-            <h3 class="font-semibold text-slate-800">SEO & PPDB</h3>
+            <h3 class="font-semibold text-slate-800">SEO</h3>
         </div>
         <div class="space-y-5 p-6">
             <x-admin.field label="Meta Keywords" hint="Pisahkan dengan koma.">
                 <x-admin.input name="meta_keywords" :value="$settings['meta_keywords'] ?? ''" placeholder="sma, tahfizh, islam, pekanbaru, ..." />
             </x-admin.field>
-            <div class="pt-1">
-                <x-admin.checkbox name="ppdb_open" label="Buka Pendaftaran PPDB" :checked="($settings['ppdb_open'] ?? '0') === '1'" />
-            </div>
         </div>
     </div>
 

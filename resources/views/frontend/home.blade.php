@@ -67,11 +67,13 @@
             <p class="mt-3 text-gradient-light text-lg font-semibold sm:text-xl">{{ $tagline }}</p>
             <p class="mt-4 max-w-xl text-sm leading-relaxed text-emerald-100/90 sm:text-base">{{ $desc }}</p>
             <div class="mt-8 flex flex-wrap items-center gap-3">
+                @if (($settings['ppdb_open'] ?? '0') === '1')
                 <a href="{{ route('ppdb.register') }}"
                    class="sheen inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-6 py-3.5 text-sm font-bold text-emerald-950 shadow-lg shadow-amber-500/40 transition hover:brightness-105">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Daftar PPDB {{ $settings['ppdb_tahun_ajaran'] ?? '' }}
                 </a>
+                @endif
                 <a href="#profil"
                    class="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur transition hover:border-white/50 hover:bg-white/20">
                     Profil Sekolah
@@ -518,16 +520,18 @@
                                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
                                 <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400"></span>
                             </span>
-                            Pendaftaran PPDB Dibuka
+                            {{ ($settings['ppdb_open'] ?? '0') === '1' ? 'Pendaftaran PPDB Dibuka' : 'Pendaftaran PPDB Ditutup' }}
                         </span>
                         <h3 class="mt-4 text-2xl font-extrabold text-white drop-shadow-[0_2px_8px_rgba(2,31,22,0.8)] sm:text-3xl">{{ $settings['cta_title'] ?? 'Siap Bergabung dengan Keluarga Besar Kami?' }}</h3>
                         <p class="mt-3 text-sm leading-relaxed text-emerald-100/90 drop-shadow-[0_1px_4px_rgba(2,31,22,0.9)]">{{ $settings['cta_text'] ?? 'Daftarkan putra/putri Anda melalui PPDB dan wujudkan impian menjadi generasi hafizh yang berkarakter Islami.' }}</p>
                     </div>
                     <div class="flex flex-col gap-3 sm:flex-row">
+                        @if (($settings['ppdb_open'] ?? '0') === '1')
                         <a href="{{ route('ppdb.register') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-emerald-950 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:bg-amber-400">
                             Daftar PPDB
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
+                        @endif
                         <a href="{{ $waLink }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:brightness-95">
                             Tanya via WhatsApp
                         </a>
