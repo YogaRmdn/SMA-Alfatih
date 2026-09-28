@@ -93,7 +93,7 @@ Relasi kunci: News→Category/Author/Comments · Album→Galleries · Ppdb→Ppd
 
 | Seeder | Isi |
 |---|---|
-| `DatabaseSeeder` | RoleSeeder + SettingsSeeder + 2 akun (`superadmin@alfatih.sch.id` / `admin@alfatih.sch.id`, password: `password`) |
+| `DatabaseSeeder` | RoleSeeder + SettingsSeeder + 2 akun admin (`superadmin@alfatih.sch.id` / `admin@alfatih.sch.id`). Password dari env `SEED_ADMIN_PASSWORD`; **wajib diisi di production**. Akun yang sudah ada tidak di-reset. |
 | `RoleSeeder` | 2 role |
 | `SettingsSeeder` | 20+ pengaturan site (ppdb_open=1, tahun ajaran 2026/2027) |
 | `DemoSeeder` · `DemoContentSeeder` | Konten demo (berita, program, guru, dll.) |

@@ -24,7 +24,7 @@
   - Prestasi (Achievements)
   - Fasilitas (Facilities) & Ekstrakurikuler (Extracurriculars)
   - Program (Programs)
-  - Slider & Banner (Sliders, Banners)
+  - Banner (Banners)
   - Unduhan (Downloads)
   - Testimoni (Testimonials) & Mitra (Partners)
   - FAQ (Faqs) & Halaman Statis (Pages)
@@ -34,13 +34,23 @@
 - Manajemen pengguna (Users) — khusus role `super_admin`.
 - Autentikasi Laravel Breeze (login, registrasi, verifikasi email, reset password).
 
+## Catatan Keamanan
+
+- **Jangan pernah** melakukan commit `.env`. Salin `.env.example` lalu isi sendiri.
+- Set `APP_DEBUG=false` di production. Dengan `true`, halaman error membocorkan path file, query, dan isi environment variable.
+- Registrasi publik di `/register` bisa dimatikan lewat `ALLOW_PUBLIC_REGISTRATION=false` (default di `.env.example`).
+- Dokumen pendaftar (KK, akta, ijazah, rapor) disimpan di disk `local` (di luar `public/`) dan hanya bisa diakses lewat session pendaftar yang sudah diverifikasi — bukan lewat URL langsung.
+- Admin layout mengirim `noindex, nofollow`; `public/robots.txt` juga menutup `/admin`, `/register`, dan `/ppdb/dokumen/`.
+- Ganti password `superadmin@alfatih.sch.id` dan `admin@alfatih.sch.id` segera setelah seeding pertama di server.
+
 ## Teknologi
 
 - **Laravel 12** (PHP ^8.2)
 - **Laravel Breeze** untuk autentikasi
 - **Blade** untuk template
-- **Tailwind CSS** + **Vite** untuk styling & bundling
+- **Tailwind CSS 3** + **Vite** untuk styling & bundling
 - **Alpine.js** untuk interaktivitas
+- **stevebauman/purify** (HTMLPurifier) untuk sanitasi HTML konten
 - **MySQL / SQLite** (database)
 
 ## Struktur Role
@@ -75,14 +85,19 @@ php artisan key:generate
 
 # 4. Konfigurasi database pada file .env (DB_DATABASE, DB_USERNAME, DB_PASSWORD)
 
-# 5. Jalankan migrasi dan seeder
+# 5. Set password awal akun admin (WAJIB di production)
+#    Akun yang sudah ada TIDAK akan di-reset passwordnya oleh seeder.
+#    Seed di .env.example:
+#    SEED_ADMIN_PASSWORD=GantiDenganPasswordYangKuat
+
+# 6. Jalankan migrasi dan seeder
 php artisan migrate --seed
 
-# 6. Instal dependensi frontend dan build
+# 7. Instal dependensi frontend dan build
 npm install
 npm run build
 
-# 7. Jalankan server
+# 8. Jalankan server
 php artisan serve
 ```
 
@@ -94,7 +109,16 @@ Akses aplikasi di `http://localhost:8000`.
 |-------------------|-----------------------------------------------------|
 | `RoleSeeder`      | Membuat role `super_admin` dan `admin`              |
 | `SettingsSeeder`  | Data pengaturan dasar website                       |
+| `DatabaseSeeder`  | Memanggil `RoleSeeder` + `SettingsSeeder`, lalu membuat 2 akun admin bila belum ada |
 | `DemoSeeder`      | Data contoh/demo konten                            |
+
+Password akun admin diambil dari env `SEED_ADMIN_PASSWORD`:
+
+- **Production** — wajib diisi. Kalau kosong, `db:seed` gagal dengan pesan jelas, bukan diam-diam memakai password tebakan.
+- **Local/testing** — kalau kosong, password acak dicetak ke terminal.
+- Akun yang email-nya sudah terdaftar **tidak** di-reset, jadi `db:seed` aman dijalankan berulang kali di server yang sudah aktif.
+
+Setelah seeding berhasil, kosongkan lagi `SEED_ADMIN_PASSWORD` di `.env`.
 
 ## Struktur Direktori Utama
 

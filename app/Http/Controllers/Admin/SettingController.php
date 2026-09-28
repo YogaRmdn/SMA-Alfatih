@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Rules\GoogleMapsEmbed;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
@@ -30,7 +30,7 @@ class SettingController extends Controller
             'facebook' => ['nullable', 'url', 'max:500'],
             'youtube' => ['nullable', 'url', 'max:500'],
             'tiktok' => ['nullable', 'url', 'max:500'],
-            'maps_embed' => ['nullable', 'string', 'max:2000', $this->mapsEmbedRule()],
+            'maps_embed' => ['nullable', 'string', 'max:2000', new GoogleMapsEmbed],
             'operational_hours' => ['nullable', 'string', 'max:500'],
             'ppdb_open' => ['nullable', 'boolean'],
             'ppdb_tahun_ajaran' => ['nullable', 'string', 'max:50'],
@@ -122,47 +122,5 @@ class SettingController extends Controller
         if (is_string($current) && $current !== '') {
             delete_file($current);
         }
-    }
-
-    /**
-     * Rule validasi untuk URL embed peta (iframe Google Maps HTTPS).
-     */
-    private function mapsEmbedRule(): callable
-    {
-        return function ($attribute, $value, $fail) {
-            if (empty($value)) {
-                return;
-            }
-
-            $parts = parse_url($value);
-
-            if (($parts['scheme'] ?? '') !== 'https' || ! isset($parts['host'])) {
-                $fail('URL embed peta harus menggunakan HTTPS.');
-
-                return;
-            }
-
-            $allowedHosts = [
-                'maps.google.com',
-                'www.google.com',
-                'google.com',
-                'maps.google.co.id',
-                'www.google.co.id',
-                'google.co.id',
-            ];
-
-            if (! in_array(strtolower($parts['host']), $allowedHosts, true)) {
-                $fail('URL embed peta hanya diizinkan dari Google Maps.');
-
-                return;
-            }
-
-            $path = $parts['path'] ?? '';
-            $query = $parts['query'] ?? '';
-
-            if (! str_contains($path, '/maps/') && ! str_contains($query, 'output=embed')) {
-                $fail('URL embed peta tidak valid.');
-            }
-        };
     }
 }
