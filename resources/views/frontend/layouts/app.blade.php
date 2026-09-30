@@ -135,6 +135,25 @@
 
     $orgSchema = array_filter($orgSchema, fn ($value) => $value !== null);
 
+    // Program belajar (Full Day, Boarding, Takhousus) diambil dari opsi field
+    // `program` di form PPDB, jadi schema ikut berubah otomatis kalau admin
+    // menambah atau mengganti program lewat panel.
+    $programField = app(App\Services\PpdbFormDefinition::class)->fieldByKey('program');
+    $programDescriptions = [
+        'FULLDAY' => 'Program sekolah penuh hari kerja sama dengan pembelajaran tahfizh dan akhlak di sekolah.',
+        'BOARDING' => 'Program asrama bagi siswa yang tinggal di sekolah, lengkap dengan pembelajaran tahfizh, akhlak, dan akademik.',
+        'TAKHOSUS' => 'Program kelas khusus tahfizh dengan intensify hafalan dan pembinaan akhlak.',
+    ];
+    $courses = collect($programField?->optionList() ?: [])
+        ->map(fn (string $label, string $value): array => [
+            'name' => $label,
+            'description' => $programDescriptions[$value] ?? "Program {$label} di ".$siteName.'.',
+            'url' => url('/').'#program',
+        ])
+        ->values()
+        ->all();
+    $coursesSchema = courses_schema($courses, ['@id' => url('/').'#sekolah']);
+
     // Schema WebSite (untuk sinyal nama resmi situs di hasil pencarian)
     $siteSchema = array_filter([
         '@context' => 'https://schema.org',
@@ -213,6 +232,7 @@
     <script type="application/ld+json">
 {!! json_encode($siteSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
+    {!! $coursesSchema !!}
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\News;
+use App\Models\PpdbFormField;
 use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
@@ -77,7 +78,7 @@ class SeoTest extends TestCase
 
         preg_match('#<title>(.*?)</title>#s', $html, $title);
         $this->assertSame(
-            'SMA IT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu &amp; Tahfizh Al-Qur&#039;an',
+            'SMAIT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu &amp; Tahfizh Al-Qur&#039;an',
             $title[1]
         );
     }
@@ -259,6 +260,99 @@ class SeoTest extends TestCase
 
         $this->assertStringContainsString('name="robots" content="noindex, nofollow"', $html);
         $this->assertStringContainsString('rel="icon" href="'.asset_v('favicon.ico').'"', $html);
+    }
+
+    public function test_beranda_mengirim_schema_faq_page(): void
+    {
+        $html = $this->get('/')->assertSuccessful()->getContent();
+
+        $faq = $this->jsonLdOfType($html, 'FAQPage');
+
+        $this->assertNotNull($faq, 'Schema FAQPage tidak ada di beranda');
+        $this->assertNotEmpty($faq['mainEntity'] ?? []);
+
+        foreach ($faq['mainEntity'] as $index => $entity) {
+            $this->assertSame('Question', $entity['@type'] ?? null);
+            $this->assertSame('Answer', $entity['acceptedAnswer']['@type'] ?? null);
+            $this->assertNotEmpty($entity['name'] ?? null, "FAQ #{$index} tidak punya pertanyaan");
+            $this->assertNotEmpty($entity['acceptedAnswer']['text'] ?? null, "FAQ #{$index} tidak punya jawaban");
+        }
+    }
+
+    public function test_setiap_pertanyaan_faq_juga_terlihat_di_halaman(): void
+    {
+        // Google menandai FAQ schema sebagai spam kalau teksnya tidak ada
+        // di halaman. Jadi isi JSON-LD wajib cocok dengan yang dirender.
+        $html = $this->get('/')->assertSuccessful()->getContent();
+        $visible = html_entity_decode(strip_tags($html), ENT_QUOTES, 'UTF-8');
+
+        $faq = $this->jsonLdOfType($html, 'FAQPage');
+
+        $this->assertNotNull($faq, 'Schema FAQPage tidak ada di beranda');
+
+        foreach ($faq['mainEntity'] as $entity) {
+            $this->assertStringContainsString(
+                $entity['name'],
+                $visible,
+                'Pertanyaan FAQ tidak terlihat di halaman: '.$entity['name']
+            );
+        }
+    }
+
+    public function test_beranda_mengirim_schema_course_dari_program_ppdb(): void
+    {
+        $html = $this->get('/')->assertSuccessful()->getContent();
+
+        $courses = collect($this->allJsonLd($html))
+            ->filter(fn (array $node): bool => ($node['@type'] ?? null) === 'ItemList')
+            ->flatMap(fn (array $node): array => $node['itemListElement'] ?? [])
+            ->map(fn (array $item): array => $item['item'] ?? [])
+            ->filter(fn (array $item): bool => ($item['@type'] ?? null) === 'Course')
+            ->values();
+
+        $this->assertGreaterThan(0, $courses->count(), 'Schema Course tidak ada di beranda');
+
+        $programOptions = PpdbFormField::where('key', 'program')->first()?->options ?? [];
+
+        foreach ($courses as $course) {
+            $this->assertNotEmpty($course['name'] ?? null);
+            $this->assertNotEmpty($course['description'] ?? null);
+            $this->assertSame('sekolah', parse_url($course['provider']['@id'] ?? '', PHP_URL_FRAGMENT));
+        }
+
+        // Schema harus mengikuti opsi program, bukan daftar hardcode.
+        $this->assertArrayHasKey('FULLDAY', $programOptions);
+        $this->assertTrue(
+            $courses->contains(fn (array $course): bool => $course['name'] === 'Full Day'),
+            'Program Full Day tidak muncul sebagai Course'
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function allJsonLd(string $html): array
+    {
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $matches);
+
+        return array_values(array_filter(array_map(
+            fn (string $json): mixed => json_decode(trim($json), true),
+            $matches[1]
+        )));
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function jsonLdOfType(string $html, string $type): ?array
+    {
+        foreach ($this->allJsonLd($html) as $node) {
+            if (($node['@type'] ?? null) === $type) {
+                return $node;
+            }
+        }
+
+        return null;
     }
 
     private function assertJsonLdValid(string $html, string $path): void

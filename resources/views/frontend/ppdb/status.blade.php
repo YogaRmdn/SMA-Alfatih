@@ -98,6 +98,10 @@
                     </div>
                     <div class="text-sm"><span class="block text-xs uppercase tracking-wider text-slate-400">Jenis Kelamin</span><span class="font-medium text-slate-700">{{ $ppdb->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></div>
                     <div class="text-sm"><span class="block text-xs uppercase tracking-wider text-slate-400">Asal Sekolah</span><span class="font-medium text-slate-700">{{ $ppdb->origin_school ?? '-' }}</span></div>
+                    @php $programField = $form->fieldByKey('program'); @endphp
+                    @if ($programField && $ppdb->program)
+                        <div class="text-sm"><span class="block text-xs uppercase tracking-wider text-slate-400">Program</span><span class="font-medium text-slate-700">{{ $programField->optionList()[$ppdb->program] ?? $ppdb->program }}</span></div>
+                    @endif
                 </div>
 
                 @if ($ppdb->admin_notes)

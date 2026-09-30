@@ -10,7 +10,8 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            'site_name' => 'SMA IT Tahfizh Al-Fatih Pekanbaru',
+            'site_name' => 'SMAIT Tahfizh Al-Fatih Pekanbaru',
+            'site_motto' => 'The Best Way For Shaping The Future',
             'site_tagline' => 'Mencetak Generasi Qur\'ani, Berprestasi & Berkarakter',
             'site_description' => 'Sekolah menengah atas Islam terpadu tahfizh Al-Qur\'an di Pekanbaru yang mencetak generasi unggul, berakhlak mulia, dan berprestasi.',
             'logo' => null,
@@ -27,9 +28,9 @@ class SettingsSeeder extends Seeder
             'operational_hours' => 'Senin - Jumat: 07.00 - 16.00 WIB',
             'ppdb_open' => '1',
             'ppdb_tahun_ajaran' => '2026/2027',
-            'meta_keywords' => 'SMA IT Tahfizh Al-Fatih Pekanbaru, SMA tahfizh Pekanbaru, sekolah tahfizh Pekanbaru, sekolah islam terpadu Pekanbaru, SMAIT Al-Fatih, tahfizh Al-Fatih, sekolah islam Riau, PPDB Pekanbaru, PPDB SMA IT Tahfizh Al-Fatih, sekolah Quran Pekanbaru',
-            'seo_home_title' => 'SMA IT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu & Tahfizh Al-Qur\'an',
-            'seo_home_description' => 'SMA IT Tahfizh Al-Fatih Pekanbaru adalah sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau. PPDB tahun ajaran 2026/2027 sedang dibuka. Daftar sekarang!',
+            'meta_keywords' => 'SMAIT Tahfizh Al-Fatih Pekanbaru, SMA IT Tahfizh Al-Fatih Pekanbaru, SMA tahfizh Pekanbaru, sekolah tahfizh Pekanbaru, sekolah islam terpadu Pekanbaru, SMAIT Al-Fatih, tahfizh Al-Fatih, sekolah islam Riau, PPDB Pekanbaru, PPDB SMAIT Tahfizh Al-Fatih, sekolah Quran Pekanbaru',
+            'seo_home_title' => 'SMAIT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu & Tahfizh Al-Qur\'an',
+            'seo_home_description' => 'SMAIT Tahfizh Al-Fatih Pekanbaru adalah sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau. PPDB tahun ajaran 2026/2027 sedang dibuka. Daftar sekarang!',
             'meta_geo_region' => 'ID-RI',
             'meta_geo_placename' => 'Pekanbaru',
             'meta_geo_position' => '0.507073;101.447779',
@@ -84,6 +85,9 @@ class SettingsSeeder extends Seeder
 
             'testimoni_eyebrow' => 'Kata Mereka',
             'testimoni_title' => 'Testimoni Alumni & Wali',
+
+            'faq_eyebrow' => 'Pertanyaan Umum',
+            'faq_title' => 'Pertanyaan yang Sering Ditanya Orang Tua',
 
             'partner_title' => 'Mitra & Kerja Sama',
             'partner_subtitle' => 'Bersama membangun pendidikan berkualitas.',

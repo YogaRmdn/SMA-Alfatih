@@ -18,6 +18,7 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'site_name' => ['required', 'string', 'max:255'],
+            'site_motto' => ['nullable', 'string', 'max:500'],
             'site_tagline' => ['nullable', 'string', 'max:500'],
             'site_description' => ['nullable', 'string', 'max:1000'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],

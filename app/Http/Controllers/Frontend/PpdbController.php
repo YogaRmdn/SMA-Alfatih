@@ -7,28 +7,15 @@ use App\Http\Requests\PpdbRegistrationRequest;
 use App\Models\Contact;
 use App\Models\Ppdb;
 use App\Models\PpdbDocument;
+use App\Models\PpdbFormField;
 use App\Models\Setting;
+use App\Services\PpdbFormDefinition;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PpdbController extends Controller
 {
-    protected const ALLOWED_DOCUMENT_TYPES = [
-        'photo',
-        'kk',
-        'birth_certificate',
-        'diploma',
-        'report_card',
-    ];
-
-    protected const DOCUMENT_LABELS = [
-        'kk' => 'Kartu Keluarga (KK)',
-        'birth_certificate' => 'Akta Kelahiran',
-        'diploma' => 'Ijazah / SKL',
-        'report_card' => 'Rapor',
-    ];
-
     protected const PRIVATE_DISK = 'local';
 
     private function settings(): array
@@ -46,8 +33,9 @@ class PpdbController extends Controller
         }
 
         $academicYear = $settings['ppdb_tahun_ajaran'] ?? (now()->year.'/'.(now()->year + 1));
+        $form = app(PpdbFormDefinition::class);
 
-        return view('frontend.ppdb.form', compact('settings', 'contact', 'academicYear'));
+        return view('frontend.ppdb.form', compact('settings', 'contact', 'academicYear', 'form'));
     }
 
     public function store(PpdbRegistrationRequest $request)
@@ -58,64 +46,78 @@ class PpdbController extends Controller
             return redirect()->route('ppdb.register')->withErrors(['closed' => 'Pendaftaran PPDB sedang ditutup.']);
         }
 
+        $form = app(PpdbFormDefinition::class);
+
         $data = $request->validated();
+        $filePaths = [];
 
-        $data['gender'] = $request->gender;
-        $data['religion'] = $request->filled('religion') ? $request->religion : 'Islam';
-        $data['academic_year'] = $settings['ppdb_tahun_ajaran'] ?? (now()->year.'/'.(now()->year + 1));
-        $data['status'] = 'pending';
-        $data['access_code'] = Ppdb::generateAccessCode();
-        $data['photo'] = upload_file($request->file('photo'), 'ppdb/photos', self::PRIVATE_DISK);
-
-        $documentPaths = [];
-
-        foreach (array_keys(self::DOCUMENT_LABELS) as $type) {
-            if ($request->hasFile($type)) {
-                $documentPaths[$type] = upload_file($request->file($type), 'ppdb/documents', self::PRIVATE_DISK);
+        foreach ($form->fileFields() as $field) {
+            if ($request->hasFile($field->key)) {
+                $filePaths[$field->key] = upload_file(
+                    $request->file($field->key),
+                    $form->uploadDirectory($field->key),
+                    self::PRIVATE_DISK
+                );
             }
         }
+
+        $persist = $form->persist($data, $filePaths);
+
+        $attributes = $persist['columns'];
+        $attributes['academic_year'] = $settings['ppdb_tahun_ajaran'] ?? (now()->year.'/'.(now()->year + 1));
+        $attributes['status'] = 'pending';
+        $attributes['access_code'] = Ppdb::generateAccessCode();
+        $attributes['answers'] = $persist['answers'];
 
         $ppdb = null;
         $exception = null;
 
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        for ($attempt = 0; $attempt < 5; $attempt++) {
-            $data['registration_number'] = Ppdb::generateRegistrationNumber();
+            for ($attempt = 0; $attempt < 5; $attempt++) {
+                $attributes['registration_number'] = Ppdb::generateRegistrationNumber();
 
-            try {
-                $ppdb = Ppdb::query()->create($data);
-                break;
-            } catch (QueryException $e) {
-                $exception = $e;
-
-                if (! $this->isRegistrationNumberCollision($e)) {
+                try {
+                    $ppdb = Ppdb::query()->create($attributes);
                     break;
+                } catch (QueryException $e) {
+                    $exception = $e;
+
+                    if (! $this->isRegistrationNumberCollision($e)) {
+                        break;
+                    }
                 }
             }
+
+            if ($ppdb) {
+                foreach ($persist['documents'] as $document) {
+                    PpdbDocument::create([
+                        'ppdb_id' => $ppdb->id,
+                        ...$document,
+                    ]);
+                }
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            foreach ($filePaths as $path) {
+                delete_file($path, self::PRIVATE_DISK);
+            }
+
+            throw $e;
         }
 
         if (! $ppdb) {
-            DB::rollBack();
-            delete_file($data['photo'], self::PRIVATE_DISK);
-            foreach ($documentPaths as $path) {
+            foreach ($filePaths as $path) {
                 delete_file($path, self::PRIVATE_DISK);
             }
 
             throw $exception
                 ?? new QueryException('', [], new \RuntimeException('Pendaftaran gagal, silakan coba lagi.'));
         }
-
-        foreach ($documentPaths as $type => $path) {
-            PpdbDocument::create([
-                'ppdb_id' => $ppdb->id,
-                'name' => self::DOCUMENT_LABELS[$type],
-                'type' => $type,
-                'file_path' => $path,
-            ]);
-        }
-
-        DB::commit();
 
         session(['ppdb_registration_id' => $ppdb->id]);
 
@@ -132,15 +134,18 @@ class PpdbController extends Controller
             ]);
         }
 
-        return view('frontend.ppdb.success', compact('ppdb', 'contact'));
+        $form = app(PpdbFormDefinition::class);
+
+        return view('frontend.ppdb.success', compact('ppdb', 'contact', 'form'));
     }
 
     public function status()
     {
         $settings = $this->settings();
         $contact = Contact::first();
+        $form = app(PpdbFormDefinition::class);
 
-        return view('frontend.ppdb.status', compact('settings', 'contact'));
+        return view('frontend.ppdb.status', compact('settings', 'contact', 'form'));
     }
 
     public function checkStatus()
@@ -159,6 +164,7 @@ class PpdbController extends Controller
 
         $settings = $this->settings();
         $contact = Contact::first();
+        $form = app(PpdbFormDefinition::class);
 
         if (! $ppdb) {
             return back()->withErrors([
@@ -168,12 +174,12 @@ class PpdbController extends Controller
 
         session(['ppdb_verified_id' => $ppdb->id]);
 
-        return view('frontend.ppdb.status', compact('ppdb', 'settings', 'contact'));
+        return view('frontend.ppdb.status', compact('ppdb', 'settings', 'contact', 'form'));
     }
 
     public function document(Ppdb $ppdb, string $type)
     {
-        abort_unless(in_array($type, self::ALLOWED_DOCUMENT_TYPES, true), 404);
+        abort_unless(in_array($type, app(PpdbFormDefinition::class)->allowedDocumentTypes(), true), 404);
 
         $authorized = session('ppdb_registration_id') === $ppdb->id
             || session('ppdb_verified_id') === $ppdb->id;
@@ -182,7 +188,7 @@ class PpdbController extends Controller
 
         $disk = Storage::disk(self::PRIVATE_DISK);
 
-        $path = $type === 'photo'
+        $path = $type === PpdbFormField::PHOTO_KEY
             ? $ppdb->photo
             : $ppdb->documents()->where('type', $type)->value('file_path');
 
@@ -194,12 +200,19 @@ class PpdbController extends Controller
     private function isRegistrationNumberCollision(QueryException $e): bool
     {
         $errorInfo = $e->errorInfo;
-        $code = $errorInfo[1] ?? null;
 
-        if (is_string($errorInfo) && str_contains($errorInfo, 'UNIQUE constraint failed')) {
+        // MySQL/MariaDB: SQLSTATE 23000 dengan driver error 1062.
+        if (($errorInfo[1] ?? null) == 1062) {
             return true;
         }
 
-        return $code == 1062 || str_contains((string) $e->getMessage(), 'unique');
+        $message = is_array($errorInfo) ? (string) ($errorInfo[2] ?? '') : (string) $errorInfo;
+
+        if (is_array($errorInfo) && str_contains($message, 'UNIQUE constraint failed')) {
+            return true;
+        }
+
+        return str_contains($message, 'Duplicate entry')
+            || str_contains($message, 'UNIQUE constraint failed');
     }
 }

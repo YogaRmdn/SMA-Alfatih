@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             SettingsSeeder::class,
+            PpdbFormFieldSeeder::class,
         ]);
 
         $secret = $this->initialPassword();

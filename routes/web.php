@@ -37,7 +37,7 @@ Route::middleware('throttle:20,1')->group(function () {
 
 Route::middleware('throttle:30,1')->group(function () {
     Route::get('ppdb/dokumen/{ppdb}/{type}', [PpdbController::class, 'document'])
-        ->where('type', 'photo|kk|birth_certificate|diploma|report_card')
+        ->where('type', '[a-z0-9_]+')
         ->name('ppdb.document');
 });
 

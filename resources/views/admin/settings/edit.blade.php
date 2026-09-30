@@ -15,11 +15,16 @@
         </div>
         <div class="space-y-5 p-6">
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.field label="Nama Website" name="site_name" required>
-                    <x-admin.input name="site_name" :value="$settings['site_name'] ?? ''" required />
+                <div class="md:col-span-2">
+                    <x-admin.field label="Nama Website" name="site_name" required>
+                        <x-admin.input name="site_name" :value="$settings['site_name'] ?? ''" required />
+                    </x-admin.field>
+                </div>
+                <x-admin.field label="Motto Sekolah" name="site_motto" hint="Tampil di bawah nama sekolah pada hero beranda.">
+                    <x-admin.input name="site_motto" :value="$settings['site_motto'] ?? ''" placeholder="The Best Way For Shaping The Future" />
                 </x-admin.field>
-                <x-admin.field label="Tagline">
-                    <x-admin.input name="site_tagline" :value="$settings['site_tagline'] ?? ''" placeholder="Motto atau Tagline Sekolah" />
+                <x-admin.field label="Tagline" name="site_tagline" hint="Slogan/janji sekolah, tampil di bawah motto.">
+                    <x-admin.input name="site_tagline" :value="$settings['site_tagline'] ?? ''" placeholder="Mencetak Generasi Qur'ani" />
                 </x-admin.field>
             </div>
 

@@ -24,7 +24,7 @@
         </span>
         <h1 class="mt-4 text-3xl font-extrabold text-white lg:text-4xl">Formulir Pendaftaran Peserta Didik Baru</h1>
         <p class="mt-3 max-w-2xl text-sm leading-relaxed text-emerald-100/90">
-            Isi formulir berikut dengan data yang benar dan upload dokumen persyaratan.
+            Isi formulir berikut dengan data yang benar dan unggah bukti pembayaran formulir pendaftaran.
             Setelah dikirim, sistem akan menerbitkan <span class="font-semibold text-amber-300">No. Registrasi</span> yang dapat Anda gunakan untuk memantau status pendaftaran.
         </p>
         <div class="mt-6 grid max-w-xl gap-3 sm:grid-cols-3">
@@ -34,7 +34,7 @@
                 </span>
                 <span class="text-sm">
                     <span class="block font-bold text-white">Langkah 1</span>
-                    <span class="block text-xs text-emerald-200">Isi Biodata</span>
+                    <span class="block text-xs text-emerald-200">Isi Data Siswa</span>
                 </span>
             </div>
             <div class="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur">
@@ -43,7 +43,7 @@
                 </span>
                 <span class="text-sm">
                     <span class="block font-bold text-white">Langkah 2</span>
-                    <span class="block text-xs text-emerald-200">Upload Dokumen</span>
+                    <span class="block text-xs text-emerald-200">Unggah Bukti Bayar</span>
                 </span>
             </div>
             <div class="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 backdrop-blur">
@@ -69,193 +69,122 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('ppdb.store') }}" enctype="multipart/form-data" class="space-y-8" x-data="{ file: null }">
+        @if ($form->fields()->isEmpty())
+            <div class="rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center">
+                <p class="text-sm font-semibold text-amber-800">Formulir pendaftaran belum disiapkan oleh administrator.</p>
+                <p class="mt-1 text-sm text-amber-700">Silakan hubungi sekolah untuk informasi pendaftaran.</p>
+            </div>
+        @else
+        <form method="POST" action="{{ route('ppdb.store') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
 
-            {{-- DATA SISWA --}}
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">1</span>
-                    <div>
-                        <h2 class="font-bold text-emerald-950">Data Siswa</h2>
-                        <p class="text-xs text-slate-500">Identitas lengkap calon peserta didik</p>
+            @foreach ($form->rows() as $row)
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-xs font-bold text-white">{{ $loop->iteration }}</span>
+                        <h2 class="font-bold text-emerald-950">
+                            {{ $row['heading'] }} @if ($row['required'])<span class="text-red-500">*</span>@endif
+                        </h2>
                     </div>
-                </div>
-                <div class="grid gap-5 p-6 sm:grid-cols-2">
-                    <div class="sm:col-span-2">
-                        <label for="full_name" class="mb-1.5 block text-sm font-medium text-slate-700">Nama Lengkap <span class="text-red-500">*</span></label>
-                        <input type="text" name="full_name" id="full_name" value="{{ old('full_name') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="Nama sesuai akta kelahiran">
-                        @error('full_name')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
+                    <div class="grid gap-5 p-6 {{ count($row['fields']) > 1 ? 'sm:grid-cols-2' : '' }}">
+                        @foreach ($row['fields'] as $field)
+                            <div @class(['sm:col-span-2' => $field->width === 'full' || count($row['fields']) === 1])>
 
-                    <div>
-                        <label for="gender" class="mb-1.5 block text-sm font-medium text-slate-700">Jenis Kelamin <span class="text-red-500">*</span></label>
-                        <select name="gender" id="gender" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            <option value="L" @selected(old('gender') === 'L')>Laki-laki</option>
-                            <option value="P" @selected(old('gender') === 'P')>Perempuan</option>
-                        </select>
-                        @error('gender')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="religion" class="mb-1.5 block text-sm font-medium text-slate-700">Agama</label>
-                        <select name="religion" id="religion"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            @foreach (['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'] as $religion)
-                                <option value="{{ $religion }}" @selected(old('religion', 'Islam') === $religion)>{{ $religion }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="birth_place" class="mb-1.5 block text-sm font-medium text-slate-700">Tempat Lahir</label>
-                        <input type="text" name="birth_place" id="birth_place" value="{{ old('birth_place') }}"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="Kota/Kabupaten">
-                        @error('birth_place')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="birth_date" class="mb-1.5 block text-sm font-medium text-slate-700">Tanggal Lahir <span class="text-red-500">*</span></label>
-                        <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        @error('birth_date')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-
-                    <div>
-                        <label for="nisn" class="mb-1.5 block text-sm font-medium text-slate-700">NISN</label>
-                        <input type="text" name="nisn" id="nisn" value="{{ old('nisn') }}" maxlength="10"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="10 digit (opsional)">
-                        @error('nisn')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="origin_school" class="mb-1.5 block text-sm font-medium text-slate-700">Asal Sekolah <span class="text-red-500">*</span></label>
-                        <input type="text" name="origin_school" id="origin_school" value="{{ old('origin_school') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="Nama SMP/MTs asal">
-                        @error('origin_school')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label for="address" class="mb-1.5 block text-sm font-medium text-slate-700">Alamat Lengkap <span class="text-red-500">*</span></label>
-                        <textarea name="address" id="address" rows="2" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-                            placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, Kota">{{ old('address') }}</textarea>
-                        @error('address')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-
-                    <div>
-                        <label for="phone" class="mb-1.5 block text-sm font-medium text-slate-700">No. HP / WhatsApp <span class="text-red-500">*</span></label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="08xxxxxxxxxx">
-                        @error('phone')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="email" class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="email@gmail.com">
-                        @error('email')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                </div>
-            </div>
-
-            {{-- DATA ORANG TUA --}}
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">2</span>
-                    <div>
-                        <h2 class="font-bold text-emerald-950">Data Orang Tua / Wali</h2>
-                        <p class="text-xs text-slate-500">Informasi orang tua atau wali siswa</p>
-                    </div>
-                </div>
-                <div class="grid gap-5 p-6 sm:grid-cols-2">
-                    <div>
-                        <label for="father_name" class="mb-1.5 block text-sm font-medium text-slate-700">Nama Ayah <span class="text-red-500">*</span></label>
-                        <input type="text" name="father_name" id="father_name" value="{{ old('father_name') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        @error('father_name')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="father_job" class="mb-1.5 block text-sm font-medium text-slate-700">Pekerjaan Ayah</label>
-                        <input type="text" name="father_job" id="father_job" value="{{ old('father_job') }}"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        @error('father_job')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="mother_name" class="mb-1.5 block text-sm font-medium text-slate-700">Nama Ibu <span class="text-red-500">*</span></label>
-                        <input type="text" name="mother_name" id="mother_name" value="{{ old('mother_name') }}" required
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        @error('mother_name')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="mother_job" class="mb-1.5 block text-sm font-medium text-slate-700">Pekerjaan Ibu</label>
-                        <input type="text" name="mother_job" id="mother_job" value="{{ old('mother_job') }}"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                        @error('mother_job')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="family_income" class="mb-1.5 block text-sm font-medium text-slate-700">Penghasilan Keluarga</label>
-                        <select name="family_income" id="family_income"
-                            class="w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            <option value="">Pilih penghasilan (opsional)</option>
-                            @foreach (['< Rp 1.000.000', 'Rp 1.000.000 - Rp 3.000.000', 'Rp 3.000.000 - Rp 5.000.000', '> Rp 5.000.000'] as $income)
-                                <option value="{{ $income }}" @selected(old('family_income') === $income)>{{ $income }}</option>
-                            @endforeach
-                        </select>
-                        @error('family_income')<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                </div>
-            </div>
-
-            {{-- DOKUMEN --}}
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">3</span>
-                    <div>
-                        <h2 class="font-bold text-emerald-950">Dokumen Persyaratan</h2>
-                        <p class="text-xs text-slate-500">Format JPG/PNG/PDF, maksimal 4 MB per dokumen</p>
-                    </div>
-                </div>
-                <div class="grid gap-5 p-6 sm:grid-cols-2">
-                    @php
-                        $documentFields = [
-                            'photo' => ['label' => 'Foto Siswa', 'hint' => 'Pas foto terbaru 3x4 (JPG/PNG, maks 2 MB)', 'accept' => 'image/*', 'required' => true],
-                            'kk' => ['label' => 'Kartu Keluarga (KK)', 'hint' => 'Scan KK', 'accept' => 'image/*,.pdf', 'required' => true],
-                            'birth_certificate' => ['label' => 'Akta Kelahiran', 'hint' => 'Scan akta kelahiran', 'accept' => 'image/*,.pdf', 'required' => true],
-                            'diploma' => ['label' => 'Ijazah / SKL', 'hint' => 'Ijazah SMP atau Surat Keterangan Lulus', 'accept' => 'image/*,.pdf', 'required' => true],
-                            'report_card' => ['label' => 'Rapor', 'hint' => 'Scan rapor semester terakhir', 'accept' => 'image/*,.pdf', 'required' => true],
-                        ];
-                    @endphp
-                    @foreach ($documentFields as $name => $doc)
-                        <div class="@if ($name === 'photo') sm:col-span-2 @endif">
-                            <label for="{{ $name }}" class="mb-1.5 block text-sm font-medium text-slate-700">
-                                {{ $doc['label'] }} @if ($doc['required'])<span class="text-red-500">*</span>@endif
-                            </label>
-                            <div class="flex flex-col gap-2">
-                                @if ($name === 'photo')
-                                    <div class="flex items-center gap-4">
-                                        <span class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-300">
-                                            <svg x-show="!file" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                        </span>
-                                        <input type="file" name="photo" id="photo" accept="{{ $doc['accept'] }}" required
-                                            class="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100">
-                                    </div>
-                                @else
-                                    <input type="file" name="{{ $name }}" id="{{ $name }}" accept="{{ $doc['accept'] }}" required
-                                        class="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100">
+                                @if ($row['sub'])
+                                    <label for="{{ $field->key }}" class="mb-1.5 block text-sm font-medium text-slate-700">
+                                        {{ $field->label }} @if ($field->is_required)<span class="text-red-500">*</span>@endif
+                                    </label>
                                 @endif
+
+                                @php
+                                    $old = old($field->key);
+                                    $inputClass = 'w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500';
+                                @endphp
+
+                                @switch($field->type)
+                                    @case('textarea')
+                                        <textarea name="{{ $field->key }}" id="{{ $field->key }}" rows="2"
+                                            @if ($field->is_required) required @endif
+                                            class="{{ $inputClass }}"
+                                            placeholder="{{ $field->placeholder }}">{{ $old }}</textarea>
+                                        @break
+
+                                    @case('date')
+                                        <input type="date" name="{{ $field->key }}" id="{{ $field->key }}"
+                                            value="{{ $old }}"
+                                            @if ($field->is_required) required @endif
+                                            class="{{ $inputClass }}">
+                                        @break
+
+                                    @case('tel')
+                                        <input type="tel" name="{{ $field->key }}" id="{{ $field->key }}"
+                                            value="{{ $old }}" inputmode="numeric"
+                                            placeholder="{{ $field->placeholder ?? '08xxxxxxxxxx' }}"
+                                            @if ($field->is_required) required @endif
+                                            class="{{ $inputClass }}">
+                                        @break
+
+                                    @case('select')
+                                        <select name="{{ $field->key }}" id="{{ $field->key }}"
+                                            @if ($field->is_required) required @endif
+                                            class="{{ $inputClass }}">
+                                            <option value="">{{ $field->is_required ? 'Pilih salah satu' : 'Pilih (opsional)' }}</option>
+                                            @foreach ($field->optionList() as $value => $label)
+                                                <option value="{{ $value }}" @selected($old === $value)>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @break
+
+                                    @case('radio')
+                                        <div class="grid gap-2 @if (count($field->optionList()) > 3) 'sm:grid-cols-3' @endif">
+                                            @foreach ($field->optionList() as $value => $label)
+                                                <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition hover:border-emerald-400 hover:bg-emerald-50 has-checked:border-emerald-600 has-checked:bg-emerald-50">
+                                                    <input type="radio" name="{{ $field->key }}" value="{{ $value }}"
+                                                        @checked($old === $value)
+                                                        @if ($field->is_required) required @endif
+                                                        class="border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                                    <span class="font-medium text-slate-700">{{ $label }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        @break
+
+                                    @case('file')
+                                        <input type="file" name="{{ $field->key }}" id="{{ $field->key }}"
+                                            accept="{{ $field->htmlAccept() }}"
+                                            @if ($field->is_required) required @endif
+                                            class="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100">
+                                        @break
+
+                                    @default
+                                        <input type="text" name="{{ $field->key }}" id="{{ $field->key }}"
+                                            value="{{ $old }}"
+                                            placeholder="{{ $field->placeholder }}"
+                                            @if ($field->is_required) required @endif
+                                            class="{{ $inputClass }}">
+                                @endswitch
+
+                                @if ($field->help_text)
+                                    <p class="mt-1 text-xs text-slate-500">{{ $field->help_text }}</p>
+                                @elseif ($field->isFile())
+                                    <p class="mt-1 text-xs text-slate-500">Format {{ $field->acceptLabel() }}, maksimal {{ $field->maxKbLabel() }}.</p>
+                                @endif
+
+                                @error($field->key)
+                                    <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
-                            <p class="mt-1 text-xs text-slate-500">{{ $doc['hint'] }}</p>
-                            @error($name)<p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endforeach
 
             {{-- SUBMIT --}}
             <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
                 <div class="flex items-start gap-3">
                     <svg class="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     <p class="text-sm leading-relaxed text-emerald-900">
-                        Pastikan seluruh data dan dokumen sudah benar sebelum mengirim.
+                        Pastikan seluruh data sudah benar sebelum mengirim.
                         Setelah dikirim, Anda akan mendapat <span class="font-semibold">No. Registrasi</span> otomatis.
                         Simpan nomor tersebut untuk <a href="{{ route('ppdb.status') }}" class="font-semibold underline decoration-emerald-400 underline-offset-2 hover:text-emerald-700">cek status pendaftaran</a>.
                     </p>
@@ -267,6 +196,7 @@
                 </button>
             </div>
         </form>
+        @endif
     </div>
 </section>
 

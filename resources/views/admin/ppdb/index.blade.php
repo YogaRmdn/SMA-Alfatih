@@ -26,7 +26,7 @@
     <div class="border-b border-slate-100 p-4">
         <form method="GET" class="flex flex-col gap-3 md:flex-row md:items-center">
             <div class="relative flex-1">
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari Nama / No. Registrasi / NISN..."
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari Nama / No. Registrasi / Asal Sekolah..."
                        class="w-full rounded-lg border-slate-300 py-2 pl-10 pr-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                 <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
@@ -38,6 +38,14 @@
                 <option value="accepted" {{ request('status') === 'accepted' ? 'selected' : '' }}>Diterima</option>
                 <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
             </select>
+            @if ($programs !== [])
+                <select name="program" class="rounded-lg border-slate-300 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <option value="">Semua Program</option>
+                    @foreach ($programs as $value => $label)
+                        <option value="{{ $value }}" {{ request('program') === (string) $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            @endif
             <select name="gender" class="rounded-lg border-slate-300 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                 <option value="">Semua Jenis Kelamin</option>
                 <option value="L" {{ request('gender') === 'L' ? 'selected' : '' }}>Laki-laki</option>
@@ -46,7 +54,7 @@
             <input type="text" name="academic_year" value="{{ request('academic_year') }}" placeholder="Tahun Ajaran"
                    class="w-full rounded-lg border-slate-300 py-2 px-3 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 md:w-40">
             <button type="submit" class="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700">Filter</button>
-            @if (request()->hasAny(['q', 'status', 'gender', 'academic_year']))
+            @if (request()->hasAny(['q', 'status', 'gender', 'program', 'academic_year']))
                 <a href="{{ route('admin.ppdb.index') }}" class="text-sm text-slate-500 hover:text-emerald-700">Reset</a>
             @endif
         </form>
@@ -59,8 +67,9 @@
                     <th class="px-5 py-3">No. Registrasi</th>
                     <th class="px-5 py-3">Nama</th>
                     <th class="px-5 py-3">JK</th>
-                    <th class="px-5 py-3">NISN</th>
+                    <th class="px-5 py-3">Program</th>
                     <th class="px-5 py-3">Asal Sekolah</th>
+                    <th class="px-5 py-3">Bukti Bayar</th>
                     <th class="px-5 py-3">Tahun Ajaran</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3">Daftar</th>
@@ -75,8 +84,21 @@
                             <a href="{{ route('admin.ppdb.show', $item) }}" class="font-medium text-slate-800 hover:text-emerald-700">{{ $item->full_name }}</a>
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $item->gender === 'L' ? 'L' : 'P' }}</td>
-                        <td class="px-5 py-3 text-slate-600">{{ $item->nisn ?? '-' }}</td>
+                        <td class="px-5 py-3">
+                            <span class="text-slate-600">{{ $programs[$item->program] ?? $item->program ?? '-' }}</span>
+                        </td>
                         <td class="max-w-[180px] truncate px-5 py-3 text-slate-600">{{ $item->origin_school ?? '-' }}</td>
+                        <td class="px-5 py-3">
+                            @if ($item->hasDocument('payment_proof'))
+                                <a href="{{ route('admin.ppdb.document', [$item, 'payment_proof']) }}" target="_blank" rel="noopener"
+                                   class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Ada
+                                </a>
+                            @else
+                                <span class="rounded-lg bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">Belum</span>
+                            @endif
+                        </td>
                         <td class="px-5 py-3 text-slate-600">{{ $item->academic_year ?? '-' }}</td>
                         <td class="px-5 py-3">
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $item->statusColor() }}">{{ $item->statusLabel() }}</span>
@@ -101,7 +123,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-5 py-12 text-center text-slate-400">Belum ada pendaftar PPDB.</td>
+                        <td colspan="10" class="px-5 py-12 text-center text-slate-400">Belum ada pendaftar PPDB.</td>
                     </tr>
                 @endforelse
             </tbody>

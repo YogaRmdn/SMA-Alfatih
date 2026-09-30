@@ -18,9 +18,10 @@ use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PpdbController;
+use App\Http\Controllers\Admin\PpdbFormFieldController;
 use App\Http\Controllers\Admin\ProgramController;
-use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SchoolProfileController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\TestimonialController;
@@ -80,10 +81,28 @@ Route::middleware(['auth', 'verified', 'role:super_admin,admin'])
         Route::get('ppdb', [PpdbController::class, 'index'])->name('ppdb.index');
         Route::get('ppdb/{ppdb}', [PpdbController::class, 'show'])->name('ppdb.show');
         Route::get('ppdb/{ppdb}/document/{type}', [PpdbController::class, 'document'])
-            ->where('type', 'photo|kk|birth_certificate|diploma|report_card')
+            ->where('type', '[a-z0-9_]+')
             ->name('ppdb.document');
         Route::put('ppdb/{ppdb}/status', [PpdbController::class, 'updateStatus'])->name('ppdb.status');
+        Route::put('ppdb/{ppdb}/details', [PpdbController::class, 'updateDetails'])->name('ppdb.details');
+        Route::post('ppdb/{ppdb}/documents', [PpdbController::class, 'storeDocument'])->name('ppdb.documents.store');
+        Route::delete('ppdb/{ppdb}/documents/{type}', [PpdbController::class, 'destroyDocument'])
+            ->where('type', '[a-z0-9_]+')
+            ->name('ppdb.documents.destroy');
         Route::delete('ppdb/{ppdb}', [PpdbController::class, 'destroy'])->name('ppdb.destroy');
+
+        Route::prefix('ppdb-form-fields')->name('ppdb-form-fields.')->group(function () {
+            Route::get('/', [PpdbFormFieldController::class, 'index'])->name('index');
+            Route::get('create', [PpdbFormFieldController::class, 'create'])->name('create');
+            Route::post('/', [PpdbFormFieldController::class, 'store'])->name('store');
+            Route::put('reorder', [PpdbFormFieldController::class, 'reorder'])->name('reorder');
+            Route::delete('delete-all', [PpdbFormFieldController::class, 'deleteAll'])->name('delete-all');
+            Route::delete('reset', [PpdbFormFieldController::class, 'reset'])->name('reset');
+            Route::get('{ppdbFormField}/edit', [PpdbFormFieldController::class, 'edit'])->name('edit');
+            Route::put('{ppdbFormField}', [PpdbFormFieldController::class, 'update'])->name('update');
+            Route::patch('{ppdbFormField}/toggle', [PpdbFormFieldController::class, 'toggle'])->name('toggle');
+            Route::delete('{ppdbFormField}', [PpdbFormFieldController::class, 'destroy'])->name('destroy');
+        });
 
         Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');

@@ -14,7 +14,7 @@
                     Kelola seluruh konten website {{ $settings['site_name'] ?? config('app.name') }} dengan mudah dari panel administrasi ini.
                 </p>
             </div>
-            <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="Logo {{ $settings['site_name'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru' }}"
+            <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="Logo {{ $settings['site_name'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru' }}"
                  class="h-14 w-14 rounded-xl bg-white/20 p-2 object-contain shadow-lg ring-1 ring-white/30 sm:h-24 sm:w-24 sm:rounded-2xl">
         </div>
     </div>

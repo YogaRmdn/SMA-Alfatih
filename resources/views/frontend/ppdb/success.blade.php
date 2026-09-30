@@ -55,6 +55,8 @@
                 </ul>
             </div>
 
+            @include('frontend.ppdb.partials.summary')
+
             <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <a href="{{ route('ppdb.status') }}"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-emerald-950 shadow-lg shadow-amber-500/30 transition hover:bg-amber-400">

@@ -3,6 +3,7 @@
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Stevebauman\Purify\Facades\Purify;
 
 const UPLOAD_ALLOWED_EXTENSIONS = [
     'jpg', 'jpeg', 'png', 'webp', 'avif', 'gif',
@@ -204,6 +205,122 @@ if (! function_exists('breadcrumb_schema')) {
     }
 }
 
+if (! function_exists('faq_schema')) {
+    /**
+     * Bangun tag <script> JSON-LD FAQPage dari daftar tanya jawab.
+     *
+     * Hanya kirim JSON-LD untuk pertanyaan yang jawabannya benar-benar
+     * terlihat di halaman. Google menandai FAQ schema yang tidak punya
+     * teks yang cocok sebagai spam, dan keyword di situ jadi sia-sia.
+     *
+     * @param  array<int, array{question: string, answer: string}>  $items
+     */
+    function faq_schema(array $items): string
+    {
+        $entities = [];
+
+        foreach ($items as $item) {
+            $question = trim((string) ($item['question'] ?? ''));
+            $answer = trim((string) ($item['answer'] ?? ''));
+
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+
+            $entities[] = [
+                '@type' => 'Question',
+                'name' => $question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $answer,
+                ],
+            ];
+        }
+
+        if ($entities === []) {
+            return '';
+        }
+
+        $json = json_encode(
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => $entities,
+            ],
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+        );
+
+        return '<script type="application/ld+json">'.$json.'</script>';
+    }
+}
+
+if (! function_exists('courses_schema')) {
+    /**
+     * JSON-LD Course untuk program belajar yang ditawarkan sekolah.
+     *
+     * Dipakai supaya Google bisa menafsirkan program (Full Day, Boarding,
+     * Takhousus) sebagai entri tersendiri, bukan sekadar teks di halaman.
+     *
+     * @param  array<int, array{name: string, description?: string, url?: string}>  $courses
+     * @param  array<string, mixed>  $provider
+     */
+    function courses_schema(array $courses, array $provider = []): string
+    {
+        $entities = [];
+
+        foreach ($courses as $course) {
+            $name = trim((string) ($course['name'] ?? ''));
+
+            if ($name === '') {
+                continue;
+            }
+
+            $entity = [
+                '@type' => 'Course',
+                'name' => $name,
+                'inLanguage' => 'id-ID',
+            ];
+
+            if (! empty($course['description'])) {
+                $entity['description'] = trim((string) $course['description']);
+            }
+
+            if (! empty($course['url'])) {
+                $entity['url'] = $course['url'];
+            }
+
+            if ($provider !== []) {
+                $entity['provider'] = $provider;
+            }
+
+            $entities[] = $entity;
+        }
+
+        if ($entities === []) {
+            return '';
+        }
+
+        $json = json_encode(
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'ItemList',
+                'itemListElement' => array_map(
+                    static fn (array $entity, int $index): array => [
+                        '@type' => 'ListItem',
+                        'position' => $index + 1,
+                        'item' => $entity,
+                    ],
+                    $entities,
+                    array_keys($entities)
+                ),
+            ],
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+        );
+
+        return '<script type="application/ld+json">'.$json.'</script>';
+    }
+}
+
 if (! function_exists('format_bytes')) {
     function format_bytes(int $bytes, int $precision = 2): string
     {
@@ -224,6 +341,6 @@ if (! function_exists('sanitize_html')) {
             return $html;
         }
 
-        return \Stevebauman\Purify\Facades\Purify::clean($html);
+        return Purify::clean($html);
     }
 }

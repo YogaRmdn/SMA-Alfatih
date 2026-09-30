@@ -16,7 +16,8 @@
             ['label' => 'Partner', 'icon' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'route' => 'admin.partners.index', 'slug' => 'partners'],
         ]],
         'ppdb' => ['label' => 'PPDB Online', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'children' => [
-            ['label' => 'Data Pendaftar', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb.index', 'slug' => 'ppdb'],
+            ['label' => 'Data Pendaftar', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb.index', 'slug' => 'ppdb.'],
+            ['label' => 'Atur Formulir', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb-form-fields.index', 'slug' => 'ppdb-form-fields'],
         ]],
         'download' => ['label' => 'Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'children' => [
             ['label' => 'File Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'route' => 'admin.downloads.index', 'slug' => 'downloads'],
@@ -75,13 +76,13 @@
         <div class="flex h-16 items-center justify-between border-b border-white/10 px-4">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-                    <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="{{ $settings['site_name'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru' }}" class="h-full w-full object-contain p-1">
+                    <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="{{ $settings['site_name'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru' }}" class="h-full w-full object-contain p-1">
                 </span>
                 <span class="text-sm font-bold leading-tight">
-                    <span class="block max-w-[140px] overflow-hidden" title="{{ $settings['site_name'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru' }}">
+                    <span class="block max-w-[140px] overflow-hidden" title="{{ $settings['site_name'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru' }}">
                         <span class="site-name-marquee inline-flex whitespace-nowrap">
-                            <span class="pr-4">{{ $settings['site_name'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru' }}</span>
-                            <span class="site-name-dupe pr-4" aria-hidden="true">{{ $settings['site_name'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru' }}</span>
+                            <span class="pr-4">{{ $settings['site_name'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru' }}</span>
+                            <span class="site-name-dupe pr-4" aria-hidden="true">{{ $settings['site_name'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru' }}</span>
                         </span>
                     </span>
                     <span class="block text-[12px] font-normal text-emerald-300">Administrator</span>

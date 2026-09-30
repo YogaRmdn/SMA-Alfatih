@@ -27,6 +27,8 @@ class Ppdb extends Model
         'email',
         'nisn',
         'origin_school',
+        'program',
+        'info_source',
         'father_name',
         'mother_name',
         'father_job',
@@ -37,6 +39,7 @@ class Ppdb extends Model
         'birth_certificate',
         'diploma',
         'report_card',
+        'answers',
         'status',
         'admin_notes',
         'academic_year',
@@ -46,6 +49,7 @@ class Ppdb extends Model
     {
         return [
             'birth_date' => 'date',
+            'answers' => 'array',
         ];
     }
 
@@ -57,6 +61,36 @@ class Ppdb extends Model
     public function document(string $type): HasOne
     {
         return $this->hasOne(PpdbDocument::class)->where('type', $type);
+    }
+
+    public function hasDocument(string $type): bool
+    {
+        return $this->relationLoaded('documents')
+            ? $this->documents->contains('type', $type)
+            : $this->documents()->where('type', $type)->exists();
+    }
+
+    /**
+     * Baca nilai satu field konfigurasi formulir, baik yang disimpan di kolom
+     * tabel `ppdb` maupun di kolom JSON `answers`.
+     */
+    public function answer(string $key): mixed
+    {
+        if ($key === PpdbFormField::PHOTO_KEY) {
+            return $this->photo;
+        }
+
+        if (in_array($key, PpdbFormField::COLUMN_KEYS, true)) {
+            return $this->{$key};
+        }
+
+        $answers = $this->answers ?? [];
+
+        if (array_key_exists($key, $answers)) {
+            return $answers[$key];
+        }
+
+        return $this->document($key)?->file_path;
     }
 
     public function statusLabel(): string

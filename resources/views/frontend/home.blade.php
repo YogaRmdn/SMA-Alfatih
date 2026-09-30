@@ -2,8 +2,8 @@
 
 @section('title', 'Beranda')
 
-@section('seo_title', $settings['seo_home_title'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu & Tahfizh Al-Qur\'an')
-@section('seo_description', $settings['seo_home_description'] ?? 'SMA IT Tahfizh Al-Fatih Pekanbaru adalah sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau. PPDB tahun ajaran 2026/2027 sedang dibuka. Daftar sekarang!')
+@section('seo_title', $settings['seo_home_title'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru — Sekolah Islam Terpadu & Tahfizh Al-Qur\'an')
+@section('seo_description', $settings['seo_home_description'] ?? 'SMAIT Tahfizh Al-Fatih Pekanbaru adalah sekolah islam terpadu & tahfizh Al-Qur\'an di Pekanbaru, Riau. PPDB tahun ajaran 2026/2027 sedang dibuka. Daftar sekarang!')
 
 @php
     $siteName = $settings['site_name'] ?? config('app.name');
@@ -64,7 +64,12 @@
                     <span class="block">{{ $line }}</span>
                 @endforeach
             </h1>
-            <p class="mt-3 text-gradient-light text-lg font-semibold sm:text-xl">{{ $tagline }}</p>
+            @if (($motto = $settings['site_motto'] ?? '') !== '')
+                <p class="mt-4 text-lg italic text-white/95 sm:text-xl">
+                    {{ $motto }}
+                </p>
+            @endif
+            <p class="mt-2 text-gradient-light text-lg font-semibold sm:text-xl">{{ $tagline }}</p>
             <p class="mt-4 max-w-xl text-sm leading-relaxed text-emerald-100/90 sm:text-base">{{ $desc }}</p>
             <div class="mt-8 flex flex-wrap items-center gap-3">
                 @if (($settings['ppdb_open'] ?? '0') === '1')
@@ -897,6 +902,9 @@
         </div>
     </section>
 @endif
+
+{{-- ============ FAQ ============ --}}
+@include('frontend.partials.faq')
 
 {{-- ============ KONTAK ============ --}}
 <section id="kontak" class="bg-slate-50 py-20 lg:py-24">
