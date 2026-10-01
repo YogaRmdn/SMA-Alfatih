@@ -6,7 +6,9 @@ use App\Models\Role;
 use App\Models\Setting;
 use App\Models\Teacher;
 use App\Models\User;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class TeacherGenderOrderTest extends TestCase
@@ -122,6 +124,24 @@ class TeacherGenderOrderTest extends TestCase
             ->assertOk()
             ->assertSee('Laki-laki')
             ->assertSee('Perempuan');
+    }
+
+    public function test_ordering_falls_back_when_gender_column_is_missing(): void
+    {
+        Teacher::create(['name' => 'Zulu', 'sort_order' => 2, 'is_active' => true]);
+        Teacher::create(['name' => 'Andi', 'sort_order' => 1, 'is_active' => true]);
+
+        Schema::table('teachers', function (Blueprint $table) {
+            $table->dropColumn('gender');
+        });
+
+        $names = Teacher::query()->orderedByGender()->pluck('name')->all();
+
+        $this->assertSame(
+            ['Andi', 'Zulu'],
+            $names,
+            'Kalau kolom gender belum ada, halaman publik harus tetap bisa dibuka.'
+        );
     }
 
     private function admin(): User

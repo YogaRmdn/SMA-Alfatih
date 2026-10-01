@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 
 class Teacher extends Model
 {
@@ -55,11 +56,21 @@ class Teacher extends Model
      * kedua supaya urutan pilihan admin di dalam masing-masing kelompok tetap
      * dihormati.
      *
+     * Kalau kolom `gender` belum ada (kode ter-deploy duluan sebelum
+     * migration dijalankan), falling back ke urutan lama supaya halaman
+     * publik tetap bisa dibuka.
+     *
      * @param  Builder<$this>  $query
      */
     public function scopeOrderedByGender(Builder $query): Builder
     {
         $table = $query->getModel()->getTable();
+
+        if (! Schema::hasColumn($table, 'gender')) {
+            return $query
+                ->orderBy($table.'.sort_order')
+                ->orderBy($table.'.name');
+        }
 
         return $query
             ->orderByRaw(
