@@ -25,6 +25,13 @@
             </div>
             <h3 class="mt-3 text-sm font-semibold text-slate-800">{{ $teacher->name }}</h3>
             <p class="text-xs text-slate-500">{{ $teacher->subject ?? 'Guru' }}</p>
+            <p class="mt-1.5">
+                @if ($teacher->gender_label)
+                    <span class="inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">{{ $teacher->gender_label }}</span>
+                @else
+                    <span class="inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">Jenis kelamin belum diisi</span>
+                @endif
+            </p>
             <div class="mt-3 flex justify-center gap-2">
                 <a href="{{ route('admin.teachers.edit', $teacher) }}" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700">Edit</a>
                 <form id="delete-teacher-{{ $teacher->id }}" method="POST" action="{{ route('admin.teachers.destroy', $teacher) }}">

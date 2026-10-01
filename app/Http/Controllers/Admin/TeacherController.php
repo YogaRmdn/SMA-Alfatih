@@ -26,8 +26,7 @@ class TeacherController extends Controller
         $teachers = Teacher::query()
             ->when(request('q'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%")
                 ->orWhere('subject', 'like', "%{$search}%"))
-            ->orderBy('sort_order')
-            ->orderBy('name')
+            ->orderedByGender()
             ->paginate(12)
             ->withQueryString();
 

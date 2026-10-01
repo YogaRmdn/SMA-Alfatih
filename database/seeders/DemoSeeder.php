@@ -185,20 +185,21 @@ class DemoSeeder extends Seeder
     protected function seedTeachers(): void
     {
         $teachers = [
-            ['Ilham Dwitama Haeba, Ph.D.', 'Kepala Sekolah', 'Tahfizh', 'ilham-dwitama', '198005122005011001', 'S3 Pendidikan Islam', 'kepsek@alfatih.sch.id', '081277777001', 0],
-            ['Ust. Ahmad Fauzi, Lc.', 'Wakil Kepala Bidang Kurikulum', "Al-Qur'an", 'ahmad-fauzi', '198311162009021002', 'Lc. Ushuluddin', 'ahmadfauzi@alfatih.sch.id', '081277777002', 1],
-            ['Rina Marlina, S.Pd.', 'Wakil Kepala Bidang Kesiswaan', 'Bahasa Indonesia', 'rina-marlina', '199003152015032003', 'S.Pd. Pendidikan Bahasa Indonesia', 'rinamarlina@alfatih.sch.id', '081277777003', 2],
-            ['Dimas Prasetyo, S.Pd.', 'Guru Matematika', 'Matematika', 'dimas-prasetyo', '199107272019031004', 'S.Pd. Pendidikan Matematika', 'dimasprasetyo@alfatih.sch.id', '081277777004', 3],
-            ['Lia Amalia, S.Pd.', 'Guru Bahasa Inggris', 'Bahasa Inggris', 'lia-amalia', '199204152020122005', 'S.Pd. Pendidikan Bahasa Inggris', 'liaamalia@alfatih.sch.id', '081277777005', 4],
-            ['Ust. Muhammad Ilham', 'Pembina Tahfizh', 'Tahfizh', 'muhammad-ilham', '198809122012011006', 'Tahfizh 30 Juz', 'muhammadilham@alfatih.sch.id', '081277777006', 5],
-            ['Taufik Hidayat, S.Kom.', 'Guru TIK & Robotik', 'Informatika', 'taufik-hidayat', '199403182018041007', 'S.Kom. Informatika', 'taufikhidayat@alfatih.sch.id', '081277777007', 6],
-            ['Yusuf Ramadhan, S.Or.', 'Guru PJOK', 'PJOK', 'yusuf-ramadhan', '199508072017121008', 'S.Or. Pendidikan Jasmani', 'yusuframadhan@alfatih.sch.id', '081277777008', 7],
-            ['Andi Saputra, S.Pd.', 'Guru IPA', 'IPA', 'andi-saputra', '199111202016041009', 'S.Pd. Pendidikan IPA', 'andisaputra@alfatih.sch.id', '081277777009', 8],
-            ['Ustd. Hana Yusuf', 'Guru PAI', 'Pendidikan Agama Islam', 'hana-yusuf', '199602122020122010', 'S.Pd. PAI', 'hanayusuf@alfatih.sch.id', '081277777010', 9],
+            ['Ilham Dwitama Haeba, Ph.D.', 'L', 'Kepala Sekolah', 'Tahfizh', 'ilham-dwitama', '198005122005011001', 'S3 Pendidikan Islam', 'kepsek@alfatih.sch.id', '081277777001', 0],
+            ['Ust. Ahmad Fauzi, Lc.', 'L', 'Wakil Kepala Bidang Kurikulum', "Al-Qur'an", 'ahmad-fauzi', '198311162009021002', 'Lc. Ushuluddin', 'ahmadfauzi@alfatih.sch.id', '081277777002', 1],
+            ['Rina Marlina, S.Pd.', 'P', 'Wakil Kepala Bidang Kesiswaan', 'Bahasa Indonesia', 'rina-marlina', '199003152015032003', 'S.Pd. Pendidikan Bahasa Indonesia', 'rinamarlina@alfatih.sch.id', '081277777003', 2],
+            ['Dimas Prasetyo, S.Pd.', 'L', 'Guru Matematika', 'Matematika', 'dimas-prasetyo', '199107272019031004', 'S.Pd. Pendidikan Matematika', 'dimasprasetyo@alfatih.sch.id', '081277777004', 3],
+            ['Lia Amalia, S.Pd.', 'P', 'Guru Bahasa Inggris', 'Bahasa Inggris', 'lia-amalia', '199204152020122005', 'S.Pd. Pendidikan Bahasa Inggris', 'liaamalia@alfatih.sch.id', '081277777005', 4],
+            ['Ust. Muhammad Ilham', 'L', 'Pembina Tahfizh', 'Tahfizh', 'muhammad-ilham', '198809122012011006', 'Tahfizh 30 Juz', 'muhammadilham@alfatih.sch.id', '081277777006', 5],
+            ['Taufik Hidayat, S.Kom.', 'L', 'Guru TIK & Robotik', 'Informatika', 'taufik-hidayat', '199403182018041007', 'S.Kom. Informatika', 'taufikhidayat@alfatih.sch.id', '081277777007', 6],
+            ['Yusuf Ramadhan, S.Or.', 'L', 'Guru PJOK', 'PJOK', 'yusuf-ramadhan', '199508072017121008', 'S.Or. Pendidikan Jasmani', 'yusuframadhan@alfatih.sch.id', '081277777008', 7],
+            ['Andi Saputra, S.Pd.', 'L', 'Guru IPA', 'IPA', 'andi-saputra', '199111202016041009', 'S.Pd. Pendidikan IPA', 'andisaputra@alfatih.sch.id', '081277777009', 8],
+            ['Ustd. Hana Yusuf', 'P', 'Guru PAI', 'Pendidikan Agama Islam', 'hana-yusuf', '199602122020122010', 'S.Pd. PAI', 'hanayusuf@alfatih.sch.id', '081277777010', 9],
         ];
 
-        foreach ($teachers as [$name, $position, $subject, $slug, $nip, $education, $email, $phone, $sort]) {
+        foreach ($teachers as [$name, $gender, $position, $subject, $slug, $nip, $education, $email, $phone, $sort]) {
             Teacher::updateOrCreate(['name' => $name], [
+                'gender' => $gender,
                 'position' => $position,
                 'subject' => $subject,
                 'photo' => null,

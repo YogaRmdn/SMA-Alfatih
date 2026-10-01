@@ -96,7 +96,7 @@ class HomeController extends Controller
 
         $teachers = Teacher::query()
             ->where('is_active', true)
-            ->orderBy('sort_order')
+            ->orderedByGender()
             ->get();
 
         $profilPages = Page::query()

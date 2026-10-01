@@ -28,8 +28,8 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
-                <x-admin.field label="Mata Pelajaran">
-                    <x-admin.input name="subject" :value="$teacher->subject ?? ''" placeholder="Contoh: Matematika" />
+                <x-admin.field label="Jenis Kelamin" name="gender" required hint="Dipakai untuk mengurutkan tampilan guru: laki-laki ditampilkan lebih dulu.">
+                    <x-admin.select name="gender" :options="\App\Models\Teacher::GENDER_LABELS" :value="$teacher->gender ?? null" placeholder="-- Pilih --" required />
                 </x-admin.field>
                 <x-admin.field label="Jabatan">
                     <x-admin.input name="position" :value="$teacher->position ?? ''" placeholder="Contoh: Wali Kelas X-A" />
@@ -37,11 +37,11 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.field label="Mata Pelajaran">
+                    <x-admin.input name="subject" :value="$teacher->subject ?? ''" placeholder="Contoh: Matematika" />
+                </x-admin.field>
                 <x-admin.field label="Pendidikan Terakhir">
                     <x-admin.input name="education" :value="$teacher->education ?? ''" placeholder="Contoh: S1 Pendidikan Matematika" />
-                </x-admin.field>
-                <x-admin.field label="Urutan">
-                    <x-admin.input type="number" name="sort_order" :value="$teacher->sort_order ?? 0" />
                 </x-admin.field>
             </div>
 
@@ -51,6 +51,12 @@
                 </x-admin.field>
                 <x-admin.field label="Email">
                     <x-admin.input type="email" name="email" :value="$teacher->email ?? ''" />
+                </x-admin.field>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+                <x-admin.field label="Urutan" hint="Di dalam kelompok gender yang sama, angka lebih kecil tampil lebih dulu.">
+                    <x-admin.input type="number" name="sort_order" :value="$teacher->sort_order ?? 0" />
                 </x-admin.field>
             </div>
 

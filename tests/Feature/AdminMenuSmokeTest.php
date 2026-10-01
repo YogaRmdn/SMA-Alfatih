@@ -275,7 +275,7 @@ class AdminMenuSmokeTest extends TestCase
             'albums' => [Album::class, ['title' => 'Album Uji']],
             'galleries' => [Gallery::class, ['type' => 'photo']],
             'achievements' => [Achievement::class, ['title' => 'Prestasi Uji']],
-            'teachers' => [Teacher::class, ['name' => 'Guru Uji']],
+            'teachers' => [Teacher::class, ['name' => 'Guru Uji', 'gender' => Teacher::GENDER_L]],
             'staffs' => [Staff::class, ['name' => 'Staff Uji', 'position' => 'Tata Usaha']],
             'facilities' => [Facility::class, ['name' => 'Fasilitas Uji']],
             'extracurriculars' => [Extracurricular::class, ['name' => 'Ekskul Uji']],

@@ -272,24 +272,25 @@ class DemoContentSeeder extends Seeder
     protected function seedTeachers(): void
     {
         $items = [
-            ['Ilham Dwitama Haeba, Ph.D.', 'Kepala Sekolah', 'Tahfizh Al-Qur\'an'],
-            ['Hj. Siti Aminah, S.Pd.', 'Wakil Kepala Kurikulum', 'Matematika'],
-            ['Dedi Firmansyah, S.Pd.', 'Wakil Kepala Kesiswaan', 'Bahasa Indonesia'],
-            ['Rina Marlina, M.Pd.', 'Guru', 'Bahasa Inggris'],
-            ['Ahmad Fauzi, S.Si.', 'Guru', 'Fisika'],
-            ['Rahma Yanti, S.Si.', 'Guru', 'Biologi'],
-            ['Budi Santoso, S.Ag.', 'Guru', 'Pendidikan Agama Islam'],
-            ['Zainal Abidin, S.Pd.', 'Guru', 'Seni Budaya / Kaligrafi'],
-            ['Nurul Hidayah, S.Pd.', 'Guru', 'IPS'],
-            ['Hendra Gunawan, S.Kom.', 'Guru', 'Informatika'],
-            ['Dewi Anggraini, S.Psi.', 'Guru BK', 'Bimbingan Konseling'],
-            ['Abdul Aziz, M.Pd.', 'Guru', 'Tahsin & Tahfizh'],
+            ['Ilham Dwitama Haeba, Ph.D.', 'L', 'Kepala Sekolah', 'Tahfizh Al-Qur\'an'],
+            ['Hj. Siti Aminah, S.Pd.', 'P', 'Wakil Kepala Kurikulum', 'Matematika'],
+            ['Dedi Firmansyah, S.Pd.', 'L', 'Wakil Kepala Kesiswaan', 'Bahasa Indonesia'],
+            ['Rina Marlina, M.Pd.', 'P', 'Guru', 'Bahasa Inggris'],
+            ['Ahmad Fauzi, S.Si.', 'L', 'Guru', 'Fisika'],
+            ['Rahma Yanti, S.Si.', 'P', 'Guru', 'Biologi'],
+            ['Budi Santoso, S.Ag.', 'L', 'Guru', 'Pendidikan Agama Islam'],
+            ['Zainal Abidin, S.Pd.', 'L', 'Guru', 'Seni Budaya / Kaligrafi'],
+            ['Nurul Hidayah, S.Pd.', 'P', 'Guru', 'IPS'],
+            ['Hendra Gunawan, S.Kom.', 'L', 'Guru', 'Informatika'],
+            ['Dewi Anggraini, S.Psi.', 'P', 'Guru BK', 'Bimbingan Konseling'],
+            ['Abdul Aziz, M.Pd.', 'L', 'Guru', 'Tahsin & Tahfizh'],
         ];
 
-        foreach ($items as $sort => [$name, $position, $subject]) {
+        foreach ($items as $sort => [$name, $gender, $position, $subject]) {
             Teacher::updateOrCreate(
                 ['name' => $name],
                 [
+                    'gender' => $gender,
                     'position' => $position,
                     'subject' => $subject,
                     'education' => 'S1/S2',

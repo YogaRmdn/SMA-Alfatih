@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Teacher;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,6 +17,7 @@ class TeacherRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', Rule::in(array_keys(Teacher::GENDER_LABELS))],
             'nip' => ['nullable', 'string', 'max:50'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:262144'],
             'subject' => ['nullable', 'string', 'max:255'],
@@ -32,6 +34,8 @@ class TeacherRequest extends FormRequest
     {
         return [
             'name.required' => 'Nama guru wajib diisi.',
+            'gender.required' => 'Jenis kelamin wajib dipilih.',
+            'gender.in' => 'Jenis kelamin tidak valid.',
             'photo.max' => 'Ukuran file tidak boleh lebih dari 256 MB.',
         ];
     }
