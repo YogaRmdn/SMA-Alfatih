@@ -42,6 +42,7 @@
 - Mesin penilaian murni di backend (`LearningStyleScoringService`) — mendukung seri 2 dan 3 kategori tanpa pemilihan acak.
 - Hasil & interpretasi positif, publikasi hasil oleh guru BK sebelum siswa bisa melihat, catatan tindak lanjut guru BK.
 - Laporan individual dan rekap kelas siap cetak / simpan PDF (kertas A4, `window.print()`).
+- Pendaftaran mandiri siswa di **`/sibel/daftar`** (sementara menggantikan tombol "Daftar PPDB" pada navbar) — daftar → login otomatis → langsung ke pengisian kuesioner.
 - Panduan lengkap: **[docs/SIBEL.md](docs/SIBEL.md)**.
 
 ## Catatan Keamanan

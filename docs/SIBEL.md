@@ -83,6 +83,22 @@ Aturan sesi & pengisian ulang:
   riwayat lama tetap tersimpan.
 - Hasil siswa **tidak terlihat** sampai guru BK mempublikasikannya (halaman status "menunggu publikasi").
 
+### Pendaftaran mandiri siswa (sementara)
+
+- Tombol **"Daftar PPDB"** pada navbar website sementara diganti **"Daftar SIBEL"**
+  → mengarah ke `GET/POST /sibel/daftar` (tamu, `guest` + `throttle:10,1`).
+- Form meminta nama, email, password (+konfirmasi); **NIS dan kelas opsional** —
+  kelas bisa dikosongkan lalu dipetakan guru BK lewat menu Data Siswa
+  (migration `2026_10_19_000009` membuat `students.class_id` nullable).
+- Pendaftaran otomatis membuat akun ber-role `siswa` (sudah `email_verified_at`) +
+  profil siswa, lalu **login otomatis → langsung diarahkan ke `/sibel/kuesioner-saya`**.
+- Login manual siswa pun berakhir di halaman kuesioner (cabang `siswa` pada `/dashboard`).
+- Footer, hero beranda, dan halaman PPDB tetap menampilkan CTA PPDB — hanya tombol
+  navbar yang ditukar. Untuk mengembalikan: balikkan 2 edit di
+  `resources/views/frontend/layouts/app.blade.php` (cari komentar `SEMENTARA`).
+- Berkas: `routes/sibel.php` (grup `guest`), `RegistrationController`,
+  `StudentRegistrationRequest`, `sibel/auth/register.blade.php`.
+
 ---
 
 ## 3. Skema Database

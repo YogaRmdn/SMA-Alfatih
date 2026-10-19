@@ -4,6 +4,7 @@ use App\Http\Controllers\Sibel\AssessmentController;
 use App\Http\Controllers\Sibel\ClassController;
 use App\Http\Controllers\Sibel\DashboardController;
 use App\Http\Controllers\Sibel\QuestionnaireController;
+use App\Http\Controllers\Sibel\RegistrationController;
 use App\Http\Controllers\Sibel\ReportController;
 use App\Http\Controllers\Sibel\StudentController;
 use Illuminate\Support\Facades\Route;
@@ -13,9 +14,24 @@ use Illuminate\Support\Facades\Route;
 | SIBEL — Sistem Informasi Gaya Belajar Siswa
 |--------------------------------------------------------------------------
 | Akses:
+|   tamu                     -> pendaftaran mandiri siswa (/sibel/daftar)
 |   siswa                     -> hanya halaman kuesioner & hasil miliknya
 |   super_admin, admin, guru_bk -> dashboard, data, kuesioner, hasil, rekap
 */
+
+/*
+| Pendaftaran mandiri siswa (tamu) — sementara menggantikan tombol
+| "Daftar PPDB" pada navbar. Setelah daftar: login otomatis -> pengisian kuesioner.
+*/
+Route::middleware('guest')
+    ->prefix('sibel')
+    ->name('sibel.')
+    ->group(function () {
+        Route::get('daftar', [RegistrationController::class, 'create'])->name('register');
+        Route::post('daftar', [RegistrationController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('register.store');
+    });
 
 Route::middleware(['auth', 'verified'])
     ->prefix('sibel')
