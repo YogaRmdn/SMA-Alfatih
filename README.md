@@ -34,6 +34,16 @@
 - Manajemen pengguna (Users) — khusus role `super_admin`.
 - Autentikasi Laravel Breeze (login, registrasi, verifikasi email, reset password).
 
+### Modul SIBEL (Sistem Informasi Gaya Belajar Siswa)
+- Akses khusus di path **`/sibel`** (`routes/sibel.php`) untuk role `guru_bk`, `admin`, `super_admin`, dan `siswa`.
+- Dashboard statistik + grafik distribusi gaya belajar (Chart.js dengan fallback CSS).
+- CRUD Siswa & Kelas, builder Kuesioner (pertanyaan + 3 pilihan A/B/C), sesi buka/tutup, dan verifikasi instrumen.
+- Pengisian kuesioner dinamis: indikator progres, konfirmasi sebelum kirim, anti kirim ganda, aturan pengisian ulang dikendalikan guru BK.
+- Mesin penilaian murni di backend (`LearningStyleScoringService`) — mendukung seri 2 dan 3 kategori tanpa pemilihan acak.
+- Hasil & interpretasi positif, publikasi hasil oleh guru BK sebelum siswa bisa melihat, catatan tindak lanjut guru BK.
+- Laporan individual dan rekap kelas siap cetak / simpan PDF (kertas A4, `window.print()`).
+- Panduan lengkap: **[docs/SIBEL.md](docs/SIBEL.md)**.
+
 ## Catatan Keamanan
 
 - **Jangan pernah** melakukan commit `.env`. Salin `.env.example` lalu isi sendiri.
@@ -58,7 +68,9 @@
 | Role        | Slug         | Hak Akses                                       |
 |-------------|--------------|--------------------------------------------------|
 | Super Admin | `super_admin`| Akses penuh, termasuk kelola pengguna            |
-| Admin       | `admin`      | Mengelola seluruh konten website                 |
+| Admin       | `admin`      | Mengelola seluruh konten website, termasuk SIBEL |
+| Guru BK     | `guru_bk`    | Kelola data siswa/kelas/kuesioner SIBEL, hasil, publikasi & rekap |
+| Siswa       | `siswa`      | Mengisi kuesioner SIBEL dan melihat hasil miliknya sendiri |
 
 ## Instalasi
 
@@ -107,9 +119,11 @@ Akses aplikasi di `http://localhost:8000`.
 
 | Seeder            | Keterangan                                         |
 |-------------------|-----------------------------------------------------|
-| `RoleSeeder`      | Membuat role `super_admin` dan `admin`              |
+| `RoleSeeder`      | Membuat role `super_admin`, `admin`, `guru_bk`, dan `siswa` |
 | `SettingsSeeder`  | Data pengaturan dasar website                       |
-| `DatabaseSeeder`  | Memanggil `RoleSeeder` + `SettingsSeeder`, lalu membuat 2 akun admin bila belum ada |
+| `DatabaseSeeder`  | Memanggil `RoleSeeder` + `SettingsSeeder` + `SibelSeeder`, lalu membuat 2 akun admin bila belum ada |
+| `SibelSeeder`     | Kuesioner SIBEL bawaan (15 pertanyaan, status draft + perlu verifikasi) |
+| `SibelDemoSeeder` | Data demo SIBEL (kelas, siswa, hasil) — jalankan manual dengan `php artisan db:seed --class=SibelDemoSeeder` |
 | `DemoSeeder`      | Data contoh/demo konten                            |
 
 Password akun admin diambil dari env `SEED_ADMIN_PASSWORD`:
@@ -128,20 +142,29 @@ app/
 │   └── Controllers/
 │       ├── Admin/       # Controller panel admin
 │       ├── Auth/        # Controller autentikasi (Breeze)
-│       └── Frontend/    # Controller halaman publik
+│       ├── Frontend/    # Controller halaman publik
+│       └── Sibel/       # Controller modul SIBEL (gaya belajar)
+├── Policies/            # Otorisasi (mis. SibelResultPolicy)
+├── Services/            # Layanan bisnis (mis. LearningStyleScoringService)
 └── Models/             # Model Eloquent
+config/
+└── sibel.php           # Konfigurasi kategori, warna, strategi & etika SIBEL
 database/
 ├── migrations/         # Skema tabel
 └── seeders/            # Seeder database
+docs/
+└── SIBEL.md            # Panduan lengkap modul SIBEL
 resources/views/
 ├── admin/              # View panel admin
 ├── frontend/           # View halaman publik
 ├── auth/               # View autentikasi
+├── sibel/              # View modul SIBEL (layout sendiri + halaman cetak A4)
 └── components/         # Komponen Blade
 routes/
 ├── web.php             # Route publik & profil
 ├── admin.php           # Route panel admin
-└── auth.php            # Route autentikasi
+├── auth.php            # Route autentikasi
+└── sibel.php           # Route modul SIBEL (prefix /sibel)
 ```
 
 ## Lisensi
