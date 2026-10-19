@@ -379,4 +379,28 @@ class AdminMenuSmokeTest extends TestCase
         $this->put('/admin/settings', ['site_name' => 'SMA Uji Baru'])->assertRedirect('/admin/settings');
         $this->assertEquals('SMA Uji Baru', Setting::get('site_name'));
     }
+
+    /**
+     * Grup "SIBEL Gaya Belajar" di sidebar admin harus lengkap, urut, dan tertaut.
+     */
+    public function test_sidebar_sibel_menu_is_complete(): void
+    {
+        $this->actingAs($this->admin());
+
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('SIBEL Gaya Belajar')
+            ->assertSee('Dashboard SIBEL')
+            ->assertSee('Data Siswa')
+            ->assertSee('Kelas')
+            ->assertSee('Kuesioner')
+            ->assertSee('Hasil Asesmen')
+            ->assertSee('Rekap Kelas')
+            ->assertSee(route('sibel.dashboard'))
+            ->assertSee(route('sibel.students.index'))
+            ->assertSee(route('sibel.classes.index'))
+            ->assertSee(route('sibel.questionnaires.index'))
+            ->assertSee(route('sibel.results.index'))
+            ->assertSee(route('sibel.recap.index'));
+    }
 }

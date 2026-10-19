@@ -19,10 +19,13 @@
             ['label' => 'Data Pendaftar', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb.index', 'slug' => 'ppdb.'],
             ['label' => 'Atur Formulir', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb-form-fields.index', 'slug' => 'ppdb-form-fields'],
         ]],
-        'sibel' => ['label' => 'SIBEL Gaya Belajar', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'children' => [
-            ['label' => 'Dashboard SIBEL', 'icon' => 'M9 19h6m-6-4h6m-6-4h6M3 9l9-6 9 6v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9z', 'route' => 'sibel.dashboard', 'slug' => 'sibel-dashboard'],
-            ['label' => 'Data Siswa', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', 'route' => 'sibel.students.index', 'slug' => 'sibel-students'],
-            ['label' => 'Hasil & Rekap', 'icon' => 'M9 17v-6m4 6V7m4 10v-3M3 21h18M5 21V10l7-6 7 6v11', 'route' => 'sibel.results.index', 'slug' => 'sibel-results'],
+        'sibel' => ['label' => 'SIBEL Gaya Belajar', 'icon' => 'M12 14l9-5-9-5-9 5 9 5zm0 0v6.969c0 .538-.224 1.052-.622 1.412A9.99 9.99 0 0112 23a9.99 9.99 0 01-6.378-2.619A1.98 1.98 0 015 18.97V14m9-6a2 2 0 10-2 2 2 2 0 002-2z', 'route_prefix' => 'sibel.', 'children' => [
+            ['label' => 'Dashboard SIBEL', 'icon' => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10', 'route' => 'sibel.dashboard', 'slug' => 'dashboard'],
+            ['label' => 'Data Siswa', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', 'route' => 'sibel.students.index', 'slug' => 'students'],
+            ['label' => 'Kelas', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'route' => 'sibel.classes.index', 'slug' => 'classes'],
+            ['label' => 'Kuesioner', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 00-2-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'route' => 'sibel.questionnaires.index', 'slug' => 'questionnaires'],
+            ['label' => 'Hasil Asesmen', 'icon' => 'M9 17v-6m4 6V7m4 10v-3M3 21h18M5 21V10l7-6 7 6v11', 'route' => 'sibel.results.index', 'slug' => 'results'],
+            ['label' => 'Rekap Kelas', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'route' => 'sibel.recap.index', 'slug' => 'recap'],
         ]],
         'download' => ['label' => 'Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'children' => [
             ['label' => 'File Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'route' => 'admin.downloads.index', 'slug' => 'downloads'],
@@ -102,7 +105,7 @@
             @foreach ($menu as $key => $item)
                 @if (isset($item['route']))
                     <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
-                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ request()->routeIs('admin.'.$item['slug'].'*') ? 'bg-white/15 text-white' : 'text-emerald-100 hover:bg-white/10 hover:text-white' }}">
+                       class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ request()->routeIs(($item['route_prefix'] ?? 'admin.').$item['slug'].'*') ? 'bg-white/15 text-white' : 'text-emerald-100 hover:bg-white/10 hover:text-white' }}">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" /></svg>
                         {{ $item['label'] }}
                     </a>
@@ -112,11 +115,12 @@
                             ->filter(fn ($child) => empty($child['super_admin_only']) || auth()->user()->isSuperAdmin())
                             ->filter(fn ($child) => Route::has($child['route']))
                             ->values();
-                        $hasActive = $visibleChildren->contains(fn ($child) => request()->routeIs('admin.'.$child['slug'].'*'));
+                        $prefix = $item['route_prefix'] ?? 'admin.';
+                        $hasActive = $visibleChildren->contains(fn ($child) => request()->routeIs($prefix.$child['slug'].'*'));
                     @endphp
                     @if ($visibleChildren->isNotEmpty())
                     <details {{ $hasActive ? 'open' : '' }} class="group">
-                        <summary class="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-emerald-100 transition-colors hover:bg-white/10 hover:text-white">
+                        <summary class="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-white/10 {{ $hasActive ? 'bg-white/15 font-semibold text-white' : 'text-emerald-100' }}">
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" /></svg>
                             <span class="flex-1">{{ $item['label'] }}</span>
                             <svg class="h-4 w-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -124,7 +128,7 @@
                         <div class="ml-4 mt-1 space-y-0.5 border-l border-white/10 pl-3">
                             @foreach ($visibleChildren as $child)
                                 <a href="{{ route($child['route']) }}"
-                                   class="flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors {{ request()->routeIs('admin.'.$child['slug'].'*') ? 'bg-white/15 font-semibold text-white' : 'text-emerald-200 hover:bg-white/10 hover:text-white' }}">
+                                   class="flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors {{ request()->routeIs($prefix.$child['slug'].'*') ? 'bg-white/15 font-semibold text-white' : 'text-emerald-200 hover:bg-white/10 hover:text-white' }}">
                                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $child['icon'] }}" /></svg>
                                     {{ $child['label'] }}
                                 </a>
