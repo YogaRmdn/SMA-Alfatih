@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Sibel\AssessmentController;
 use App\Http\Controllers\Sibel\ClassController;
 use App\Http\Controllers\Sibel\DashboardController;
@@ -20,13 +21,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 /*
-| Pendaftaran mandiri siswa — sementara menggantikan tombol "Daftar PPDB"
-| pada navbar. Halaman form terbuka untuk siapa pun (termasuk admin yang
-| sedang login); otomatis-login ke pengisian kuesioner hanya untuk tamu.
+| Login & pendaftaran mandiri siswa — sementara menggantikan tombol "Daftar
+| PPDB" pada navbar. Login SIBEL (/sibel/masuk) terpisah dari login website
+| (/login) demi identitas yang profesional; keduanya memakai controller dan
+| proteksi autentikasi yang sama. Halaman terbuka untuk siapa pun (termasuk
+| admin yang sedang login, untuk ganti akun); otomatis-login ke pengisian
+| kuesioner hanya untuk tamu.
 */
 Route::prefix('sibel')
     ->name('sibel.')
     ->group(function () {
+        Route::get('masuk', fn () => view('sibel.auth.login'))->name('login');
+        Route::post('masuk', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
         Route::get('daftar', [RegistrationController::class, 'create'])->name('register');
         Route::post('daftar', [RegistrationController::class, 'store'])
             ->middleware('throttle:10,1')

@@ -6,6 +6,7 @@ use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,6 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'public-registration' => EnsurePublicRegistrationIsEnabled::class,
         ]);
+
+        // Tamu di area SIBEL diarahkan ke login khusus SIBEL (/sibel/masuk);
+        // area lain tetap ke login website (/login).
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            return str_starts_with($request->path(), 'sibel')
+                ? route('sibel.login')
+                : route('login');
+        });
 
         $middleware->append(SecurityHeaders::class);
 

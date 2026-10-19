@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-sibel.layouts.auth title="Daftar">
     <div class="mb-6 text-center">
         <p class="text-xs font-bold uppercase tracking-widest text-emerald-600">SIBEL &middot; SMA Alfatih</p>
         <h1 class="mt-1 text-xl font-extrabold text-slate-800">Daftar Akun Siswa</h1>
@@ -124,8 +124,8 @@
     <div class="mt-5 flex flex-col items-center gap-1.5 text-center text-sm text-slate-500">
         <p>
             Sudah punya akun?
-            <a href="{{ route('login') }}" class="font-bold text-emerald-700 transition hover:text-emerald-900">Masuk</a>
+            <a href="{{ route('sibel.login') }}" class="font-bold text-emerald-700 transition hover:text-emerald-900">Masuk</a>
         </p>
         <a href="/" class="text-xs text-slate-400 transition hover:text-slate-600">&larr; Kembali ke beranda</a>
     </div>
-</x-guest-layout>
+</x-sibel.layouts.auth>

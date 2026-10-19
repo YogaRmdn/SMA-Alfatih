@@ -115,8 +115,20 @@ Aturan sesi & pengisian ulang:
   (siswa → kuesioner, guru_bk → dashboard SIBEL, admin → panel admin).
 - Sidebar SIBEL untuk siswa hanya berisi **"Kuesioner Saya"** (+ tautan Website
   Sekolah); menu pengelola disembunyikan dan route pengelola tetap `403`.
-- Berkas: `routes/sibel.php` (grup publik `sibel.*`), `RegistrationController`,
-  `StudentRegistrationRequest`, `sibel/auth/register.blade.php`.
+- **Login khusus SIBEL di `/sibel/masuk`** (`sibel.login`) — tampilan kartu
+  terpusat di atas gradien emerald dengan branding SIBEL
+  (`components/sibel/layouts/auth.blade.php`), sengaja berbeda dari login
+  website (`/login`, panel foto + form "Masuk ke Panel Admin"). Keduanya
+  memakai controller `AuthenticatedSessionController` yang sama, jadi filter
+  `intended` dan percabangan `/dashboard` tetap berlaku.
+- Tamu yang membuka area `/sibel/*` otomatis diarahkan ke `/sibel/masuk`
+  (`redirectGuestsTo` pada `bootstrap/app.php`); area lain tetap ke `/login`.
+- Halaman daftar (`/sibel/daftar`) memakai layout auth SIBEL yang sama dan
+  menautkan "Masuk" ke `/sibel/masuk`.
+- Berkas: `routes/sibel.php` (grup publik `sibel.*` — `masuk` + `daftar`),
+  `RegistrationController`, `StudentRegistrationRequest`,
+  `sibel/auth/login.blade.php`, `sibel/auth/register.blade.php`,
+  `components/sibel/layouts/auth.blade.php`, `bootstrap/app.php`.
 
 ---
 

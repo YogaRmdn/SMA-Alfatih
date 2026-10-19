@@ -77,8 +77,11 @@ class SibelAuthorizationTest extends TestCase
 
     public function test_guest_dialihkan_ke_login(): void
     {
-        $this->get('/sibel')->assertRedirect(route('login'));
-        $this->get('/sibel/hasil')->assertRedirect(route('login'));
+        $this->get('/sibel')->assertRedirect(route('sibel.login'));
+        $this->get('/sibel/hasil')->assertRedirect(route('sibel.login'));
+
+        // Area non-SIBEL tetap ke login website.
+        $this->get('/admin')->assertRedirect(route('login'));
     }
 
     public function test_guru_bk_dapat_mengakses_seluruh_layanan_pengelola(): void

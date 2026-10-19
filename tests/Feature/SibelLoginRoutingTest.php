@@ -149,4 +149,55 @@ class SibelLoginRoutingTest extends TestCase
             'password' => 'rahasia123',
         ])->assertRedirect(url('/berita/siswi-juara-1-tahfizh'));
     }
+
+    public function test_login_sibel_memiliki_halaman_sendiri(): void
+    {
+        $this->get(route('sibel.login'))
+            ->assertOk()
+            ->assertSee('Masuk ke SIBEL')
+            ->assertSee('Sistem Informasi Gaya Belajar Siswa')
+            ->assertSee(route('sibel.login.store'))
+            ->assertSee(route('sibel.register'));
+
+        // Seperti login website: admin yang sedang login pun tetap boleh
+        // membuka form untuk ganti akun.
+        $this->actingAs($this->admin())
+            ->get(route('sibel.login'))
+            ->assertOk();
+    }
+
+    public function test_tamu_di_area_sibel_diarahkan_ke_login_sibel(): void
+    {
+        $this->get('/sibel/kuesioner-saya')->assertRedirect(route('sibel.login'));
+
+        // Area non-SIBEL tetap ke login website.
+        $this->get('/profile')->assertRedirect(route('login'));
+    }
+
+    public function test_login_melalui_login_sibel_mendarat_di_kuesioner(): void
+    {
+        $siswa = $this->siswa();
+
+        $this->post(route('sibel.login.store'), [
+            'email' => 'budi@siswa.test',
+            'password' => 'rahasia123',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($siswa);
+
+        $this->get(route('dashboard'))
+            ->assertRedirect(route('sibel.assessment.index'));
+    }
+
+    public function test_login_sibel_menerapkan_filter_intended_yang_sama(): void
+    {
+        $this->siswa();
+
+        $this->withSession(['url.intended' => url('/admin')]);
+
+        $this->post(route('sibel.login.store'), [
+            'email' => 'budi@siswa.test',
+            'password' => 'rahasia123',
+        ])->assertRedirect(route('dashboard'));
+    }
 }
