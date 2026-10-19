@@ -103,6 +103,18 @@ Aturan sesi & pengisian ulang:
 - Footer, hero beranda, dan halaman PPDB tetap menampilkan CTA PPDB — hanya tombol
   navbar yang ditukar. Untuk mengembalikan: balikkan 2 edit di
   `resources/views/frontend/layouts/app.blade.php` (cari komentar `SEMENTARA`).
+**Pemisahan dashboard admin vs siswa (alur login):**
+
+- `/login` tidak lagi dibungkus middleware `guest` — admin/guru yang sedang login
+  bisa membuka form kapan pun untuk **ganti akun** (mis. beralih dari akun admin
+  ke akun siswa) tanpa dilempar ke dashboard admin.
+- Setelah login, tujuan `url.intended` difilter per scope role
+  (`AuthenticatedSessionController::mayReach`): akun siswa tidak akan pernah
+  diarahkan ke `/admin` atau halaman pengelola SIBEL; tujuan yang tidak berhak
+  dibuang sehingga jatuh ke `/dashboard` yang bercabang per role
+  (siswa → kuesioner, guru_bk → dashboard SIBEL, admin → panel admin).
+- Sidebar SIBEL untuk siswa hanya berisi **"Kuesioner Saya"** (+ tautan Website
+  Sekolah); menu pengelola disembunyikan dan route pengelola tetap `403`.
 - Berkas: `routes/sibel.php` (grup publik `sibel.*`), `RegistrationController`,
   `StudentRegistrationRequest`, `sibel/auth/register.blade.php`.
 
