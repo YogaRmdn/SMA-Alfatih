@@ -20,6 +20,7 @@ class AchievementController extends Controller
     {
         return ['photo'];
     }
+
     public function index()
     {
         $achievements = Achievement::query()

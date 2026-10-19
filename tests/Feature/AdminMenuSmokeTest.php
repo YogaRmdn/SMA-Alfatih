@@ -8,6 +8,7 @@ use App\Models\Announcement;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Comment;
+use App\Models\Contact;
 use App\Models\Download;
 use App\Models\Extracurricular;
 use App\Models\Facility;
@@ -24,6 +25,7 @@ use App\Models\Staff;
 use App\Models\Teacher;
 use App\Models\Testimonial;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -244,7 +246,7 @@ class AdminMenuSmokeTest extends TestCase
 
         $this->put('/admin/settings', [
             'site_name' => 'SMA IT Tahfizh Al-Fatih',
-            'profil_photo_1' => new \Illuminate\Http\UploadedFile(
+            'profil_photo_1' => new UploadedFile(
                 public_path('img/16.jpeg'),
                 'gedung-kiri.jpg',
                 'image/jpeg',
@@ -304,7 +306,7 @@ class AdminMenuSmokeTest extends TestCase
             $this->delete(route("admin.{$prefix}.destroy", $item))->assertRedirect("/admin/{$prefix}");
 
             $usesSoftDeletes = in_array(
-                \Illuminate\Database\Eloquent\SoftDeletes::class,
+                SoftDeletes::class,
                 class_uses_recursive($modelClass),
                 true
             );
@@ -365,7 +367,7 @@ class AdminMenuSmokeTest extends TestCase
         $this->get('/admin/contact')->assertOk();
         $this->get('/admin/settings')->assertOk();
 
-        $contact = \App\Models\Contact::firstOrCreate(['id' => 1]);
+        $contact = Contact::firstOrCreate(['id' => 1]);
 
         $this->put("/admin/contact/{$contact->id}", [
             'address' => 'Jl. Uji No. 1',

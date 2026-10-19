@@ -20,6 +20,7 @@ class TestimonialController extends Controller
     {
         return ['photo'];
     }
+
     public function index()
     {
         $testimonials = Testimonial::query()

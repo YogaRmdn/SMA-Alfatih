@@ -8,7 +8,6 @@ use App\Models\Announcement;
 use App\Models\Category;
 use App\Models\Extracurricular;
 use App\Models\Facility;
-use App\Models\Gallery;
 use App\Models\News;
 use App\Models\Partner;
 use App\Models\Program;

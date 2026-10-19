@@ -9,9 +9,9 @@ use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
@@ -77,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $host = strtolower((string) request()->header('Host'));
 
-        $isExternal = !in_array(Str::before($host, ':'), ['localhost', '127.0.0.1', '[::1]'], true);
+        $isExternal = ! in_array(Str::before($host, ':'), ['localhost', '127.0.0.1', '[::1]'], true);
 
         if ($isExternal && file_exists(public_path('build/manifest.json'))) {
             Vite::useHotFile(storage_path('framework/vite-hot-external'));

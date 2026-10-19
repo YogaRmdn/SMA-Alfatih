@@ -20,6 +20,7 @@ class ExtracurricularController extends Controller
     {
         return ['image'];
     }
+
     public function index()
     {
         $extracurriculars = Extracurricular::query()

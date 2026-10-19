@@ -20,6 +20,7 @@ class DownloadController extends Controller
     {
         return ['file'];
     }
+
     public function index()
     {
         $downloads = Download::query()

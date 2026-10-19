@@ -20,6 +20,7 @@ class BannerController extends Controller
     {
         return ['image'];
     }
+
     public function index()
     {
         $banners = Banner::query()

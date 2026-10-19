@@ -20,6 +20,7 @@ class StaffController extends Controller
     {
         return ['photo'];
     }
+
     public function index()
     {
         $staffs = Staff::query()

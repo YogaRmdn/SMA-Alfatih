@@ -17,6 +17,7 @@ class CategoryController extends Controller
     {
         return Category::class;
     }
+
     public function deleteAll()
     {
         if (Category::whereHas('news')->exists()) {

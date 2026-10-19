@@ -20,6 +20,7 @@ class FacilityController extends Controller
     {
         return ['image'];
     }
+
     public function index()
     {
         $facilities = Facility::query()

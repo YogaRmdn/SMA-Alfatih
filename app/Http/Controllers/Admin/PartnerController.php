@@ -20,6 +20,7 @@ class PartnerController extends Controller
     {
         return ['logo'];
     }
+
     public function index()
     {
         $partners = Partner::query()

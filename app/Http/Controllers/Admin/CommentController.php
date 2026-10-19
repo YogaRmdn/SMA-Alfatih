@@ -15,6 +15,7 @@ class CommentController extends Controller
     {
         return Comment::class;
     }
+
     public function index()
     {
         $comments = Comment::query()

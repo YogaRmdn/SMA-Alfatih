@@ -16,7 +16,7 @@ class SecurityHeadersTest extends TestCase
     {
         parent::setUp();
 
-        $this->hotFile = sys_get_temp_dir() . '/security-headers-test-hot-' . uniqid();
+        $this->hotFile = sys_get_temp_dir().'/security-headers-test-hot-'.uniqid();
 
         config()->set('vite.hotFile', $this->hotFile);
     }

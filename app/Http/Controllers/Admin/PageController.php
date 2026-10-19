@@ -27,6 +27,7 @@ class PageController extends Controller
     {
         return ['image'];
     }
+
     public function index()
     {
         $pages = Page::query()

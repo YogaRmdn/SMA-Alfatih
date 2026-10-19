@@ -15,6 +15,7 @@ class FaqController extends Controller
     {
         return Faq::class;
     }
+
     public function index()
     {
         $faqs = Faq::query()

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TeacherRequest;
-use App\Models\Staff;
 use App\Models\Teacher;
 use App\Traits\HasDeleteAll;
 
@@ -21,6 +20,7 @@ class TeacherController extends Controller
     {
         return ['photo'];
     }
+
     public function index()
     {
         $teachers = Teacher::query()

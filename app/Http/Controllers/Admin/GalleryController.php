@@ -33,6 +33,7 @@ class GalleryController extends Controller
 
         return back()->with('success', 'Semua item galeri berhasil dihapus.');
     }
+
     public function index()
     {
         $galleries = Gallery::query()

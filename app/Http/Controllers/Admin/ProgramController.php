@@ -20,6 +20,7 @@ class ProgramController extends Controller
     {
         return ['image'];
     }
+
     public function index()
     {
         $programs = Program::query()

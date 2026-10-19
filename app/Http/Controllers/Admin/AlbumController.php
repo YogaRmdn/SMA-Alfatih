@@ -37,6 +37,7 @@ class AlbumController extends Controller
 
         return back()->with('success', 'Semua album berhasil dihapus.');
     }
+
     public function index()
     {
         $albums = Album::query()

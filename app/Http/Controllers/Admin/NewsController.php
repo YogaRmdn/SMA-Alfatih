@@ -22,6 +22,7 @@ class NewsController extends Controller
     {
         return ['thumbnail'];
     }
+
     public function index()
     {
         $news = News::query()

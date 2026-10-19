@@ -20,6 +20,7 @@ class AnnouncementController extends Controller
     {
         return ['attachment'];
     }
+
     public function index()
     {
         $announcements = Announcement::query()
