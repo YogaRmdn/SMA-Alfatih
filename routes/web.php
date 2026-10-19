@@ -42,6 +42,17 @@ Route::middleware('throttle:30,1')->group(function () {
 });
 
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    // Pengalihan berdasarkan role (lihat rencana proyek SIBEL — bagian 5A).
+    if ($user?->hasRole('siswa')) {
+        return redirect()->route('sibel.assessment.index');
+    }
+
+    if ($user?->hasRole('guru_bk')) {
+        return redirect()->route('sibel.dashboard');
+    }
+
     return redirect()->route('admin.dashboard');
 })->middleware(['auth'])->name('dashboard');
 

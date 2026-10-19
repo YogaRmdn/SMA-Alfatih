@@ -40,7 +40,7 @@ class SecurityHeaders
     {
         $base = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net",
             "img-src 'self' data: blob: https:",
@@ -62,11 +62,11 @@ class SecurityHeaders
 
         foreach ($base as $i => $directive) {
             if (str_starts_with($directive, 'script-src ') || str_starts_with($directive, 'style-src ') || str_starts_with($directive, 'connect-src ')) {
-                $base[$i] .= ' ' . implode(' ', self::DEV_ORIGINS);
+                $base[$i] .= ' '.implode(' ', self::DEV_ORIGINS);
             }
 
             if (str_starts_with($directive, 'connect-src ')) {
-                $base[$i] .= ' ' . implode(' ', self::DEV_WS_ORIGINS);
+                $base[$i] .= ' '.implode(' ', self::DEV_WS_ORIGINS);
             }
         }
 

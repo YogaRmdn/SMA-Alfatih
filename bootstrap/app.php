@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware('web')->group(base_path('routes/admin.php'));
+            Route::middleware('web')->group(base_path('routes/sibel.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

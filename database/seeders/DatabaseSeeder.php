@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SettingsSeeder::class,
             PpdbFormFieldSeeder::class,
+            SibelSeeder::class,
         ]);
 
         $secret = $this->initialPassword();

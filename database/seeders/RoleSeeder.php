@@ -20,6 +20,16 @@ class RoleSeeder extends Seeder
                 'slug' => 'admin',
                 'description' => 'Mengelola seluruh konten website.',
             ],
+            [
+                'name' => 'Guru BK',
+                'slug' => 'guru_bk',
+                'description' => 'Mengelola data siswa, kuesioner SIBEL, hasil, dan rekap kelas.',
+            ],
+            [
+                'name' => 'Siswa',
+                'slug' => 'siswa',
+                'description' => 'Mengisi kuesioner gaya belajar dan melihat hasil miliknya sendiri.',
+            ],
         ];
 
         foreach ($roles as $role) {
