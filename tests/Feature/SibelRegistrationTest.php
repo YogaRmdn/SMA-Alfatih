@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\SibelClass;
 use App\Models\SibelStudent;
 use App\Models\User;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -186,11 +187,20 @@ class SibelRegistrationTest extends TestCase
             ->assertDontSee('Budi Santoso');
     }
 
-    public function test_tombol_daftar_sibel_muncul_di_navbar(): void
+    public function test_tombol_daftar_ppdb_kembali_muncul_di_navbar(): void
     {
+        $this->seed(SettingsSeeder::class);
+
         $this->get('/')
             ->assertOk()
-            ->assertSee('Daftar SIBEL')
+            ->assertSee('Daftar PPDB')
+            ->assertDontSee('Daftar SIBEL');
+    }
+
+    public function test_pendaftaran_sibel_tetap_tersedia_lewat_login_sibel(): void
+    {
+        $this->get(route('sibel.login'))
+            ->assertOk()
             ->assertSee(route('sibel.register'));
     }
 

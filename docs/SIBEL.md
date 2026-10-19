@@ -83,12 +83,13 @@ Aturan sesi & pengisian ulang:
   riwayat lama tetap tersimpan.
 - Hasil siswa **tidak terlihat** sampai guru BK mempublikasikannya (halaman status "menunggu publikasi").
 
-### Pendaftaran mandiri siswa (sementara)
+### Pendaftaran mandiri siswa
 
-- Tombol **"Daftar PPDB"** pada navbar website sementara diganti **"Daftar SIBEL"**
-  → mengarah ke `GET/POST /sibel/daftar` — **form terbuka untuk semua** (admin yang
+- Akses pendaftaran mandiri ada di **`/sibel/daftar`** — dari tombol **"Daftar"**
+  pada halaman login SIBEL (`/sibel/masuk`) — **form terbuka untuk semua** (admin yang
   sedang login pun bisa membuka form; sesi login admin tidak diganti saat menekan
   Daftar, cukup muncul pesan sukses). `POST` dibatasi `throttle:10,1`.
+  Tombol **"Daftar PPDB"** di navbar website tetap kembali seperti semula.
 - Form meminta nama, email, password (+konfirmasi); **NIS dan kelas opsional** —
   kelas bisa dikosongkan lalu dipetakan guru BK lewat menu Data Siswa
   (migration `2026_10_19_000009` membuat `students.class_id` nullable).

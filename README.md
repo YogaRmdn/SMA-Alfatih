@@ -42,7 +42,7 @@
 - Mesin penilaian murni di backend (`LearningStyleScoringService`) — mendukung seri 2 dan 3 kategori tanpa pemilihan acak.
 - Hasil & interpretasi positif, publikasi hasil oleh guru BK sebelum siswa bisa melihat, catatan tindak lanjut guru BK.
 - Laporan individual dan rekap kelas siap cetak / simpan PDF (kertas A4, `window.print()`).
-- Pendaftaran mandiri siswa di **`/sibel/daftar`** (sementara menggantikan tombol "Daftar PPDB" pada navbar) — daftar → login otomatis → langsung ke pengisian kuesioner; pendaftar berlabel **"Daftar Mandiri"** + filter Asal di menu Data Siswa.
+- Pendaftaran mandiri siswa di **`/sibel/daftar`** — akses dari tombol "Daftar" pada halaman login SIBEL (`/sibel/masuk`) — daftar → login otomatis → langsung ke pengisian kuesioner; pendaftar berlabel **"Daftar Mandiri"** + filter Asal di menu Data Siswa.
 - Login khusus SIBEL di **`/sibel/masuk`** — tampilan & alur terpisah dari login website (`/login`); tamu yang membuka area `/sibel/*` otomatis diarahkan ke sana.
 - Panduan lengkap: **[docs/SIBEL.md](docs/SIBEL.md)**.
 

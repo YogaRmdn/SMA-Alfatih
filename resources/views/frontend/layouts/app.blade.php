@@ -326,11 +326,10 @@
             </nav>
 
             <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 xl:ml-4">
-                {{-- SEMENTARA: tombol "Daftar PPDB" diganti pendaftaran SIBEL. Kembalikan setelah masa SIBEL. --}}
-                <a href="{{ route('sibel.register') }}" class="sheen hidden whitespace-nowrap rounded-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/30 transition hover:brightness-105 sm:inline-flex sm:px-4 sm:text-sm">
-                    Daftar SIBEL
-                </a>
                 @if ($ppdbOpen)
+                <a href="{{ route('ppdb.register') }}" class="sheen hidden whitespace-nowrap rounded-lg bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-3 py-2.5 text-xs font-bold text-emerald-950 shadow-md shadow-amber-500/30 transition hover:brightness-105 sm:inline-flex sm:px-4 sm:text-sm">
+                    Daftar PPDB
+                </a>
                 <a href="{{ route('ppdb.status') }}" class="hidden whitespace-nowrap rounded-lg border border-emerald-700 px-3 py-2.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white md:inline-flex md:px-4 md:text-sm">
                     Cek Status
                 </a>
@@ -371,17 +370,16 @@
                     @endif
                 @endforeach
             </nav>
-            {{-- SEMENTARA: tombol "Daftar PPDB" diganti pendaftaran SIBEL. --}}
-            <div class="mt-3 grid gap-2 border-t border-slate-100 pt-3">
-                <a href="{{ route('sibel.register') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-500">
-                    Daftar SIBEL
+            @if ($ppdbOpen)
+            <div class="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <a href="{{ route('ppdb.register') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-amber-400">
+                    Daftar PPDB
                 </a>
-                @if ($ppdbOpen)
                 <a href="{{ route('ppdb.status') }}" @click="mobileOpen = false" class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
                     Cek Status
                 </a>
-                @endif
             </div>
+            @endif
             <div class="mt-2 border-t border-slate-100 pt-3">
                 <a href="{{ route('login') }}" @click="mobileOpen = false" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-700 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-700 hover:text-white">
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
