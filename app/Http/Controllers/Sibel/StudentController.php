@@ -19,6 +19,7 @@ class StudentController extends Controller
             ->when(request('q'), fn ($q, $search) => $q->where('full_name', 'like', "%{$search}%")
                 ->orWhere('student_number', 'like', "%{$search}%"))
             ->when(request('class_id'), fn ($q, $classId) => $q->where('class_id', $classId))
+            ->when(request('source'), fn ($q, $source) => $q->where('source', $source))
             ->orderBy('full_name')
             ->paginate(10)
             ->withQueryString();

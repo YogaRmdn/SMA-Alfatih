@@ -12,6 +12,12 @@ class SibelStudent extends Model
 
     public const STATUS_INACTIVE = 'inactive';
 
+    /** Asal data: pendaftaran mandiri lewat /sibel/daftar. */
+    public const SOURCE_SELF = 'self';
+
+    /** Asal data: dibuat guru BK/admin lewat menu Data Siswa. */
+    public const SOURCE_MANUAL = 'manual';
+
     public const STATUS_LABELS = [
         self::STATUS_ACTIVE => 'Aktif',
         self::STATUS_INACTIVE => 'Tidak Aktif',
@@ -25,6 +31,7 @@ class SibelStudent extends Model
         'student_number',
         'full_name',
         'status',
+        'source',
     ];
 
     public function user(): BelongsTo

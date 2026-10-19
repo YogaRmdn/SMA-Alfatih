@@ -56,6 +56,7 @@ class RegistrationController extends Controller
                     'student_number' => ($data['student_number'] ?? '') !== '' ? $data['student_number'] : null,
                     'full_name' => $data['full_name'],
                     'status' => SibelStudent::STATUS_ACTIVE,
+                    'source' => SibelStudent::SOURCE_SELF,
                 ]);
 
                 return $user;
@@ -71,11 +72,20 @@ class RegistrationController extends Controller
             throw $exception;
         }
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        if (Auth::guest()) {
+            // Anak-anak (tamu): login otomatis langsung ke halaman pengisian.
+            Auth::login($user);
+            $request->session()->regenerate();
 
+            return redirect()
+                ->route('sibel.assessment.index')
+                ->with('success', 'Pendaftaran berhasil. Silakan isi kuesioner gaya belajar.');
+        }
+
+        // Sudah login (mis. admin yang mengetes form): sesi TIDAK diganti —
+        // cukup kembali ke form dengan kabar sukses akun baru sudah dibuat.
         return redirect()
-            ->route('sibel.assessment.index')
-            ->with('success', 'Pendaftaran berhasil. Silakan isi kuesioner gaya belajar.');
+            ->route('sibel.register')
+            ->with('success', "Pendaftaran berhasil. Akun \"{$user->email}\" sudah dibuat — silakan login dengan akun tersebut untuk mulai mengisi.");
     }
 }

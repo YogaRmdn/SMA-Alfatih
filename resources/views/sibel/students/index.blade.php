@@ -27,6 +27,12 @@
                     :options="$classes->mapWithKeys(fn ($class) => [$class->id => $class->label()])->all()" />
             </x-admin.field>
         </div>
+        <div class="w-full sm:w-52">
+            <x-admin.field label="Asal" name="source">
+                <x-admin.select name="source" :value="request('source')" placeholder="Semua asal"
+                    :options="['self' => 'Daftar mandiri', 'manual' => 'Dibuat admin']" />
+            </x-admin.field>
+        </div>
         <div class="flex gap-2">
             <button type="submit" class="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900">Filter</button>
             <a href="{{ route('sibel.students.index') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">Reset</a>
@@ -56,6 +62,11 @@
                             <a href="{{ route('sibel.students.show', $student) }}" class="font-semibold text-slate-800 hover:text-emerald-700">
                                 {{ $student->full_name }}
                             </a>
+                            @if ($student->source === \App\Models\SibelStudent::SOURCE_SELF)
+                                <span class="mt-1 block w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200" title="Mendaftar sendiri lewat /sibel/daftar">
+                                    Daftar Mandiri
+                                </span>
+                            @endif
                         </td>
                         <td class="px-5 py-3 text-slate-600">{{ $student->student_number ?: '—' }}</td>
                         <td class="px-5 py-3">

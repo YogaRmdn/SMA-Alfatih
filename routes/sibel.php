@@ -20,11 +20,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 /*
-| Pendaftaran mandiri siswa (tamu) — sementara menggantikan tombol
-| "Daftar PPDB" pada navbar. Setelah daftar: login otomatis -> pengisian kuesioner.
+| Pendaftaran mandiri siswa — sementara menggantikan tombol "Daftar PPDB"
+| pada navbar. Halaman form terbuka untuk siapa pun (termasuk admin yang
+| sedang login); otomatis-login ke pengisian kuesioner hanya untuk tamu.
 */
-Route::middleware('guest')
-    ->prefix('sibel')
+Route::prefix('sibel')
     ->name('sibel.')
     ->group(function () {
         Route::get('daftar', [RegistrationController::class, 'create'])->name('register');

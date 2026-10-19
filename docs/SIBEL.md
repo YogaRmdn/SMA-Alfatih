@@ -86,17 +86,24 @@ Aturan sesi & pengisian ulang:
 ### Pendaftaran mandiri siswa (sementara)
 
 - Tombol **"Daftar PPDB"** pada navbar website sementara diganti **"Daftar SIBEL"**
-  → mengarah ke `GET/POST /sibel/daftar` (tamu, `guest` + `throttle:10,1`).
+  → mengarah ke `GET/POST /sibel/daftar` — **form terbuka untuk semua** (admin yang
+  sedang login pun bisa membuka form; sesi login admin tidak diganti saat menekan
+  Daftar, cukup muncul pesan sukses). `POST` dibatasi `throttle:10,1`.
 - Form meminta nama, email, password (+konfirmasi); **NIS dan kelas opsional** —
   kelas bisa dikosongkan lalu dipetakan guru BK lewat menu Data Siswa
   (migration `2026_10_19_000009` membuat `students.class_id` nullable).
 - Pendaftaran otomatis membuat akun ber-role `siswa` (sudah `email_verified_at`) +
-  profil siswa, lalu **login otomatis → langsung diarahkan ke `/sibel/kuesioner-saya`**.
-- Login manual siswa pun berakhir di halaman kuesioner (cabang `siswa` pada `/dashboard`).
+  profil siswa, lalu **(untuk tamu) login otomatis → langsung diarahkan ke
+  `/sibel/kuesioner-saya`**. Login manual siswa pun berakhir di kuesioner
+  (cabang `siswa` pada `/dashboard`).
+- **Melacak siapa yang mendaftar**: profil siswa berkolom `source` (migration
+  `2026_10_19_000010`) — `self` = daftar mandiri, `manual` = dibuat admin.
+  Menu *Data Siswa* menampilkan lencana **"Daftar Mandiri"** dan filter **Asal**
+  (Semua / Daftar mandiri / Dibuat admin).
 - Footer, hero beranda, dan halaman PPDB tetap menampilkan CTA PPDB — hanya tombol
   navbar yang ditukar. Untuk mengembalikan: balikkan 2 edit di
   `resources/views/frontend/layouts/app.blade.php` (cari komentar `SEMENTARA`).
-- Berkas: `routes/sibel.php` (grup `guest`), `RegistrationController`,
+- Berkas: `routes/sibel.php` (grup publik `sibel.*`), `RegistrationController`,
   `StudentRegistrationRequest`, `sibel/auth/register.blade.php`.
 
 ---
