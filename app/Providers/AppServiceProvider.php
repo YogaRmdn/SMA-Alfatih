@@ -37,7 +37,9 @@ class AppServiceProvider extends ServiceProvider
             }));
         });
 
-        View::composer('frontend.*', function ($view) {
+        // Termasuk errors.* — halaman 404 dsb. memakai layout frontend yang
+        // membutuhkan data kontak ($contact) dari database.
+        View::composer(['frontend.*', 'errors.*'], function ($view) {
             $view->with('contact', Contact::first());
         });
 
