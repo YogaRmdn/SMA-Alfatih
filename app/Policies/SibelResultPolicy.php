@@ -16,21 +16,12 @@ class SibelResultPolicy
     }
 
     /**
-     * Siswa hanya boleh melihat hasilnya sendiri dan hanya jika sudah
-     * dipublikasikan oleh guru BK.
+     * Hasil hanya untuk pengelola — sisi siswa mengakses hasil miliknya
+     * lewat session terikat (PortalController), bukan akun login.
      */
     public function view(User $user, SibelResult $result): bool
     {
-        if ($this->viewAny($user)) {
-            return true;
-        }
-
-        if (! $user->hasRole('siswa')) {
-            return false;
-        }
-
-        return $result->attempt->student->user_id === $user->id
-            && $result->is_published;
+        return $this->viewAny($user);
     }
 
     /**

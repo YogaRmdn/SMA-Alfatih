@@ -30,106 +30,83 @@ Berjalan pada path **`/sibel`** dengan route sendiri (`routes/sibel.php`).
 
 ## 1. Akses & Role
 
-Semua route SIBEL diawali middleware `auth` + `verified`, lalu dibagi dua grup:
+SIBEL kini berjalan **tanpa login untuk siswa** — identitas siswa dipilih dari
+daftar (kelas + nama) di portal `/sibel` lalu diikat ke **session browser**
+(`sibel_student_id`, `PortalController`). Route pengelola tetap dilindungi
+`auth` + `verified` + `role:super_admin,admin,guru_bk` (login website `/login`).
 
-| Grup | Role | Route |
+| Grup | Akses | Isi |
 |------|------|-------|
-| Pengelola | `super_admin`, `admin`, `guru_bk` | Dashboard, Data Siswa, Kelas, Kuesioner, Hasil, Rekap |
-| Siswa | `siswa` | Kuesioner Saya, isi kuesioner, lihat/cetak hasil miliknya sendiri |
+| Siswa | **Tanpa login** — pilih nama di `/sibel` | Dashboard khusus pengisian kuesioner, lihat & unduh hasil miliknya |
+| Pengelola | Login website, role `super_admin` / `admin` / `guru_bk` | Dashboard, Data Siswa, Kelas, Kuesioner, Hasil, Rekap |
 
 Rute utama (semua di bawah `/sibel`):
 
 | Nama route | URI | Keterangan |
 |---|---|---|
-| `sibel.dashboard` | `/sibel` | Statistik + grafik distribusi |
-| `sibel.students.*` | `/sibel/siswa` | CRUD siswa (+ akun login opsional) |
+| `sibel.portal` | `/sibel` | Pilih identitas siswa (kelas + nama); pengelola diarahkan ke dashboard |
+| `sibel.identify` | `POST /sibel/pilih` | Ikat identitas siswa ke session (throttle 30/menit) |
+| `sibel.forget` | `POST /sibel/ganti` | Lepas ikatan ("Ganti Siswa") — penting di komputer bersama |
+| `sibel.dashboard` | `/sibel/kelola` | Statistik + grafik distribusi (pengelola) |
+| `sibel.students.*` | `/sibel/siswa` | CRUD data siswa (identitas, bukan akun) |
 | `sibel.classes.*` | `/sibel/kelas` | CRUD kelas |
 | `sibel.questionnaires.*` | `/sibel/kuesioner` | CRUD kuesioner, builder pertanyaan, buka/tutup sesi, verifikasi |
-| `sibel.results.*` | `/sibel/hasil` | Daftar & detail hasil, catatan guru, publikasi, cetak |
+| `sibel.results.*` | `/sibel/hasil` | Daftar & detail hasil, catatan guru, cetak |
 | `sibel.recap.index/print` | `/sibel/rekap`, `/sibel/rekap/cetak` | Rekap kelas (filter kelas/periode/pencarian) |
 | `sibel.assessment.*` | `/sibel/kuesioner-saya`, `/sibel/asesmen/...` | Sisi siswa: mulai, isi, kirim, lihat/cetak hasil |
 
-Setelah login, `/dashboard` mengalirkan sesuai role: `siswa` → Kuesioner Saya, `guru_bk` → Dashboard SIBEL, selainnya → dashboard admin.
+Akun website ber-role `siswa` (warisan sistem lama) tetap bisa login di
+`/login`; setelah itu `/dashboard` mengarahkannya ke portal SIBEL dan
+identitasnya otomatis terikat. `/dashboard` untuk pengelola: `guru_bk` →
+Dashboard SIBEL, selainnya → dashboard admin.
 
 ---
 
 ## 2. Alur Kerja
 
 ```
-Guru BK/Admin
+Guru BK/Admin (login /login)
   1. Buat/edit kuesioner (judul, petunjuk, versi, aturan ulang)
   2. Susun pertanyaan — tiap pertanyaan tepat 3 pilihan: A/B/C
   3. Verifikasi instrumen terhadap dokumen asli → "Tandai Terverifikasi"
   4. "Buka Sesi Pengisian"
 
-Siswa (role siswa)
-  5. Login → /sibel → "Mulai Mengisi"
-  6. Jawab semua pertanyaan (indikator progres) → konfirmasi → Kirim
+Siswa (TANPA login)
+  5. Buka /sibel → pilih kelas + nama → dashboard khusus kuesioner
+  6. "Mulai Mengisi" → jawab semua pertanyaan (indikator progres) → konfirmasi → Kirim
+  7. Hasil, interpretasi & rekomendasi LANGSUNG tampil → "Cetak / Simpan PDF"
 
 Guru BK
-  7. Review hasil, tulis catatan, centang "Publikasikan hasil ke siswa"
-  8. Cetak laporan individual / rekap kelas (A4, simpan PDF via dialog cetak)
-
-Siswa
-  9. Melihat skor, interpretasi & rekomendasi SETELAH publikasi → bisa mencetak
+  8. Review hasil, tulis catatan tindak lanjut, cetak laporan individual / rekap kelas
 ```
 
 Aturan sesi & pengisian ulang:
 
 - Sesi `draft` → belum bisa diisi; `active` → siswa bisa mulai; `closed` → pengisian baru diblokir
   (sesi yang sedang berjalan tetap boleh dikirim).
-- Satu siswa hanya punya **satu sesi berjalan** pada satu waktu.
+- Satu identitas siswa hanya punya **satu sesi berjalan** pada satu waktu.
 - Pengisian ulang hanya bila centang **"Izinkan pengisian ulang"** dikendalikan guru BK;
   riwayat lama tetap tersimpan.
-- Hasil siswa **tidak terlihat** sampai guru BK mempublikasikannya (halaman status "menunggu publikasi").
+- **Hasil langsung tampil & bisa diunduh** begitu jawaban dikirim — tidak lagi menunggu
+  publikasi guru BK (kolom `is_published` tetap ada sebagai penanda arsip, memengaruhi
+  tampilan status di panel pengelola).
 
-### Pendaftaran mandiri siswa
+### Identitas siswa di komputer bersama
 
-- Akses pendaftaran mandiri ada di **`/sibel/daftar`** — dari tombol **"Daftar"**
-  pada halaman login SIBEL (`/sibel/masuk`) — **form terbuka untuk semua** (admin yang
-  sedang login pun bisa membuka form; sesi login admin tidak diganti saat menekan
-  Daftar, cukup muncul pesan sukses). `POST` dibatasi `throttle:10,1`.
-  Tombol **"Daftar PPDB"** di navbar website tetap kembali seperti semula.
-- Form meminta nama, email, password (+konfirmasi); **NIS dan kelas opsional** —
-  kelas bisa dikosongkan lalu dipetakan guru BK lewat menu Data Siswa
-  (migration `2026_10_19_000009` membuat `students.class_id` nullable).
-- Pendaftaran otomatis membuat akun ber-role `siswa` (sudah `email_verified_at`) +
-  profil siswa, lalu **(untuk tamu) login otomatis → langsung diarahkan ke
-  `/sibel/kuesioner-saya`**. Login manual siswa pun berakhir di kuesioner
-  (cabang `siswa` pada `/dashboard`).
-- **Melacak siapa yang mendaftar**: profil siswa berkolom `source` (migration
-  `2026_10_19_000010`) — `self` = daftar mandiri, `manual` = dibuat admin.
-  Menu *Data Siswa* menampilkan lencana **"Daftar Mandiri"** dan filter **Asal**
-  (Semua / Daftar mandiri / Dibuat admin).
-- Footer, hero beranda, dan halaman PPDB tetap menampilkan CTA PPDB — hanya tombol
-  navbar yang ditukar. Untuk mengembalikan: balikkan 2 edit di
-  `resources/views/frontend/layouts/app.blade.php` (cari komentar `SEMENTARA`).
-**Pemisahan dashboard admin vs siswa (alur login):**
-
-- `/login` tidak lagi dibungkus middleware `guest` — admin/guru yang sedang login
-  bisa membuka form kapan pun untuk **ganti akun** (mis. beralih dari akun admin
-  ke akun siswa) tanpa dilempar ke dashboard admin.
-- Setelah login, tujuan `url.intended` difilter per scope role
-  (`AuthenticatedSessionController::mayReach`): akun siswa tidak akan pernah
-  diarahkan ke `/admin` atau halaman pengelola SIBEL; tujuan yang tidak berhak
-  dibuang sehingga jatuh ke `/dashboard` yang bercabang per role
-  (siswa → kuesioner, guru_bk → dashboard SIBEL, admin → panel admin).
-- Sidebar SIBEL untuk siswa hanya berisi **"Kuesioner Saya"** (+ tautan Website
-  Sekolah); menu pengelola disembunyikan dan route pengelola tetap `403`.
-- **Login khusus SIBEL di `/sibel/masuk`** (`sibel.login`) — tampilan kartu
-  terpusat di atas gradien emerald dengan branding SIBEL
-  (`components/sibel/layouts/auth.blade.php`), sengaja berbeda dari login
-  website (`/login`, panel foto + form "Masuk ke Panel Admin"). Keduanya
-  memakai controller `AuthenticatedSessionController` yang sama, jadi filter
-  `intended` dan percabangan `/dashboard` tetap berlaku.
-- Tamu yang membuka area `/sibel/*` otomatis diarahkan ke `/sibel/masuk`
-  (`redirectGuestsTo` pada `bootstrap/app.php`); area lain tetap ke `/login`.
-- Halaman daftar (`/sibel/daftar`) memakai layout auth SIBEL yang sama dan
-  menautkan "Masuk" ke `/sibel/masuk`.
-- Berkas: `routes/sibel.php` (grup publik `sibel.*` — `masuk` + `daftar`),
-  `RegistrationController`, `StudentRegistrationRequest`,
-  `sibel/auth/login.blade.php`, `sibel/auth/register.blade.php`,
-  `components/sibel/layouts/auth.blade.php`, `bootstrap/app.php`.
+- Siswa **tidak memiliki akun login**. Cukup memilih nama di `/sibel`; identitas
+  diikat ke session browser (`sibel_student_id`) lewat `PortalController`.
+- Karena satu perangkat bisa dipakai bergantian, tombol **"Ganti Siswa"**
+  (`POST /sibel/ganti`, `sibel.forget`) tersedia di topbar dan dashboard siswa —
+  siswa berikutnya wajib menggunakannya bila nama yang tampil bukan namanya.
+- Nama hanya muncul di daftar portal bila status siswa **aktif**; siswa nonaktif
+  dan nama palsu ditolak saat pengikatan.
+- **Akun siswa lama** (warisan sistem login) masih bisa login di `/login`; setelah
+  itu `/dashboard` mengarahkannya ke portal dan identitasnya otomatis terikat.
+  Akun tanpa role tetap diarahkan ke `/dashboard` biasa (bukan SIBEL).
+- Berkas: `routes/sibel.php`, `app/Http/Controllers/Sibel/PortalController.php`,
+  `resources/views/sibel/portal.blade.php`, `resources/views/sibel/layouts/student.blade.php`,
+  `resources/views/sibel/assessment/*`, `components/sibel/layouts/auth.blade.php`,
+  `bootstrap/app.php`.
 
 ---
 
@@ -197,8 +174,9 @@ butuh verifikasi ulang (lihat catatan di atas).
 - Tidak bergantung library PDF (tanpa dompdf) — memakai **dialog cetak browser** (`window.print()`).
 - Layout khusus `resources/views/sibel/layouts/print.blade.php`: kertas **A4** (`@page { size: A4; margin: 12mm }`),
   kop sekolah dari tabel `settings`, blok tanda tangan Guru BK, catatan etika, toolbar tersembunyi saat dicetak.
-- Halaman cetak: laporan individual siswa (`/sibel/asesmen/{attempt}/cetak` — hanya hasil terpublikasi),
-  laporan guru BK (`/sibel/hasil/{result}/cetak`), dan rekap kelas (`/sibel/rekap/cetak`).
+- Halaman cetak: laporan individual siswa (`/sibel/asesmen/{attempt}/cetak` — langsung tersedia
+  setelah jawaban dikirim), laporan guru BK (`/sibel/hasil/{result}/cetak`), dan rekap kelas
+  (`/sibel/rekap/cetak`).
 - Simpan sebagai PDF: buka halaman cetak → klik "Cetak / Simpan PDF" → pilih *Save as PDF* pada dialog.
 
 ---
@@ -217,14 +195,19 @@ butuh verifikasi ulang (lihat catatan di atas).
 
 - Validasi seluruh input di server (`FormRequest`); aturan tiap jawaban dibangun dinamis dari daftar
   pertanyaan + cek `exists` **opsi milik pertanyaan tersebut**.
-- Route siswa dibatasi middleware `role:siswa`; route pengelola `role:super_admin,admin,guru_bk`.
-- `SibelResultPolicy` (otomatis ter-discove): siswa hanya boleh melihat **hasilnya sendiri** dan
-  hanya setelah dipublikasikan; pengelola boleh lihat/ubah semua.
-- Sesi pengisian hanya bisa dibuka pemiliknya (`403` untuk id asing).
+- Sisi siswa tidak berbasis akun: identitas diikat ke **session browser** lewat pemilihan nama
+  (hanya siswa **aktif** yang bisa dipilih, `POST /sibel/pilih` dibatasi throttle 30/menit);
+  seluruh halaman asesmen menolak (`403`) sesi yang identitasnya bukan pemilik attempt.
+- Route pengelola dibatasi middleware `role:super_admin,admin,guru_bk`; `SibelResultPolicy`
+  kini khusus pengelola (lihat/ubah hasil).
 - Skor, persentase, kategori dominan, interpretasi, dan rekomendasi **dihitung di backend** —
   frontend hanya mengirim pilihan `question_id → option_id`.
 - Unique constraint DB: `answers(attempt_id, question_id)`, `options(question_id, option_code)`,
   `results(attempt_id)` — anti duplikasi di level database.
+- **Implikasi pemilihan nama**: siapa pun yang mengakses `/sibel` bisa memilih nama siswa mana
+  pun (tanpa verifikasi) — sesuai keputusan sekolah agar pengisian bisa dilakukan bebas di
+  komputer sekolah. Untuk konteks yang lebih terkendali, siapkan perangkat khusus dan
+  pastikan siswa menekan "Ganti Siswa" antar-pengisian.
 
 ---
 
@@ -233,7 +216,7 @@ butuh verifikasi ulang (lihat catatan di atas).
 | Seeder | Isi |
 |---|---|
 | `SibelSeeder` (dipanggil `DatabaseSeeder`) | 1 kuesioner bawaan (15 pertanyaan × 3 opsi), status `draft`, `needs_verification = true`, idempoten |
-| `SibelDemoSeeder` (manual) | 3 kelas, 9 siswa, sesi & hasil contoh (termasuk skenario seri & belum dipublikasi), 2 akun login siswa demo dengan password acak yang dicetak ke terminal |
+| `SibelDemoSeeder` (manual) | 3 kelas, 9 siswa, sesi & hasil contoh (termasuk skenario seri), tanpa akun login — siswa demo dipilih langsung dari portal |
 
 Jalankan demo:
 
@@ -241,8 +224,9 @@ Jalankan demo:
 php artisan db:seed --class=SibelDemoSeeder
 ```
 
-Membuat akun siswa: bisa lewat menu **Data Siswa → Tambah Siswa** (isi email & password — role `siswa`
-dibuat otomatis), atau lewat menu Pengguna (super_admin) lalu tautkan ke data siswa.
+Menambahkan siswa: menu **Data Siswa → Tambah Siswa** (nama, kelas, NIS, status) —
+tidak ada pembuatan akun login lagi; siswa langsung bisa mengisi lewat `/sibel`
+selama statusnya aktif.
 
 ---
 
@@ -260,9 +244,10 @@ Cakupan skenario (rencana proyek bagian 11):
 | File | Skenario |
 |---|---|
 | `tests/Unit/LearningStyleScoringServiceTest.php` | Semua-A → Visual, semua-B → Auditori, semua-C → Kinestetik, 7/4/3 → Visual, 6/6/2 → seri, 4/4/4 → seri 3 kategori, persentase ≈ 100%, jawaban tidak lengkap ditolak, versi instrumen tersimpan, penilaian ulang tidak ganda |
-| `tests/Feature/SibelAssessmentTest.php` | Mulai sesi tunggal, kirim kosong ditolak, kirim lengkap → hasil benar, anti kirim ganda, opsi milik pertanyaan lain ditolak, privasi sesi siswa lain (403), sesi ditutup, aturan pengisian ulang, gerbang publikasi + cetak, unique constraint jawaban |
-| `tests/Feature/SibelAuthorizationTest.php` | Akses guru BK/admin vs siswa vs tanpa role, redirect `/dashboard` per role, halaman pengelola ter-render |
-| `tests/Feature/SibelReportTest.php` | Konten cetak (identitas, skor, kesimpulan, rekomendasi, etika), hasil historis tak berubah saat instrumen diperbarui, keakuratan rekap (termasuk hasil terakhir per siswa & filter kelas/periode), filter daftar hasil, simpan catatan + publikasi |
+| `tests/Feature/SibelPortalTest.php` | Portal terbuka tanpa login, pemilihan nama mengikat session, nama kosong/tidak ada/nonaktif ditolak, ganti siswa melepas ikatan, filter kelas, akun siswa lama otomatis terikat, pengelola diarahkan ke dashboard |
+| `tests/Feature/SibelAssessmentTest.php` | Tanpa identitas → portal, mulai sesi tunggal, kirim kosong ditolak, kirim lengkap → hasil benar, anti kirim ganda, opsi milik pertanyaan lain ditolak, privasi sesi identitas lain (403), sesi ditutup, aturan pengisian ulang, hasil langsung tampil + cetak tanpa publikasi, unique constraint jawaban |
+| `tests/Feature/SibelAuthorizationTest.php` | Portal terbuka tanpa login vs area pengelola terproteksi, akses guru BK/admin vs siswa vs tanpa role, redirect `/dashboard` per role, halaman pengelola ter-render |
+| `tests/Feature/SibelReportTest.php` | Konten cetak (identitas, skor, kesimpulan, rekomendasi, etika), hasil historis tak berubah saat instrumen diperbarui, keakuratan rekap (termasuk hasil terakhir per siswa & filter kelas/periode), filter daftar hasil, simpan catatan guru |
 
 Helper bersama: `tests/Concerns/BuildsSibelData.php`.
 
@@ -273,8 +258,9 @@ Helper bersama: `tests/Concerns/BuildsSibelData.php`.
 | Gejala | Penyebab / solusi |
 |---|---|
 | Siswa tidak bisa mulai kuesioner | Sesi masih `draft`/`closed` — buka dari halaman kelola kuesioner |
-| Siswa sudah isi tapi tidak melihat hasil | Belum dipublikasikan — centang "Publikasikan" di detail hasil |
-| "Data Siswa Belum Terdaftar" | Akun login belum tertaut ke data siswa — daftarkan lewat menu Data Siswa |
+| Nama siswa tidak muncul di portal | Status siswa bukan `aktif`, atau filter kelas sedang dipilih — ubah di menu Data Siswa |
+| Siswa mengisi atas nama teman | Sifat sistem pemilihan nama tanpa login — edukasi siswa & sediakan perangkat khusus bila perlu |
+| Hasil tertukar antar-siswa di satu komputer | Lupa menekan "Ganti Siswa" — klik tombol itu sebelum siswa berikutnya mengisi |
 | Grafik tidak muncul | CDN Chart.js diblokir — bar fallback CSS tetap tampil; izinkan `cdn.jsdelivr.net` di CSP bila perlu |
 | Instrumen ditandai "Perlu Verifikasi" | Memang default; verifikasi dokumen asli lalu klik "Tandai Terverifikasi" |
 | Pertanyaan tidak bisa dihapus | Sudah punya jawaban riwayat — dilindungi agar laporan historis utuh |

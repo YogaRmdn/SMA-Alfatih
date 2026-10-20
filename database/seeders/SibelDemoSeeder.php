@@ -2,16 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
 use App\Models\SibelAnswer;
 use App\Models\SibelAttempt;
 use App\Models\SibelClass;
 use App\Models\SibelQuestionnaire;
 use App\Models\SibelStudent;
-use App\Models\User;
 use App\Services\LearningStyleScoringService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 /**
  * Data contoh SIBEL untuk pengembangan lokal.
@@ -19,8 +16,8 @@ use Illuminate\Support\Str;
  * TIDAK dipanggil otomatis oleh DatabaseSeeder (sama seperti DemoSeeder).
  * Jalankan manual: php artisan db:seed --class=SibelDemoSeeder
  *
- * Password akun login siswa contoh dibuat acak dan dicetak ke terminal —
- * tidak ada kredensial hardcoded di repo.
+ * Siswa kini mengisi kuesioner tanpa login (identitas dipilih di /sibel),
+ * sehingga seeder ini tidak lagi membuat akun login siswa.
  */
 class SibelDemoSeeder extends Seeder
 {
@@ -89,10 +86,6 @@ class SibelDemoSeeder extends Seeder
             ]
         ));
 
-        // Dua akun login siswa contoh (password acak dicetak).
-        $this->createDemoLogin($students[0]);
-        $this->createDemoLogin($students[1]);
-
         $service = app(LearningStyleScoringService::class);
         $patterns = array_values(self::PATTERNS);
 
@@ -144,41 +137,5 @@ class SibelDemoSeeder extends Seeder
         }
 
         $this->command?->info('Data demo SIBEL siap: 3 kelas, '.$students->count().' siswa, hasil kuesioner contoh.');
-    }
-
-    protected function createDemoLogin(SibelStudent $student): void
-    {
-        if ($student->user_id) {
-            return;
-        }
-
-        $email = 'siswa.'.Str::slug(strtolower($student->full_name)).'@demo.local';
-
-        $existing = User::where('email', $email)->first();
-
-        if ($existing) {
-            $student->update(['user_id' => $existing->id]);
-
-            return;
-        }
-
-        $role = Role::firstOrCreate(
-            ['slug' => 'siswa'],
-            ['name' => 'Siswa', 'description' => 'Mengisi kuesioner gaya belajar dan melihat hasil miliknya sendiri.']
-        );
-
-        $password = Str::password(16);
-
-        $user = new User;
-        $user->name = $student->full_name;
-        $user->email = $email;
-        $user->password = $password;
-        $user->email_verified_at = now();
-        $user->role_id = $role->id;
-        $user->save();
-
-        $student->update(['user_id' => $user->id]);
-
-        $this->command?->warn("Akun login siswa contoh: {$email} | Password: {$password}");
     }
 }

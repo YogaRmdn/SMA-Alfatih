@@ -35,15 +35,15 @@
 - Autentikasi Laravel Breeze (login, registrasi, verifikasi email, reset password).
 
 ### Modul SIBEL (Sistem Informasi Gaya Belajar Siswa)
-- Akses khusus di path **`/sibel`** (`routes/sibel.php`) untuk role `guru_bk`, `admin`, `super_admin`, dan `siswa`.
+- Akses siswa di path **`/sibel`** (`routes/sibel.php`) **tanpa login** — cukup pilih kelas + nama di portal, lalu masuk dashboard khusus pengisian kuesioner (identitas terikat ke session browser).
+- Area pengelola (`guru_bk`, `admin`, `super_admin`) tetap lewat login website (`/login`).
 - Dashboard statistik + grafik distribusi gaya belajar (Chart.js dengan fallback CSS).
 - CRUD Siswa & Kelas, builder Kuesioner (pertanyaan + 3 pilihan A/B/C), sesi buka/tutup, dan verifikasi instrumen.
 - Pengisian kuesioner dinamis: indikator progres, konfirmasi sebelum kirim, anti kirim ganda, aturan pengisian ulang dikendalikan guru BK.
 - Mesin penilaian murni di backend (`LearningStyleScoringService`) — mendukung seri 2 dan 3 kategori tanpa pemilihan acak.
-- Hasil & interpretasi positif, publikasi hasil oleh guru BK sebelum siswa bisa melihat, catatan tindak lanjut guru BK.
+- **Hasil langsung tampil & bisa diunduh/dicetak siswa** begitu jawaban dikirim, lengkap dengan interpretasi, rekomendasi, dan catatan tindak lanjut guru BK.
 - Laporan individual dan rekap kelas siap cetak / simpan PDF (kertas A4, `window.print()`).
-- Pendaftaran mandiri siswa di **`/sibel/daftar`** — akses dari tombol "Daftar" pada halaman login SIBEL (`/sibel/masuk`) — daftar → login otomatis → langsung ke pengisian kuesioner; pendaftar berlabel **"Daftar Mandiri"** + filter Asal di menu Data Siswa.
-- Login khusus SIBEL di **`/sibel/masuk`** — tampilan & alur terpisah dari login website (`/login`); tamu yang membuka area `/sibel/*` otomatis diarahkan ke sana.
+- Tombol **"Ganti Siswa"** di topbar & dashboard siswa — melepas ikatan identitas di komputer bersama.
 - Panduan lengkap: **[docs/SIBEL.md](docs/SIBEL.md)**.
 
 ## Catatan Keamanan
@@ -71,8 +71,8 @@
 |-------------|--------------|--------------------------------------------------|
 | Super Admin | `super_admin`| Akses penuh, termasuk kelola pengguna            |
 | Admin       | `admin`      | Mengelola seluruh konten website, termasuk SIBEL |
-| Guru BK     | `guru_bk`    | Kelola data siswa/kelas/kuesioner SIBEL, hasil, publikasi & rekap |
-| Siswa       | `siswa`      | Mengisi kuesioner SIBEL dan melihat hasil miliknya sendiri |
+| Guru BK     | `guru_bk`    | Kelola data siswa/kelas/kuesioner SIBEL, hasil & rekap |
+| Siswa       | `siswa`      | Tidak dipakai untuk SIBEL lagi — siswa mengisi kuesioner tanpa akun (pilih nama di `/sibel`); akun lama tetap bisa login website |
 
 ## Instalasi
 

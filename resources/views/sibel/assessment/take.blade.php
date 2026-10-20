@@ -1,7 +1,6 @@
-@extends('sibel.layouts.app')
+@extends('sibel.layouts.student')
 
 @section('title', 'Mengisi Kuesioner')
-@section('breadcrumb', 'Isi Kuesioner')
 
 @php
     $questions = $attempt->questionnaire->questions->values();

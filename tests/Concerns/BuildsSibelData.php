@@ -89,6 +89,28 @@ trait BuildsSibelData
     }
 
     /**
+     * Siswa murni identitas (tanpa akun login) — dipilih lewat portal /sibel.
+     */
+    protected function createStandaloneStudent(string $name, ?SibelClass $class = null): SibelStudent
+    {
+        $class ??= SibelClass::create(['name' => 'X-A', 'academic_year' => '2026/2027']);
+
+        return SibelStudent::create([
+            'class_id' => $class->id,
+            'full_name' => $name,
+            'status' => SibelStudent::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Ikat identitas siswa ke sesi browser (cara siswa masuk tanpa login).
+     */
+    protected function actingAsStudent(SibelStudent $student): static
+    {
+        return $this->withSession(['sibel_student_id' => $student->id]);
+    }
+
+    /**
      * Buat sesi pengisian lengkap dengan jawaban sesuai pola kode
      * (mis. "AAABBBCCC" — satu karakter per pertanyaan, berurutan).
      */

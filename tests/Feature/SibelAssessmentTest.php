@@ -8,15 +8,15 @@ use App\Models\SibelClass;
 use App\Models\SibelQuestionnaire;
 use App\Models\SibelResult;
 use App\Models\SibelStudent;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\BuildsSibelData;
 use Tests\TestCase;
 
 /**
- * Alur pengisian kuesioner sisi siswa (rencana proyek — bagian 11:
- * skenario 7, 8, 13, aturan pengisian ulang, dan gerbang publikasi).
+ * Alur pengisian kuesioner sisi siswa TANPA LOGIN (portal /sibel):
+ * identitas dipilih dari daftar lalu diikat ke session browser; hasil
+ * langsung tampil & bisa dicetak begitu jawaban dikirim.
  */
 class SibelAssessmentTest extends TestCase
 {
@@ -26,8 +26,6 @@ class SibelAssessmentTest extends TestCase
 
     protected SibelStudent $student;
 
-    protected User $siswa;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,9 +33,8 @@ class SibelAssessmentTest extends TestCase
         $this->createSibelRoles();
 
         $this->questionnaire = $this->createQuestionnaire(4);
-        $this->siswa = $this->createSibelUser('siswa', 'Siswa Satu');
-        $this->student = $this->createStudentFor(
-            $this->siswa,
+        $this->student = $this->createStandaloneStudent(
+            'Siswa Satu',
             SibelClass::create(['name' => 'X-A', 'academic_year' => '2026/2027'])
         );
     }
@@ -59,25 +56,29 @@ class SibelAssessmentTest extends TestCase
 
     protected function startAttempt(): SibelAttempt
     {
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire));
 
         return SibelAttempt::firstOrFail();
     }
 
-    public function test_siswa_tanpa_profil_melihat_pemberitahuan(): void
+    public function test_tanpa_identitas_dialihkan_ke_portal(): void
     {
-        $tanpaProfil = $this->createSibelUser('siswa', 'Siswa Tanpa Data');
+        $this->get(route('sibel.assessment.index'))
+            ->assertRedirect(route('sibel.portal'));
 
-        $this->actingAs($tanpaProfil)
+        // Sesi yang identitasnya sudah tidak aktif pun kembali ke portal.
+        $inactive = $this->createStandaloneStudent('Siswa Nonaktif', SibelClass::first());
+        $inactive->update(['status' => SibelStudent::STATUS_INACTIVE]);
+
+        $this->actingAsStudent($inactive)
             ->get(route('sibel.assessment.index'))
-            ->assertOk()
-            ->assertSee('Data Siswa Belum Terdaftar');
+            ->assertRedirect(route('sibel.portal'));
     }
 
     public function test_memulai_kuesioner_membuat_sesi_tunggal(): void
     {
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire))
             ->assertRedirect(route('sibel.assessment.show', SibelAttempt::first()));
 
@@ -88,7 +89,7 @@ class SibelAssessmentTest extends TestCase
         ]);
 
         // Klik ganda / muat ulang: tidak membuat sesi kedua.
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire));
 
         $this->assertSame(1, SibelAttempt::count());
@@ -103,14 +104,14 @@ class SibelAssessmentTest extends TestCase
         unset($payload['answers'][$questionIds->last()]); // satu pertanyaan kosong
 
         // Buka form dulu agar alur mirip browser (redirect kembali ke form).
-        $this->actingAs($this->siswa)->get(route('sibel.assessment.show', $attempt));
+        $this->actingAsStudent($this->student)->get(route('sibel.assessment.show', $attempt));
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $payload)
             ->assertRedirect(route('sibel.assessment.show', $attempt))
             ->assertSessionHasErrors(["answers.{$questionIds->last()}"]);
 
-        // Skenario 7: pengiriman tidak lengkap ditolak — sesi belum selesai, tanpa hasil.
+        // Pengiriman tidak lengkap ditolak — sesi belum selesai, tanpa hasil.
         $this->assertSame(SibelAttempt::STATUS_IN_PROGRESS, $attempt->fresh()->status);
         $this->assertSame(0, SibelResult::count());
         $this->assertSame(0, SibelAnswer::count());
@@ -120,7 +121,7 @@ class SibelAssessmentTest extends TestCase
     {
         $attempt = $this->startAttempt();
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAB'))
             ->assertRedirect(route('sibel.assessment.result', $attempt));
 
@@ -144,13 +145,13 @@ class SibelAssessmentTest extends TestCase
     {
         $attempt = $this->startAttempt();
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAA'));
 
         $this->assertSame(1, SibelResult::count());
 
-        // Skenario 13: percobaan kirim kedua tidak mengubah apa pun.
-        $this->actingAs($this->siswa)
+        // Percobaan kirim kedua tidak mengubah apa pun.
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAA'))
             ->assertRedirect(route('sibel.assessment.index'));
 
@@ -166,10 +167,10 @@ class SibelAssessmentTest extends TestCase
         $questions = $this->questionnaire->questions()->with('options')->get();
         $payload = $this->payload('AAAA');
 
-        // Skenario 8: opsi pertanyaan #2 dipaksakan ke pertanyaan #1.
+        // Opsi pertanyaan #2 dipaksakan ke pertanyaan #1.
         $payload['answers'][$questions[0]->id] = $questions[1]->options->first()->id;
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $payload)
             ->assertSessionHasErrors(["answers.{$questions[0]->id}"]);
 
@@ -177,26 +178,25 @@ class SibelAssessmentTest extends TestCase
         $this->assertSame(0, SibelResult::count());
     }
 
-    public function test_siswa_lain_tidak_bisa_membuka_sesi_orang_lain(): void
+    public function test_identitas_lain_tidak_bisa_membuka_sesi_orang_lain(): void
     {
         $attempt = $this->startAttempt();
 
-        $siswaLain = $this->createSibelUser('siswa', 'Siswa Dua');
-        $this->createStudentFor($siswaLain, SibelClass::first());
+        $siswaLain = $this->createStandaloneStudent('Siswa Dua', SibelClass::first());
 
-        $this->actingAs($siswaLain)->get(route('sibel.assessment.show', $attempt))->assertForbidden();
-        $this->actingAs($siswaLain)
+        $this->actingAsStudent($siswaLain)->get(route('sibel.assessment.show', $attempt))->assertForbidden();
+        $this->actingAsStudent($siswaLain)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAA'))
             ->assertForbidden();
-        $this->actingAs($siswaLain)->get(route('sibel.assessment.result', $attempt))->assertForbidden();
-        $this->actingAs($siswaLain)->get(route('sibel.assessment.print', $attempt))->assertForbidden();
+        $this->actingAsStudent($siswaLain)->get(route('sibel.assessment.result', $attempt))->assertForbidden();
+        $this->actingAsStudent($siswaLain)->get(route('sibel.assessment.print', $attempt))->assertForbidden();
     }
 
     public function test_sesi_ditutup_tidak_bisa_dimulai(): void
     {
         $this->questionnaire->update(['status' => SibelQuestionnaire::STATUS_CLOSED]);
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire))
             ->assertRedirect(route('sibel.assessment.index'))
             ->assertSessionHas('error');
@@ -204,14 +204,14 @@ class SibelAssessmentTest extends TestCase
         $this->assertSame(0, SibelAttempt::count());
     }
 
-    public function test_pengisian_ulang_mengikuti_atasan_guru_bk(): void
+    public function test_pengisian_ulang_mengikuti_aturan_guru_bk(): void
     {
         $attempt = $this->startAttempt();
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAA'));
 
         // Default allow_retake=false: pengisian ulang ditolak.
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire))
             ->assertRedirect(route('sibel.assessment.index'))
             ->assertSessionHas('error');
@@ -221,7 +221,7 @@ class SibelAssessmentTest extends TestCase
         // Guru BK membuka kembali aturan pengisian ulang.
         $this->questionnaire->update(['allow_retake' => true]);
 
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.start', $this->questionnaire))
             ->assertRedirect();
 
@@ -232,48 +232,39 @@ class SibelAssessmentTest extends TestCase
         );
     }
 
-    public function test_hasil_tersembunyi_sampai_guru_bk_mempublikasikan(): void
+    public function test_hasil_langsung_tampil_dan_bisa_dicetak_tanpa_publikasi(): void
     {
         $attempt = $this->startAttempt();
-        $this->actingAs($this->siswa)
+        $this->actingAsStudent($this->student)
             ->post(route('sibel.assessment.submit', $attempt), $this->payload('AAAA'));
 
-        // Sebelum publikasi: halaman status, interpretasi tidak tampil.
-        $this->actingAs($this->siswa)
-            ->get(route('sibel.assessment.result', $attempt))
-            ->assertOk()
-            ->assertSee('sudah kami terima dan sedang ditinjau')
-            ->assertDontSee('Kecenderungan utama');
-
-        // Cetak juga diblokir sebelum publikasi.
-        $this->actingAs($this->siswa)
-            ->get(route('sibel.assessment.print', $attempt))
-            ->assertForbidden();
-
-        // Guru BK mempublikasikan hasil.
-        $guru = $this->createSibelUser('guru_bk', 'Guru BK');
-        $result = SibelResult::where('attempt_id', $attempt->id)->firstOrFail();
-
-        $this->actingAs($guru)
-            ->put(route('sibel.results.update', $result), [
-                'is_published' => 1,
-                'teacher_note' => 'Teruskan ke orang tua untuk diskusi rutin.',
-            ])
-            ->assertRedirect(route('sibel.results.show', $result));
-
-        $this->assertTrue($result->fresh()->is_published);
-
-        // Setelah publikasi: siswa melihat hasil lengkap dan bisa mencetak.
-        $this->actingAs($this->siswa)
+        // Tanpa publikasi apa pun: siswa langsung melihat hasil lengkap.
+        $this->actingAsStudent($this->student)
             ->get(route('sibel.assessment.result', $attempt))
             ->assertOk()
             ->assertSee('Kecenderungan utama')
             ->assertSee('Visual');
 
-        $this->actingAs($this->siswa)
+        // Cetak / unduh PDF juga langsung tersedia.
+        $this->actingAsStudent($this->student)
             ->get(route('sibel.assessment.print', $attempt))
             ->assertOk()
             ->assertSee('Laporan Hasil Asesmen Gaya Belajar Siswa');
+
+        // Guru BK tetap bisa menambahkan catatan yang tampil di hasil siswa.
+        $guru = $this->createSibelUser('guru_bk', 'Guru BK');
+        $result = SibelResult::where('attempt_id', $attempt->id)->firstOrFail();
+
+        $this->actingAs($guru)
+            ->put(route('sibel.results.update', $result), [
+                'teacher_note' => 'Teruskan ke orang tua untuk diskusi rutin.',
+            ])
+            ->assertRedirect(route('sibel.results.show', $result));
+
+        $this->actingAsStudent($this->student)
+            ->get(route('sibel.assessment.result', $attempt))
+            ->assertOk()
+            ->assertSee('Teruskan ke orang tua untuk diskusi rutin.');
     }
 
     public function test_jawaban_ganda_pada_pertanyaan_sama_dicegah_db(): void

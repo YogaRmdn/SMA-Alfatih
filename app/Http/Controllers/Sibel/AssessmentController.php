@@ -10,21 +10,23 @@ use App\Models\SibelQuestionnaire;
 use App\Models\SibelStudent;
 use App\Services\IncompleteAttemptException;
 use App\Services\LearningStyleScoringService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AssessmentController extends Controller
 {
     public function __construct(protected LearningStyleScoringService $scoring) {}
 
     /**
-     * Daftar kuesioner beserta status pengisian siswa yang sedang login.
+     * Dashboard khusus siswa: daftar kuesioner beserta status pengisian.
      */
-    public function index()
+    public function index(): View|RedirectResponse
     {
         $student = $this->currentStudent();
 
         if (! $student) {
-            return view('sibel.assessment.no-profile');
+            return redirect()->route('sibel.portal');
         }
 
         $questionnaires = SibelQuestionnaire::withCount('questions')
@@ -32,6 +34,7 @@ class AssessmentController extends Controller
             ->get();
 
         $attempts = $student->attempts()
+            ->with('result')
             ->orderByDesc('id')
             ->get()
             ->groupBy('questionnaire_id');
@@ -42,9 +45,10 @@ class AssessmentController extends Controller
     /**
      * Mulai sesi pengisian (atau lanjutkan sesi yang masih berjalan).
      */
-    public function start(SibelQuestionnaire $questionnaire)
+    public function start(SibelQuestionnaire $questionnaire): RedirectResponse
     {
         $student = $this->currentStudent();
+
         abort_unless($student, 403);
 
         if (! $questionnaire->isActive()) {
@@ -90,7 +94,7 @@ class AssessmentController extends Controller
     /**
      * Form pengisian kuesioner (satu jawaban per pertanyaan + indikator progres).
      */
-    public function show(SibelAttempt $attempt)
+    public function show(SibelAttempt $attempt): View|RedirectResponse
     {
         $this->authorizeAttempt($attempt);
 
@@ -109,7 +113,7 @@ class AssessmentController extends Controller
     /**
      * Simpan jawaban + hitung hasil (backend, transaksional, anti kirim ganda).
      */
-    public function submit(AssessmentSubmitRequest $request, SibelAttempt $attempt)
+    public function submit(AssessmentSubmitRequest $request, SibelAttempt $attempt): RedirectResponse
     {
         $this->authorizeAttempt($attempt);
 
@@ -150,13 +154,13 @@ class AssessmentController extends Controller
         }
 
         return redirect()->route('sibel.assessment.result', $attempt)
-            ->with('success', 'Jawaban berhasil dikirim dan dinilai. Hasil akan tampil setelah dipublikasikan guru BK.');
+            ->with('success', 'Jawaban berhasil dikirim dan dinilai. Hasil kini bisa langsung dilihat dan diunduh.');
     }
 
     /**
-     * Halaman hasil siswa. Tanpa publikasi guru BK, skor tidak ditampilkan.
+     * Halaman hasil siswa — langsung tampil setelah pengiriman.
      */
-    public function result(SibelAttempt $attempt)
+    public function result(SibelAttempt $attempt): View|RedirectResponse
     {
         $this->authorizeAttempt($attempt);
 
@@ -167,23 +171,19 @@ class AssessmentController extends Controller
 
         $result = $attempt->result;
 
-        if (! $result->is_published) {
-            return view('sibel.assessment.result-pending', compact('attempt', 'result'));
-        }
-
         $attempt->load(['questionnaire', 'student.schoolClass']);
 
         return view('sibel.assessment.result', compact('attempt', 'result'));
     }
 
     /**
-     * Cetak laporan individual oleh siswa — hanya hasil yang sudah dipublikasikan.
+     * Cetak / simpan PDF laporan individual oleh siswa.
      */
-    public function print(SibelAttempt $attempt)
+    public function print(SibelAttempt $attempt): View
     {
         $this->authorizeAttempt($attempt);
 
-        abort_unless($attempt->isCompleted() && $attempt->result?->is_published, 403);
+        abort_unless($attempt->isCompleted() && $attempt->result, 403);
 
         $result = $attempt->result;
         $attempt->load(['questionnaire.questions.options', 'answers.option', 'student.schoolClass']);
@@ -191,28 +191,34 @@ class AssessmentController extends Controller
         return view('sibel.results.print', compact('attempt', 'result'));
     }
 
+    /**
+     * Siswa yang sedang mengikat sesi browser ini (tanpa login).
+     */
     protected function currentStudent(): ?SibelStudent
     {
-        $user = auth()->user();
+        $studentId = session('sibel_student_id');
 
-        if (! $user) {
+        if (! $studentId) {
             return null;
         }
 
-        return SibelStudent::with('schoolClass')->where('user_id', $user->id)->first();
+        return SibelStudent::with('schoolClass')
+            ->where('status', SibelStudent::STATUS_ACTIVE)
+            ->find($studentId);
     }
 
     /**
-     * Sesi hanya boleh diakses pemiliknya (siswa terkait) — uji coba privasi.
+     * Sesi hanya boleh dibuka oleh identitas siswa yang terikat di sesi
+     * browser ini — uji coba privasi antar-siswa.
      */
     protected function authorizeAttempt(SibelAttempt $attempt): void
     {
-        $user = auth()->user();
+        $studentId = (int) session('sibel_student_id');
 
         abort_unless(
-            $user && $attempt->student && $attempt->student->user_id === $user->id,
+            $studentId > 0 && $attempt->student && (int) $attempt->student->id === $studentId,
             403,
-            'Anda tidak memiliki izin untuk mengakses sesi pengisian ini.'
+            'Anda tidak memiliki izin untuk mengakses sesi pengisian ini. Silakan pilih ulang nama Anda di halaman utama SIBEL.'
         );
     }
 }

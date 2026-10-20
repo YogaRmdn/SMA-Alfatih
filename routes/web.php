@@ -45,8 +45,10 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
 
     // Pengalihan berdasarkan role (lihat rencana proyek SIBEL — bagian 5A).
+    // Akun siswa lama diarahkan ke portal SIBEL (kini siswa mengisi tanpa
+    // login; portal mengikat identitas lewat session browser).
     if ($user?->hasRole('siswa')) {
-        return redirect()->route('sibel.assessment.index');
+        return redirect()->route('sibel.portal');
     }
 
     if ($user?->hasRole('guru_bk')) {

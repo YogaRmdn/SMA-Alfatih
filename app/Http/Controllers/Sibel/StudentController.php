@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Sibel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sibel\StudentRequest;
-use App\Models\Role;
 use App\Models\SibelClass;
 use App\Models\SibelStudent;
-use App\Models\User;
 
 class StudentController extends Controller
 {
@@ -38,15 +36,10 @@ class StudentController extends Controller
 
     public function store(StudentRequest $request)
     {
-        $data = $request->validated();
-        $data['user_id'] = $this->createLoginAccount($request);
-
-        unset($data['email'], $data['password']);
-
-        SibelStudent::create($data);
+        SibelStudent::create($request->validated());
 
         return redirect()->route('sibel.students.index')
-            ->with('success', 'Data siswa berhasil ditambahkan.');
+            ->with('success', 'Data siswa berhasil ditambahkan. Siswa kini bisa mengisi kuesioner lewat /sibel tanpa login.');
     }
 
     public function show(SibelStudent $student)
@@ -71,17 +64,7 @@ class StudentController extends Controller
 
     public function update(StudentRequest $request, SibelStudent $student)
     {
-        $data = $request->validated();
-
-        // Email/hanya dipakai saat membuat akun login baru.
-        if ($student->user_id || ! ($data['email'] ?? null)) {
-            unset($data['email'], $data['password']);
-        } else {
-            $data['user_id'] = $this->createLoginAccount($request);
-            unset($data['email'], $data['password']);
-        }
-
-        $student->update($data);
+        $student->update($request->validated());
 
         return redirect()->route('sibel.students.index')
             ->with('success', 'Data siswa berhasil diperbarui.');
@@ -92,37 +75,10 @@ class StudentController extends Controller
         $user = $student->user;
         $student->delete();
 
-        // Akun login yang dibuat khusus untuk siswa ini ikut dihapus.
+        // Akun login website lama (bila ada) ikut dihapus agar tidak menggantung.
         $user?->delete();
 
         return redirect()->route('sibel.students.index')
             ->with('success', 'Data siswa berhasil dihapus.');
-    }
-
-    /**
-     * Buat akun login ber-role siswa bila form diisi email + password.
-     */
-    protected function createLoginAccount(StudentRequest $request): ?int
-    {
-        $email = $request->validated('email');
-
-        if (! $email) {
-            return null;
-        }
-
-        $role = Role::firstOrCreate(
-            ['slug' => 'siswa'],
-            ['name' => 'Siswa', 'description' => 'Mengisi kuesioner gaya belajar dan melihat hasilnya sendiri.']
-        );
-
-        $user = new User;
-        $user->name = $request->validated('full_name');
-        $user->email = $email;
-        $user->password = (string) $request->validated('password');
-        $user->email_verified_at = now();
-        $user->role_id = $role->id;
-        $user->save();
-
-        return $user->id;
     }
 }

@@ -43,8 +43,8 @@
                 </dd>
             </div>
             <div class="flex justify-between gap-3">
-                <dt class="text-slate-500">Akun Login</dt>
-                <dd class="text-right font-semibold text-slate-800">{{ $student->user->email ?? 'Belum ada akun' }}</dd>
+                <dt class="text-slate-500">Cara Mengisi</dt>
+                <dd class="text-right font-semibold text-slate-800">Tanpa login (pilih nama di /sibel)</dd>
             </div>
         </dl>
 

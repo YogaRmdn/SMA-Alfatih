@@ -5,7 +5,7 @@
 
 @section('content')
 <x-admin.page-header :title="isset($student) ? 'Edit Siswa' : 'Tambah Siswa'"
-    subtitle="Data identitas siswa dan (opsional) akun login untuk mengisi kuesioner">
+    subtitle="Data identitas siswa — dipakai sebagai pengisi kuesioner di halaman /sibel (tanpa akun login)">
     <x-slot:button>
         <a href="{{ route('sibel.students.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
             Kembali
@@ -50,28 +50,10 @@
         </div>
     </div>
 
-    @if (!isset($student) || ! $student->user_id)
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-100 px-6 py-4">
-                <h3 class="font-semibold text-slate-800">Akun Login Siswa <span class="ml-1 text-xs font-normal text-slate-400">(opsional)</span></h3>
-                <p class="mt-0.5 text-xs text-slate-500">Isi email & password bila siswa perlu login sendiri untuk mengisi kuesioner. Role otomatis: Siswa.</p>
-            </div>
-            <div class="space-y-5 p-6">
-                <div class="grid gap-5 md:grid-cols-2">
-                    <x-admin.field label="Email Login" name="email">
-                        <x-admin.input name="email" type="email" :value="old('email')" placeholder="siswa@contoh.sch.id" />
-                    </x-admin.field>
-
-                    <x-admin.field label="Password" name="password" hint="Minimal 8 karakter.">
-                        <x-admin.input name="password" type="password" :value="old('password')" placeholder="••••••••" />
-                    </x-admin.field>
-                </div>
-            </div>
-        </div>
-    @else
-        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            Siswa ini sudah terhubung dengan akun login (<span class="font-semibold">{{ $student->user->email ?? '-' }}</span>).
-            Kelola akun melalui menu <a href="{{ route('admin.users.index') }}" class="font-semibold underline">Pengguna</a> di panel admin.
+    @if (isset($student) && $student->user_id)
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            Siswa ini tercatat punya akun login website lama (<span class="font-semibold">{{ $student->user->email ?? '-' }}</span>).
+            Pengisian kuesioner kini <strong>tanpa login</strong> — cukup pilih nama di halaman <a href="{{ route('sibel.portal') }}" class="font-semibold underline">SIBEL</a>.
         </div>
     @endif
 

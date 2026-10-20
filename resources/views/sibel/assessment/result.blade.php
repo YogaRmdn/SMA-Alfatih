@@ -1,7 +1,6 @@
-@extends('sibel.layouts.app')
+@extends('sibel.layouts.student')
 
 @section('title', 'Hasil Kuesioner Saya')
-@section('breadcrumb', 'Hasil Kuesioner')
 
 @section('content')
 <div class="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">

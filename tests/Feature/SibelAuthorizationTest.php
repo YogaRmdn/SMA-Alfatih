@@ -75,10 +75,14 @@ class SibelAuthorizationTest extends TestCase
         ];
     }
 
-    public function test_guest_dialihkan_ke_login(): void
+    public function test_tamu_dapat_membuka_portal_tanpa_login(): void
     {
-        $this->get('/sibel')->assertRedirect(route('sibel.login'));
-        $this->get('/sibel/hasil')->assertRedirect(route('sibel.login'));
+        // Portal siswa terbuka untuk siapa pun (tanpa login).
+        $this->get('/sibel')->assertOk();
+
+        // Area pengelola tetap dilindungi login website.
+        $this->get('/sibel/hasil')->assertRedirect(route('login'));
+        $this->get('/sibel/kelola')->assertRedirect(route('login'));
 
         // Area non-SIBEL tetap ke login website.
         $this->get('/admin')->assertRedirect(route('login'));
@@ -109,7 +113,7 @@ class SibelAuthorizationTest extends TestCase
         }
     }
 
-    public function test_pengguna_tanpa_role_diblokir(): void
+    public function test_pengguna_tanpa_role_diblokir_dari_area_pengelola(): void
     {
         $tanpaRole = new User;
         $tanpaRole->name = 'Pengguna Biasa';
@@ -119,19 +123,17 @@ class SibelAuthorizationTest extends TestCase
         $tanpaRole->save();
 
         $this->actingAs($tanpaRole)->get(route('sibel.dashboard'))->assertForbidden();
-        $this->actingAs($tanpaRole)->get(route('sibel.assessment.index'))->assertForbidden();
     }
 
-    public function test_siswa_hanya_bisa_mengakses_area_kuesioner(): void
+    public function test_area_kuesioner_terbuka_tanpa_login(): void
     {
-        $this->actingAs($this->siswa)
-            ->get(route('sibel.assessment.index'))
-            ->assertOk();
+        // Tamu tanpa sesi identitas dialihkan ke pemilih nama, bukan 403/login.
+        $this->get(route('sibel.assessment.index'))->assertRedirect(route('sibel.portal'));
 
-        // Area kuesioner berprefix role:siswa — pengelola tidak masuk.
+        // Pengelola juga tidak langsung masuk — harus memilih identitas dulu.
         $this->actingAs($this->guruBk)
             ->get(route('sibel.assessment.index'))
-            ->assertForbidden();
+            ->assertRedirect(route('sibel.portal'));
     }
 
     public function test_siswa_tidak_bisa_membuka_detail_hasil_orang_lain(): void
@@ -151,9 +153,10 @@ class SibelAuthorizationTest extends TestCase
 
     public function test_pengalihan_dashboard_mengikuti_role(): void
     {
+        // Akun siswa lama diarahkan ke portal (identitas mengikat via session).
         $this->actingAs($this->siswa)
             ->get(route('dashboard'))
-            ->assertRedirect(route('sibel.assessment.index'));
+            ->assertRedirect(route('sibel.portal'));
 
         $this->actingAs($this->guruBk)
             ->get(route('dashboard'))
@@ -166,12 +169,14 @@ class SibelAuthorizationTest extends TestCase
 
     public function test_membuka_sesi_dengan_id_asing_mendapat_403(): void
     {
-        $siswaLain = $this->createSibelUser('siswa', 'Siswa Ketiga');
-        $this->createStudentFor($siswaLain, SibelClass::first());
+        $siswaLain = $this->createStandaloneStudent('Siswa Ketiga', SibelClass::first());
 
         $attempt = SibelAttempt::first();
 
-        $this->actingAs($siswaLain)->get(route('sibel.assessment.show', $attempt))->assertForbidden();
-        $this->actingAs($siswaLain)->get(route('sibel.assessment.result', $attempt))->assertForbidden();
+        $this->actingAsStudent($siswaLain)->get(route('sibel.assessment.show', $attempt))->assertForbidden();
+        $this->actingAsStudent($siswaLain)->get(route('sibel.assessment.result', $attempt))->assertForbidden();
+
+        // Pemilik sesi tetap boleh membuka miliknya sendiri.
+        $this->actingAsStudent($this->student)->get(route('sibel.assessment.result', $attempt))->assertOk();
     }
 }

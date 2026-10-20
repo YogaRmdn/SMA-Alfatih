@@ -37,7 +37,6 @@
         @php
             $sibelUser = auth()->user();
             $isManager = $sibelUser && $sibelUser->hasRole('super_admin', 'admin', 'guru_bk');
-            $isStudent = $sibelUser && $sibelUser->hasRole('siswa');
 
             $managerMenu = [
                 ['label' => 'Dashboard', 'route' => 'sibel.dashboard', 'match' => 'sibel.dashboard', 'icon' => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10'],
@@ -50,15 +49,6 @@
         @endphp
 
         <nav class="h-[calc(100vh-4rem)] overflow-y-auto px-3 py-4 space-y-1">
-            @if ($isStudent)
-                <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Menu Siswa</p>
-                <a href="{{ route('sibel.assessment.index') }}"
-                   class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ request()->routeIs('sibel.assessment.*') ? 'bg-white/15 text-white' : 'text-emerald-100 hover:bg-white/10 hover:text-white' }}">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                    Kuesioner Saya
-                </a>
-            @endif
-
             @if ($isManager)
                 <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Menu Guru BK & Admin</p>
                 @foreach ($managerMenu as $item)

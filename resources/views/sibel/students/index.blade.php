@@ -4,7 +4,7 @@
 @section('breadcrumb', 'Data Siswa')
 
 @section('content')
-<x-admin.page-header title="Data Siswa" subtitle="Kelola data siswa, kelas, dan akun login kuesioner">
+<x-admin.page-header title="Data Siswa" subtitle="Kelola data siswa & kelas — siswa mengisi kuesioner lewat /sibel tanpa login">
     <x-slot:button>
         <a href="{{ route('sibel.students.create') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
@@ -51,7 +51,6 @@
                     <th class="px-5 py-3">Kelas</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3 text-center">Selesai Mengisi</th>
-                    <th class="px-5 py-3">Akun Login</th>
                     <th class="px-5 py-3 text-right">Aksi</th>
                 </tr>
             </thead>
@@ -63,7 +62,7 @@
                                 {{ $student->full_name }}
                             </a>
                             @if ($student->source === \App\Models\SibelStudent::SOURCE_SELF)
-                                <span class="mt-1 block w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200" title="Mendaftar sendiri lewat /sibel/daftar">
+                                <span class="mt-1 block w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200" title="Mendaftar sendiri lewat pendaftaran mandiri (data lama)">
                                     Daftar Mandiri
                                 </span>
                             @endif
@@ -79,16 +78,6 @@
                         </td>
                         <td class="px-5 py-3 text-center">
                             <span class="text-sm font-bold text-slate-700">{{ $student->completed_attempts_count }}</span>
-                        </td>
-                        <td class="px-5 py-3">
-                            @if ($student->user_id)
-                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                    Aktif
-                                </span>
-                            @else
-                                <span class="text-xs text-slate-400">Belum ada</span>
-                            @endif
                         </td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-1">
@@ -113,7 +102,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-10 text-center text-slate-500">
+                        <td colspan="6" class="px-5 py-10 text-center text-slate-500">
                             Belum ada data siswa. Tambahkan siswa terlebih dahulu untuk bisa mengisi kuesioner.
                         </td>
                     </tr>
