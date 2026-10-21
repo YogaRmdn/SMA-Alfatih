@@ -44,7 +44,7 @@
             </div>
             <div class="flex justify-between gap-3">
                 <dt class="text-slate-500">Cara Mengisi</dt>
-                <dd class="text-right font-semibold text-slate-800">Tanpa login (pilih nama di /sibel)</dd>
+                <dd class="text-right font-semibold text-slate-800">Tanpa login (tulis nama di /sibel)</dd>
             </div>
         </dl>
 

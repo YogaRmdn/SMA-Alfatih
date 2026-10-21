@@ -11,7 +11,7 @@
 <table class="meta">
     <tr><td>Nama Siswa</td><td>:</td><td><strong>{{ $attempt->student->full_name ?? '—' }}</strong></td></tr>
     <tr><td>Nomor Induk</td><td>:</td><td>{{ $attempt->student->student_number ?? '—' }}</td></tr>
-    <tr><td>Kelas</td><td>:</td><td>{{ $attempt->student->schoolClass->name ?? '—' }} {{ $attempt->student->schoolClass->academic_year ? ' (' . $attempt->student->schoolClass->academic_year . ')' : '' }}</td></tr>
+    <tr><td>Kelas</td><td>:</td><td>{{ $attempt->student->schoolClass?->name ?? '—' }}@if ($attempt->student->schoolClass?->academic_year) ({{ $attempt->student->schoolClass->academic_year }})@endif</td></tr>
     <tr><td>Tanggal Pengisian</td><td>:</td><td>{{ optional($attempt->completed_at)->format('d F Y') ?? '—' }}</td></tr>
     <tr><td>Status Hasil</td><td>:</td><td>{{ $result->is_published ? 'Dipublikasikan' : 'Belum dipublikasikan' }}</td></tr>
 </table>

@@ -39,7 +39,7 @@
                 <form method="POST" action="{{ route('sibel.forget') }}">
                     @csrf
                     <button type="submit" class="rounded-lg border border-white/25 bg-white/5 px-3 py-2 text-xs font-bold text-emerald-100 transition hover:bg-white/15 hover:text-white">
-                        Ganti Siswa
+                        Ganti Nama
                     </button>
                 </form>
             @endisset

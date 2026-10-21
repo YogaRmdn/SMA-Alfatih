@@ -43,7 +43,7 @@
 - Mesin penilaian murni di backend (`LearningStyleScoringService`) — mendukung seri 2 dan 3 kategori tanpa pemilihan acak.
 - **Hasil langsung tampil & bisa diunduh/dicetak siswa** begitu jawaban dikirim, lengkap dengan interpretasi, rekomendasi, dan catatan tindak lanjut guru BK.
 - Laporan individual dan rekap kelas siap cetak / simpan PDF (kertas A4, `window.print()`).
-- Tombol **"Ganti Siswa"** di topbar & dashboard siswa — melepas ikatan identitas di komputer bersama.
+- Tombol **"Isi untuk Nama Lain"** di topbar & halaman hasil — melepas ikatan identitas di komputer bersama.
 - Panduan lengkap: **[docs/SIBEL.md](docs/SIBEL.md)**.
 
 ## Catatan Keamanan
@@ -72,7 +72,7 @@
 | Super Admin | `super_admin`| Akses penuh, termasuk kelola pengguna            |
 | Admin       | `admin`      | Mengelola seluruh konten website, termasuk SIBEL |
 | Guru BK     | `guru_bk`    | Kelola data siswa/kelas/kuesioner SIBEL, hasil & rekap |
-| Siswa       | `siswa`      | Tidak dipakai untuk SIBEL lagi — siswa mengisi kuesioner tanpa akun (pilih nama di `/sibel`); akun lama tetap bisa login website |
+| Siswa       | `siswa`      | Tidak dipakai untuk SIBEL lagi — siswa mengisi kuesioner tanpa akun (tulis nama di `/sibel`); akun lama tetap bisa login website |
 
 ## Instalasi
 

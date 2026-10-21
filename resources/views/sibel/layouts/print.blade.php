@@ -69,7 +69,7 @@
             margin-bottom: 20px;
         }
 
-        .letterhead img { max-width: 74px; max-height: 74px; object-fit: contain; }
+        .letterhead img { width: 74px; height: 74px; object-fit: contain; }
         .letterhead .logo-fallback {
             width: 74px; height: 74px; border: 2px solid var(--line); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -128,11 +128,9 @@
 
     <div class="sheet">
         <header class="letterhead">
-            @if (!empty($settings['logo']))
-                <img src="{{ img_url($settings['logo']) }}" alt="Logo Sekolah">
-            @else
-                <div class="logo-fallback">{{ strtoupper(substr($settings['site_name'] ?? 'S', 0, 1)) }}</div>
-            @endif
+            {{-- Logo sekolah: unggahan admin bila ada, jika tidak pakai logo bawaan SMA. --}}
+            <img src="{{ img_url($settings['logo'] ?? null, 'img/sma.png') }}" alt="Logo Sekolah"
+                 onerror="this.style.display='none'">
             <div>
                 <h1>{{ $settings['site_name'] ?? config('app.name') }}</h1>
                 <p>{{ $settings['address'] ?? '' }}</p>

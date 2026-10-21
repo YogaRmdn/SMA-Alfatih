@@ -1,85 +1,86 @@
 @extends('sibel.layouts.student')
 
-@section('title', 'Mengisi Kuesioner')
+@section('title', 'Isi Kuesioner Gaya Belajar')
 
 @php
-    $questions = $attempt->questionnaire->questions->values();
+    $questions = $questionnaire->questions->values();
     $totalQuestions = $questions->count();
+    $prefillName = old('full_name', $student->full_name ?? '');
+    // Jawaban lama (saat validasi gagal) disuntikkan langsung ke state Alpine
+    // lewat @js() — aman di atribut HTML (tanpa kutip ganda di hasilnya).
+    $initialAnswers = (object) collect(old('answers', []))
+        ->mapWithKeys(fn ($optionId, $questionId) => [(string) $questionId => (string) $optionId])
+        ->all();
 @endphp
 
 @section('content')
 <div class="mx-auto max-w-3xl"
      x-data="{
-        answers: {},
+        answers: @js($initialAnswers),
         showConfirm: false,
+        showMissing: false,
         get answered() { return Object.keys(this.answers).filter(k => this.answers[k]).length },
         get remaining() { return {{ $totalQuestions }} - this.answered },
         get progress() { return {{ $totalQuestions }} > 0 ? Math.round((this.answered / {{ $totalQuestions }}) * 100) : 0 },
         submitForm() {
+            if (! document.getElementById('full_name')?.value.trim()) {
+                document.getElementById('full_name')?.focus();
+                return;
+            }
             if (this.remaining > 0) {
                 this.showMissing = true;
                 document.getElementById('question-list')?.scrollIntoView({ behavior: 'smooth' });
                 return;
             }
             this.showConfirm = true;
-        },
-        showMissing: false,
-        init() {
-            this.$nextTick(() => {
-                document.querySelectorAll('input[type=radio][name^=\"answers\"]:checked').forEach((radio) => {
-                    const match = radio.name.match(/\\d+/);
-                    if (match) this.answers[match[0]] = radio.value;
-                });
-            });
         }
      }">
-    {{-- Header kuesioner --}}
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <h1 class="text-lg font-bold text-slate-800">{{ $attempt->questionnaire->title }}</h1>
-                <p class="mt-0.5 text-xs text-slate-500">
-                    v{{ $attempt->questionnaire->version }} • Dimulai {{ optional($attempt->started_at)->format('d/m/Y H:i') }}
-                </p>
-            </div>
-            <a href="{{ route('sibel.assessment.index') }}" class="shrink-0 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                Keluar
-            </a>
-        </div>
 
-        @if ($attempt->questionnaire->instructions)
-            <div class="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900">
-                <p class="mb-1 font-bold">Petunjuk Pengisian</p>
-                <p class="whitespace-pre-line">{{ $attempt->questionnaire->instructions }}</p>
-            </div>
-        @endif
-
-        {{-- Progres --}}
-        <div class="mt-4">
-            <div class="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-600">
-                <span>Progres pengisian</span>
-                <span><span x-text="answered"></span>/{{ $totalQuestions }} terjawab (<span x-text="progress"></span>%)</span>
-            </div>
-            <div class="h-3 overflow-hidden rounded-full bg-slate-200">
-                <div class="h-full rounded-full bg-emerald-600 transition-all duration-300" :style="'width:' + progress + '%'"></div>
-            </div>
-            <p x-show="remaining > 0" class="mt-1.5 text-xs font-medium text-amber-600">
-                Masih ada <span x-text="remaining"></span> pertanyaan yang belum dijawab.
-            </p>
-        </div>
-    </div>
-
-    @error('answers')
-        <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">{{ $message }}</div>
-    @enderror
-
-    <form method="POST" action="{{ route('sibel.assessment.submit', $attempt) }}" id="question-list"
-          class="mt-4 space-y-4" @submit.prevent="submitForm">
+    <form method="POST" action="{{ route('sibel.submit') }}" id="question-list" class="space-y-4"
+          @submit.prevent="submitForm">
         @csrf
 
-        @foreach ($questions as $index => $question)
-            <fieldset class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                      :class="{{ old('answers.' . $question->id) ? 'border-emerald-300' : '' }}">
+        {{-- Header kuesioner + identitas: cukup tulis nama --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h1 class="text-lg font-bold text-slate-800">Isi Kuesioner Gaya Belajar 👋</h1>
+            <p class="mt-0.5 text-sm text-slate-600">{{ $questionnaire->title }} <span class="text-xs text-slate-400">• v{{ $questionnaire->version }}</span></p>
+
+            @if ($questionnaire->instructions)
+                <div class="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-emerald-900">
+                    <p class="mb-1 font-bold">Petunjuk Pengisian</p>
+                    <p class="whitespace-pre-line">{{ $questionnaire->instructions }}</p>
+                </div>
+            @endif
+
+            <div class="mt-4">
+                <label for="full_name" class="mb-1.5 block text-sm font-semibold text-slate-700">Nama Lengkap Anda <span class="text-red-500">*</span></label>
+                <input type="text" id="full_name" name="full_name" value="{{ $prefillName }}" required maxlength="120"
+                       placeholder="Tulis nama Anda sesuai daftar sekolah"
+                       class="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                @error('full_name')
+                    <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                @else
+                    <p class="mt-1 text-xs text-slate-400">Nama dipakai untuk mencatat hasil — pastikan ditulis dengan benar.</p>
+                @enderror
+            </div>
+
+            {{-- Progres --}}
+            <div class="mt-4">
+                <div class="mb-1.5 flex items-center justify-between text-xs font-semibold text-slate-600">
+                    <span>Progres pengisian</span>
+                    <span><span x-text="answered"></span>/{{ $totalQuestions }} terjawab (<span x-text="progress"></span>%)</span>
+                </div>
+                <div class="h-3 overflow-hidden rounded-full bg-slate-200">
+                    <div class="h-full rounded-full bg-emerald-600 transition-all duration-300" :style="'width:' + progress + '%'"></div>
+                </div>
+                <p x-show="remaining > 0" class="mt-1.5 text-xs font-medium text-amber-600">
+                    Masih ada <span x-text="remaining"></span> pertanyaan yang belum dijawab.
+                </p>
+            </div>
+        </div>
+
+        @foreach ($questions as $question)
+            <fieldset class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <legend class="sr-only">Pertanyaan {{ $question->order_number }}</legend>
 
                 <div class="flex items-start gap-3">
@@ -98,9 +99,7 @@
                     @foreach ($question->options as $option)
                         @php
                             $oldValue = old('answers.' . $question->id);
-                            $isChecked = $oldValue !== null
-                                ? (string) $oldValue === (string) $option->id
-                                : (isset($answered[$question->id]) && ($attempt->answers->firstWhere('question_id', $question->id)?->option_id === $option->id));
+                            $isChecked = $oldValue !== null && (string) $oldValue === (string) $option->id;
                         @endphp
                         <label for="answer-{{ $question->id }}-{{ $option->id }}"
                                class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition {{ $isChecked ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400' : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50' }}">
@@ -116,16 +115,20 @@
                         </label>
                     @endforeach
                 </div>
+
+                @error('answers.' . $question->id)
+                    <p class="mt-2 pl-10 text-xs font-medium text-red-600">{{ $message }}</p>
+                @enderror
             </fieldset>
         @endforeach
 
-        @if ($errors->has('answers'))
-            <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">{{ $errors->first('answers') }}</p>
-        @endif
+        @error('answers')
+            <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">{{ $message }}</p>
+        @enderror
 
         <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <p class="text-xs text-slate-500">
-                Jawaban dikirim ke server untuk dinilai. Pastikan seluruh pertanyaan terjawab.
+                Jawaban dikirim ke server untuk dinilai. Setelah selesai, hasil bisa langsung diunduh.
             </p>
             <button type="submit"
                     class="rounded-lg bg-emerald-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
@@ -147,7 +150,7 @@
             </p>
             <div class="mt-5 flex justify-end gap-2">
                 <button type="button" @click="showConfirm = false" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">Periksa Lagi</button>
-                <button type="button" @click="$el.closest('[x-data]') && document.querySelector('form#question-list').submit(); showConfirm = false"
+                <button type="button" @click="document.querySelector('form#question-list').submit(); showConfirm = false"
                         class="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
                     Ya, Kirim
                 </button>

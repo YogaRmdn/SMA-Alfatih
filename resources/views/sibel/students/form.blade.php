@@ -53,7 +53,7 @@
     @if (isset($student) && $student->user_id)
         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
             Siswa ini tercatat punya akun login website lama (<span class="font-semibold">{{ $student->user->email ?? '-' }}</span>).
-            Pengisian kuesioner kini <strong>tanpa login</strong> — cukup pilih nama di halaman <a href="{{ route('sibel.portal') }}" class="font-semibold underline">SIBEL</a>.
+            Pengisian kuesioner kini <strong>tanpa login</strong> — cukup tulis nama di halaman <a href="{{ route('sibel.portal') }}" class="font-semibold underline">SIBEL</a>.
         </div>
     @endif
 

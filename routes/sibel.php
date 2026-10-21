@@ -14,13 +14,14 @@ use Illuminate\Support\Facades\Route;
 | SIBEL — Sistem Informasi Gaya Belajar Siswa
 |--------------------------------------------------------------------------
 | Akses:
-|   tamu (siswa)  -> pilih identitas (kelas + nama) tanpa login, lalu
-|                   dashboard khusus pengisian kuesioner & unduh hasil
+|   tamu (siswa)  -> buka /sibel: langsung halaman pengisian kuesioner
+|                   (isi nama + jawab pertanyaan), tanpa login; setelah
+|                   kirim, hasil tampil & bisa diunduh
 |   super_admin, admin, guru_bk -> login website (/login): dashboard,
 |                   data, kuesioner, hasil, rekap
 |
-| Identitas siswa diikat ke session browser (`sibel_student_id`) melalui
-| PortalController — tidak ada akun login siswa lagi.
+| Identitas siswa diikat ke session browser (`sibel_student_id`) setelah
+| jawaban dikirim (PortalController) — tidak ada akun login siswa.
 */
 
 Route::prefix('sibel')
@@ -28,27 +29,16 @@ Route::prefix('sibel')
     ->group(function () {
 
         /*
-        | Pintu masuk siswa tanpa login: pilih identitas, ganti siswa,
-        | dan seluruh alur pengisian kuesioner + unduh hasil.
+        | Pintu masuk siswa tanpa login: pengisian langsung (nama + jawaban),
+        | ganti siswa, dan halaman hasil/unduhan.
         */
         Route::get('/', [PortalController::class, 'index'])->name('portal');
-        Route::post('/pilih', [PortalController::class, 'identify'])
-            ->middleware('throttle:30,1')
-            ->name('identify');
+        Route::post('/kirim', [PortalController::class, 'submit'])
+            ->middleware('throttle:20,1')
+            ->name('submit');
         Route::post('/ganti', [PortalController::class, 'forget'])
             ->name('forget');
 
-        Route::get('kuesioner-saya', [AssessmentController::class, 'index'])->name('assessment.index');
-        Route::post('kuesioner-saya/{questionnaire}/mulai', [AssessmentController::class, 'start'])
-            ->whereNumber('questionnaire')
-            ->name('assessment.start');
-
-        Route::get('asesmen/{attempt}', [AssessmentController::class, 'show'])
-            ->whereNumber('attempt')
-            ->name('assessment.show');
-        Route::post('asesmen/{attempt}/kirim', [AssessmentController::class, 'submit'])
-            ->whereNumber('attempt')
-            ->name('assessment.submit');
         Route::get('asesmen/{attempt}/hasil', [AssessmentController::class, 'result'])
             ->whereNumber('attempt')
             ->name('assessment.result');

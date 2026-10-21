@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Siswa: hanya area pengisian miliknya sendiri.
-        return (bool) preg_match('#^/sibel/(kuesioner-saya|asesmen)(/|$)#', $path);
+        return (bool) preg_match('#^/sibel(/asesmen(/.*)?)?$#', $path);
     }
 
     /**

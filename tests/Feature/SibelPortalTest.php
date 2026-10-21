@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\SibelAnswer;
+use App\Models\SibelAttempt;
 use App\Models\SibelClass;
 use App\Models\SibelQuestionnaire;
+use App\Models\SibelResult;
 use App\Models\SibelStudent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,8 +14,9 @@ use Tests\Concerns\BuildsSibelData;
 use Tests\TestCase;
 
 /**
- * Portal SIBEL tanpa login (/sibel): tamu memilih identitas kelas + nama,
- * sesi browser terikat, lalu dashboard khusus pengisian kuesioner tampil.
+ * Portal SIBEL tanpa login (/sibel): langsung halaman pengisian kuesioner
+ * dengan kolom nama (tanpa memilih dari daftar). Jawaban dikirim -> sesi
+ * terikat ke nama tersebut -> hasil tampil & bisa diunduh.
  */
 class SibelPortalTest extends TestCase
 {
@@ -35,73 +39,161 @@ class SibelPortalTest extends TestCase
         $this->questionnaire = $this->createQuestionnaire(2);
     }
 
-    public function test_portal_terbuka_tanpa_login_dan_menampilkan_daftar_nama(): void
+    /**
+     * Payload kirim jawaban: nama + jawaban lengkap sesuai pola kode.
+     */
+    protected function payload(string $name, string $pattern = 'AA'): array
+    {
+        $answers = [];
+
+        foreach ($this->questionnaire->questions()->with('options')->get() as $i => $question) {
+            $option = $question->options->firstWhere('option_code', strtoupper($pattern[$i] ?? 'A'));
+            $answers[$question->id] = $option->id;
+        }
+
+        return ['full_name' => $name, 'answers' => $answers];
+    }
+
+    public function test_portal_terbuka_tanpa_login_dan_langsung_menampilkan_kuesioner(): void
     {
         $this->get(route('sibel.portal'))
             ->assertOk()
-            ->assertSee('Pilih Identitas Siswa')
-            ->assertSee('Aisyah Rahmawati')
-            ->assertSee(route('sibel.identify'));
+            ->assertSee('Isi Kuesioner Gaya Belajar')
+            ->assertSee('Nama Lengkap Anda')
+            ->assertSee('Pertanyaan ke-1')
+            ->assertSee('Pertanyaan ke-2')
+            ->assertDontSee('Pilih Identitas Siswa');
     }
 
-    public function test_memilih_nama_mengikat_sesi_dan_membuka_dashboard(): void
+    public function test_mengirim_jawaban_dengan_nama_baru_membuat_identitas_dan_hasil(): void
     {
-        $this->post(route('sibel.identify'), ['student_id' => $this->student->id])
-            ->assertRedirect(route('sibel.assessment.index'))
+        $this->post(route('sibel.submit'), $this->payload('Budi Santoso'))
+            ->assertRedirect(route('sibel.assessment.result', SibelAttempt::firstOrFail()))
+            ->assertSessionHas('sibel_student_id');
+
+        $student = SibelStudent::where('full_name', 'Budi Santoso')->firstOrFail();
+
+        $this->assertSame(SibelStudent::SOURCE_SELF, $student->source);
+        $this->assertSame(SibelStudent::STATUS_ACTIVE, $student->status);
+        $this->assertNull($student->class_id);
+
+        $this->assertDatabaseHas('attempts', [
+            'student_id' => $student->id,
+            'questionnaire_id' => $this->questionnaire->id,
+            'status' => SibelAttempt::STATUS_COMPLETED,
+        ]);
+
+        $this->assertSame(1, SibelResult::count());
+    }
+
+    public function test_nama_sama_dengan_siswa_terdaftar_dipakai_ulang(): void
+    {
+        $this->post(route('sibel.submit'), $this->payload('aisyah rahmawati'))
             ->assertSessionHas('sibel_student_id', $this->student->id);
 
-        $this->get(route('sibel.assessment.index'))
+        // Tidak membuat identitas duplikat — memakai profil yang sudah ada.
+        $this->assertSame(1, SibelStudent::count());
+        $this->assertDatabaseHas('attempts', ['student_id' => $this->student->id]);
+    }
+
+    public function test_nama_wajib_diisi(): void
+    {
+        $payload = $this->payload('Sementara');
+        $payload['full_name'] = '';
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('full_name');
+
+        $this->assertSame(0, SibelAttempt::count());
+
+        // Nama terlalu pendek juga ditolak.
+        $payload['full_name'] = 'Ab';
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('full_name');
+    }
+
+    public function test_jawaban_kosong_ditolak_dan_tidak_menyimpan_apa_pun(): void
+    {
+        $payload = $this->payload('Budi Santoso');
+        $questionIds = $this->questionnaire->questions()->pluck('id');
+        unset($payload['answers'][$questionIds->last()]); // satu pertanyaan kosong
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors(["answers.{$questionIds->last()}"]);
+
+        $this->assertSame(0, SibelAttempt::count());
+        $this->assertSame(0, SibelAnswer::count());
+        $this->assertSame(0, SibelResult::count());
+    }
+
+    public function test_opsi_milik_pertanyaan_lain_ditolak(): void
+    {
+        $questions = $this->questionnaire->questions()->with('options')->get();
+        $payload = $this->payload('Budi Santoso');
+
+        // Opsi pertanyaan #2 dipaksakan ke pertanyaan #1.
+        $payload['answers'][$questions[0]->id] = $questions[1]->options->first()->id;
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors(["answers.{$questions[0]->id}"]);
+
+        $this->assertSame(0, SibelResult::count());
+    }
+
+    public function test_pengisian_ulang_diblokir_dan_mengarahkan_ke_hasil_lama(): void
+    {
+        $this->post(route('sibel.submit'), $this->payload('Aisyah Rahmawati'));
+
+        $latest = SibelAttempt::firstOrFail();
+
+        // Default allow_retake=false: kirim ulang tidak membuat sesi baru.
+        $this->post(route('sibel.submit'), $this->payload('Aisyah Rahmawati', 'BB'))
+            ->assertRedirect(route('sibel.assessment.result', $latest));
+
+        $this->assertSame(1, SibelAttempt::count());
+        $this->assertSame(1, SibelResult::count());
+    }
+
+    public function test_sudah_mengisi_membuka_langsung_halaman_hasil(): void
+    {
+        $this->post(route('sibel.submit'), $this->payload('Aisyah Rahmawati'));
+
+        $attempt = SibelAttempt::firstOrFail();
+
+        $this->actingAsStudent($this->student)
+            ->get(route('sibel.portal'))
+            ->assertRedirect(route('sibel.assessment.result', $attempt));
+    }
+
+    public function test_sesi_ditutup_menampilkan_halaman_kosong(): void
+    {
+        $this->questionnaire->update(['status' => SibelQuestionnaire::STATUS_CLOSED]);
+
+        $this->get(route('sibel.portal'))
             ->assertOk()
-            ->assertSee('Halo, Aisyah')
-            ->assertSee('Kuesioner Gaya Belajar');
-    }
+            ->assertSee('Sesi Kuesioner Belum Dibuka');
 
-    public function test_nama_tidak_dipilih_ditolak(): void
-    {
-        $this->post(route('sibel.identify'), [])
-            ->assertSessionHasErrors('student_id');
+        // Pengiriman pun ditolak selama sesi ditutup.
+        $this->post(route('sibel.submit'), $this->payload('Budi Santoso'))
+            ->assertRedirect(route('sibel.portal'))
+            ->assertSessionHas('error');
 
-        $this->post(route('sibel.identify'), ['student_id' => 9999])
-            ->assertSessionHasErrors('student_id');
-
-        $this->assertNull(session('sibel_student_id'));
-    }
-
-    public function test_siswa_nonaktif_tidak_bisa_dipilih(): void
-    {
-        $inactive = $this->createStandaloneStudent('Budi Cadangan', $this->class);
-        $inactive->update(['status' => SibelStudent::STATUS_INACTIVE]);
-
-        $this->post(route('sibel.identify'), ['student_id' => $inactive->id])
-            ->assertSessionHasErrors('student_id');
-
-        $this->assertNull(session('sibel_student_id'));
+        $this->assertSame(0, SibelAttempt::count());
     }
 
     public function test_mengganti_siswa_melepas_ikatan_sesi(): void
     {
-        $this->actingAsStudent($this->student)
-            ->post(route('sibel.identify'), ['student_id' => $this->student->id]);
+        $this->post(route('sibel.submit'), $this->payload('Aisyah Rahmawati'));
 
-        $this->actingAsStudent($this->student)
-            ->post(route('sibel.forget'))
+        $this->post(route('sibel.forget'))
             ->assertRedirect(route('sibel.portal'));
 
         $this->assertNull(session('sibel_student_id'));
 
-        // Kembali ke halaman kuesioner tanpa identitas -> portal lagi.
-        $this->get(route('sibel.assessment.index'))->assertRedirect(route('sibel.portal'));
-    }
-
-    public function test_portal_menampilkan_hanya_siswa_aktif_pada_kelas_terpilih(): void
-    {
-        $otherClass = SibelClass::create(['name' => 'XI-IPA-1', 'academic_year' => '2026/2027']);
-        $this->createStandaloneStudent('Zainab di Kelas Lain', $otherClass);
-
-        $this->get(route('sibel.portal', ['kelas' => $this->class->id]))
+        // Tanpa ikatan sesi, halaman pengisian tetap terbuka untuk nama berikutnya.
+        $this->get(route('sibel.portal'))
             ->assertOk()
-            ->assertSee('Aisyah Rahmawati')
-            ->assertDontSee('Zainab di Kelas Lain');
+            ->assertSee('Nama Lengkap Anda');
     }
 
     public function test_akun_siswa_lama_otomatis_terikat_ke_profilnya(): void
@@ -109,15 +201,66 @@ class SibelPortalTest extends TestCase
         $legacy = $this->createSibelUser('siswa', 'Siswa Lama');
         $profile = $this->createStudentFor($legacy, $this->class);
 
+        // Belum pernah mengisi -> halaman pengisian tampil, nama sudah terisi.
         $this->actingAs($legacy)
             ->get(route('sibel.portal'))
-            ->assertRedirect(route('sibel.assessment.index'))
+            ->assertOk()
+            ->assertSee('Siswa Lama')
             ->assertSessionHas('sibel_student_id', $profile->id);
 
+        // Sudah mengisi -> langsung ke halaman hasil.
+        $attempt = $this->createAttempt($profile, $this->questionnaire, 'AA');
+
         $this->actingAs($legacy)
-            ->get(route('sibel.assessment.index'))
+            ->get(route('sibel.portal'))
+            ->assertRedirect(route('sibel.assessment.result', $attempt));
+    }
+
+    public function test_validasi_gagal_mengembalikan_jawaban_lama_dan_tanpa_kode_bocor(): void
+    {
+        $payload = $this->payload('Budi Santoso');
+        $payload['full_name'] = ''; // nama kosong -> validasi gagal
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('full_name');
+
+        // Halaman pengisian tampil lagi: jawaban lama tetap terpilih (checked),
+        // tanpa potongan kode JavaScript yang bocor ke badan halaman
+        // (regresi: atribut x-data sempat putus karena escape kutip \" ).
+        $response = $this->get(route('sibel.portal'))->assertOk();
+
+        $response->assertDontSee('radio.name.match');
+        $response->assertDontSee('querySelectorAll');
+        $response->assertSee('x-data="{', false);
+
+        $firstQuestion = $this->questionnaire->questions()->with('options')->get()->first();
+
+        $this->assertMatchesRegularExpression(
+            '/name="answers\[' . $firstQuestion->id . '\]"[^>]*checked/',
+            $response->getContent()
+        );
+    }
+
+    public function test_halaman_cetak_siswa_tanpa_kelas_tidak_error(): void
+    {
+        // Siswa hasil pengisian mandiri umumnya belum punya kelas (class_id null).
+        $this->post(route('sibel.submit'), $this->payload('Budi Santoso', 'AA'));
+
+        $attempt = SibelAttempt::firstOrFail();
+
+        $this->assertNull($attempt->student->class_id);
+
+        // Halaman hasil & cetak tetap tampil walau data kelas kosong
+        // (kelas ditampilkan sebagai "—" — tanpa error properti null).
+        $this->get(route('sibel.assessment.result', $attempt))
             ->assertOk()
-            ->assertSee('Halo, Siswa');
+            ->assertSee('Kelas')
+            ->assertSee('—');
+
+        $this->get(route('sibel.assessment.print', $attempt))
+            ->assertOk()
+            ->assertSee('Laporan Hasil Asesmen Gaya Belajar Siswa')
+            ->assertSee('Budi Santoso');
     }
 
     public function test_pengelola_dari_portal_masuk_ke_dashboard_pengelola(): void

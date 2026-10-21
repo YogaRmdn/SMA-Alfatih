@@ -54,6 +54,21 @@ class SibelQuestionnaire extends Model
         return $this->status === self::STATUS_ACTIVE;
     }
 
+    /**
+     * Kuesioner yang bisa langsung diisi siswa di /sibel:
+     * sesi aktif terbaru yang sudah punya pertanyaan.
+     * Pertanyaan + opsi ikut dimuat (dipakai form isian & validasi).
+     */
+    public static function activeForFilling(): ?self
+    {
+        return static::query()
+            ->where('status', self::STATUS_ACTIVE)
+            ->whereHas('questions')
+            ->with('questions.options')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     public function statusLabel(): string
     {
         return self::STATUS_LABELS[$this->status] ?? ucfirst($this->status);
