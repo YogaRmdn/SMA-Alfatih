@@ -10,7 +10,7 @@ use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Style;
 use OpenSpout\Writer\XLSX\Writer;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Unduhan hasil TOEFL ITP (XLSX) — satu sheet rekap:
@@ -34,7 +34,7 @@ class ToeflResultsExport
         protected array $metaLines = [],
     ) {}
 
-    public function download(string $filename): StreamedResponse
+    public function download(string $filename): BinaryFileResponse
     {
         $dir = is_dir('/tmp/opencode') ? '/tmp/opencode' : sys_get_temp_dir();
         $path = $dir.'/toefl-export-'.Str::random(10).'.xlsx';
@@ -55,18 +55,18 @@ class ToeflResultsExport
 
         // Kop laporan.
         $school = Setting::query()->pluck('value', 'key')['site_name'] ?? config('app.name');
-        $this->writer->addRow(new Row([new Cell($school)], $this->titleStyle()));
-        $this->writer->addRow(new Row([new Cell('Rekap Hasil TOEFL ITP Level 1 (Latihan)')], $this->titleStyle()));
+        $this->writer->addRow(new Row([Cell::fromValue($school)], $this->titleStyle()));
+        $this->writer->addRow(new Row([Cell::fromValue('Rekap Hasil TOEFL ITP Level 1 (Latihan)')], $this->titleStyle()));
 
         foreach ($this->metaLines as $line) {
-            $this->writer->addRow(new Row([new Cell($line)]));
+            $this->writer->addRow(new Row([Cell::fromValue($line)]));
         }
 
         $this->writer->addRow(new Row([]));
 
         // Header tabel.
         $this->writer->addRow(new Row(
-            array_map(fn (string $h) => new Cell($h), self::HEADER),
+            array_map(fn (string $h) => Cell::fromValue($h), self::HEADER),
             $this->headerStyle()
         ));
 
@@ -76,19 +76,19 @@ class ToeflResultsExport
             $student = $attempt->student;
 
             $this->writer->addRow(new Row([
-                new Cell($i + 1),
-                new Cell($student?->full_name ?? '-'),
-                new Cell($student?->student_number ?? '-'),
-                new Cell($student?->class_name ?? '-'),
-                new Cell($attempt->exam?->title ?? '-'),
-                new Cell($attempt->statusLabel()),
-                new Cell($r?->listening_raw_score ?? 0),
-                new Cell($r?->structure_raw_score ?? 0),
-                new Cell($r?->reading_raw_score ?? 0),
-                new Cell($r?->total_correct ?? 0),
-                new Cell($r?->total_questions ?? 0),
-                new Cell($r?->scaled_score ?? 0),
-                new Cell($r?->completed_at?->format('Y-m-d H:i') ?? ($attempt->submitted_at?->format('Y-m-d H:i') ?? '-')),
+                Cell::fromValue($i + 1),
+                Cell::fromValue($student?->full_name ?? '-'),
+                Cell::fromValue($student?->student_number ?? '-'),
+                Cell::fromValue($student?->class_name ?? '-'),
+                Cell::fromValue($attempt->exam?->title ?? '-'),
+                Cell::fromValue($attempt->statusLabel()),
+                Cell::fromValue($r?->listening_raw_score ?? 0),
+                Cell::fromValue($r?->structure_raw_score ?? 0),
+                Cell::fromValue($r?->reading_raw_score ?? 0),
+                Cell::fromValue($r?->total_correct ?? 0),
+                Cell::fromValue($r?->total_questions ?? 0),
+                Cell::fromValue($r?->scaled_score ?? 0),
+                Cell::fromValue($r?->completed_at?->format('Y-m-d H:i') ?? ($attempt->submitted_at?->format('Y-m-d H:i') ?? '-')),
             ]));
         }
 

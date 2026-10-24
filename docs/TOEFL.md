@@ -436,7 +436,7 @@ php artisan test --filter=Toefl     # hanya tes TOEFL
 vendor/bin/pint                     # format kode
 ```
 
-Cakupan skenario (70 tes / 416 asersi TOEFL + 5 tes integrasi menu admin):
+Cakupan skenario (78 tes / 474 asersi TOEFL + 5 tes integrasi menu admin):
 
 | File | Skenario |
 |---|---|
@@ -447,6 +447,7 @@ Cakupan skenario (70 tes / 416 asersi TOEFL + 5 tes integrasi menu admin):
 | `tests/Feature/ToeflTimerSessionTest.php` | Unique index menolak attempt ganda, koneksi putus → masuk ulang identitas sama → resume attempt + `session_version` naik, masuk ulang langsung ke bagian, deadline lewat → auto-finalize `expired` + hasil, jawaban lewat deadline ditolak (`expired:true`) & hasil terkunci, submit manual lewat deadline → `expired`, hasil tersembunyi saat berjalan, ujian ditutup pengawas → masuk ulang ditolak |
 | `tests/Unit/ToeflScoringServiceTest.php` | Skor scaled pada batas 310/680, linier di tengah rentang, skor mentah per bagian dari kunci, jawaban kosong tidak dihitung benar, huruf kecil tetap cocok, penilaian ulang idempoten (baris sama, tanpa duplikat), persentase & rincian bagian |
 | `tests/Feature/ToeflDummySeederTest.php` | `ToeflDummySeeder`: 3 ujian dengan status ditutup/dibuka/draf, tiap ujian terisi **140 soal** dengan rasio 50/40/50 dan durasi 6900 detik, ujian draf hanya kerangka, 30 identitas tanpa akun, 28 hasil (semua dari `ToeflScoringService`) berada di rentang 310–680, 3 sesi berjalan belum dinilai & deadline masih masa depan, kode akses berlaku tersedia, seeder idempoten |
+| `tests/Feature/ToeflResultExportTest.php` | **Ekspor XLSX hasil** — membalas 200 dengan `content-type` & `content-disposition` benar, arsip valid (tanda `PK`), tetap valid saat belum ada hasil, dibuka tamu → dialihkan ke login, role lain → `403`. Menjaga dua bug OpenSpout v4 yang pernah membuat endpoint `500`: `new Cell()` pada kelas abstract, dan tipe kembalian `download()` |
 | `tests/Feature/AdminMenuSmokeTest.php` | Sidebar menu TOEFL lengkap ("Data Peserta") + route aktif, halaman pengelola TOEFL ter-render untuk admin, **panel kode akses ada di halaman ujian**, halaman edit peserta tidak lagi menerbitkan kode, role lain → `403` |
 
 Helper bersama: `tests/Concerns/BuildsToeflData.php`
@@ -481,4 +482,4 @@ modul dibuang, dan menu sidebar hanya menampilkan modul sesuai role.
 | Satu komputer dipakai ganti peserta | Klik **"Keluar Sesi"** → ikatan identitas + attempt terlepas, portal bersih untuk peserta berikutnya |
 | "Ujian sudah dikumpulkan" di tengah sesi | Lewat deadline (otomatis dinilai) atau guru menyelesaikan sesi — guru bisa **Buka Kembali** di Hasil & Sesi |
 | Skor tidak sama dengan TOEFL asli | Memang aproksimasi linear 310–680 untuk latihan — tabel konversi resmi ETS berbeda |
-| Ekspor XLSX gagal | Pastikan `openspout/openspout` terpasang (`composer install`); file sementara dipakai lalu dihapus otomatis |
+| Ekspor XLSX gagal | Pastikan `openspout/openspout` terpasang (`composer install`). Dua perangkap OpenSpout v4 yang pernah membuat endpoint ini `500` sudah diperbaiki dan kini dijaga tes: `Cell` abstract (wajib `Cell::fromValue()`, bukan `new Cell()`), dan tipe kembalian `download()` harus `BinaryFileResponse` |

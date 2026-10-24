@@ -272,4 +272,40 @@ class SibelReportTest extends TestCase
             'needs_verification' => true,
         ]);
     }
+
+    /**
+     * Ekspor rekap ke XLSX memakai OpenSpout v4, yang mewajibkan pabrik
+     * statis `Cell::fromValue()` — `Cell` sudah abstract. Dijaga di sini
+     * agar endpoint tidak kembali membalas 500.
+     */
+    public function test_ekspor_rekap_menghasilkan_file_xlsx_valid(): void
+    {
+        $this->completedResult('Agus Ekspor', 'AAAA');
+
+        $response = $this->actingAs($this->guruBk)->get(route('sibel.results.export'));
+
+        $response->assertOk();
+        $response->assertHeader(
+            'content-type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        $this->assertStringContainsString(
+            '.xlsx',
+            (string) $response->headers->get('content-disposition')
+        );
+
+        // XLSX adalah arsip ZIP — tandanya dua byte pertama "PK".
+        $file = $response->baseResponse->getFile()->getPathname();
+        $this->assertFileExists($file);
+        $this->assertSame('PK', substr((string) file_get_contents($file), 0, 2));
+    }
+
+    public function test_ekspor_rekap_hanya_untuk_pengelola_sibel(): void
+    {
+        $this->completedResult('Agus Ekspor', 'AAAA');
+
+        $this->get(route('sibel.results.export'))->assertRedirect(route('login'));
+
+        $this->actingAs($this->guruBk)->get(route('sibel.results.export'))->assertOk();
+    }
 }
