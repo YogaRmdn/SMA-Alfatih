@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Sibel;
 
+use App\Exports\SibelResultsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sibel\ResultUpdateRequest;
 use App\Models\SibelAttempt;
@@ -121,6 +122,52 @@ class ReportController extends Controller
     }
 
     /**
+     * Unduhan hasil (XLSX) — 3 sheet: rekap per siswa, distribusi kelas,
+     * dan detail jawaban tiap butir. Mengikuti filter aktif di halaman
+     * hasil/rekap (pencarian, kelas, periode, status publikasi).
+     */
+    public function export()
+    {
+        Gate::authorize('viewAny', SibelResult::class);
+
+        $attempts = $this->latestCompletedAttempts();
+
+        $filename = 'hasil-sibel-'.now()->format('Ymd-His').'.xlsx';
+
+        return (new SibelResultsExport($attempts, $this->exportMetaLines()))->download($filename);
+    }
+
+    /**
+     * Baris keterangan filter aktif untuk kop laporan Excel.
+     *
+     * @return array<int, string>
+     */
+    protected function exportMetaLines(): array
+    {
+        $lines = [];
+
+        if ($search = request('q')) {
+            $lines[] = 'Pencarian: "'.$search.'"';
+        }
+
+        if ($classId = request('class_id')) {
+            $lines[] = 'Kelas: '.(SibelClass::find($classId)?->name ?? '—');
+        }
+
+        if ($period = request('period')) {
+            $lines[] = 'Periode: '.$period;
+        }
+
+        if (($published = request('published')) !== null && $published !== '') {
+            $lines[] = 'Status: '.($published === '1' ? 'Sudah dipublikasikan' : 'Belum dipublikasikan');
+        }
+
+        $lines[] = $lines === [] ? 'Seluruh data' : 'Sesi selesai terakhir per siswa';
+
+        return $lines;
+    }
+
+    /**
      * Sesi selesai terakhir per siswa, difilter sesuai parameter rekap
      * (kelas, periode pengisian, pencarian nama).
      *
@@ -131,11 +178,16 @@ class ReportController extends Controller
         $classId = request('class_id');
         $period = request('period'); // format YYYY-MM
         $search = request('q');
+        $published = request('published');
 
         $attempts = SibelAttempt::query()
             ->with(['result', 'student.schoolClass'])
             ->where('status', SibelAttempt::STATUS_COMPLETED)
             ->when($classId, fn ($q) => $q->whereHas('student', fn ($s) => $s->where('class_id', $classId)))
+            ->when($published !== null && $published !== '', fn ($q) => $q->whereHas(
+                'result',
+                fn ($r) => $r->where('is_published', $published === '1')
+            ))
             ->when($period, function ($q) use ($period) {
                 [$year, $month] = array_map('intval', explode('-', $period));
                 $start = sprintf('%04d-%02d-01', $year, $month);

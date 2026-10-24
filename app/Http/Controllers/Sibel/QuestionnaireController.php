@@ -40,6 +40,7 @@ class QuestionnaireController extends Controller
         $data = $request->validated();
         $data['allow_retake'] = $request->boolean('allow_retake');
         $data['needs_verification'] = $request->boolean('needs_verification');
+        $data['scoring_method'] = $data['scoring_method'] ?? SibelQuestionnaire::SCORING_METHOD_CHOICE;
 
         SibelQuestionnaire::create($data);
 
@@ -160,11 +161,12 @@ class QuestionnaireController extends Controller
 
             $question = $questionnaire->questions()->create([
                 'question_text' => $data['question_text'],
+                'category_code' => $data['category_code'] ?? null,
                 'order_number' => $data['order_number'] ?? ($lastOrder + 1),
                 'is_required' => $request->boolean('is_required', true),
             ]);
 
-            $this->syncOptions($question, $data['options']);
+            $this->syncOptions($question, $data['options'] ?? []);
         });
 
         return redirect()->route('sibel.questionnaires.show', $questionnaire)
@@ -178,11 +180,12 @@ class QuestionnaireController extends Controller
 
             $question->update([
                 'question_text' => $data['question_text'],
+                'category_code' => $data['category_code'] ?? null,
                 'order_number' => $data['order_number'] ?? $question->order_number,
                 'is_required' => $request->boolean('is_required', true),
             ]);
 
-            $this->syncOptions($question, $data['options']);
+            $this->syncOptions($question, $data['options'] ?? []);
         });
 
         return redirect()->route('sibel.questionnaires.show', $question->questionnaire)
@@ -205,18 +208,35 @@ class QuestionnaireController extends Controller
     }
 
     /**
-     * Tulis/timpa tiga opsi A/B/C beserta pemetaan kategorinya dari konfigurasi.
+     * Tulis/timpa opsi jawaban sesuai metode penilaian kuesionernya:
+     * - Skala Likert: empat tingkat skala seragam dari konfigurasi (nilai 4-1).
+     * - Pilihan tunggal: tiga opsi A/B/C beserta pemetaan kategorinya.
      *
      * @param  array<string, string>  $options
      */
     protected function syncOptions(SibelQuestion $question, array $options): void
     {
+        if ($question->questionnaire->isLikert()) {
+            foreach (config('sibel.likert.levels') as $level) {
+                $question->options()->updateOrCreate(
+                    ['option_code' => $level['code']],
+                    [
+                        'option_text' => $level['label'],
+                        'value' => $level['value'],
+                    ]
+                );
+            }
+
+            return;
+        }
+
         foreach (config('sibel.code_category') as $code => $categoryKey) {
             $question->options()->updateOrCreate(
                 ['option_code' => $code],
                 [
                     'option_text' => trim((string) ($options[$code] ?? '')),
                     'category_code' => $categoryKey,
+                    'value' => null,
                 ]
             );
         }

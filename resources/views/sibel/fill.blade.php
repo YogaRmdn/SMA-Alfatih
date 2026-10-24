@@ -6,6 +6,7 @@
     $questions = $questionnaire->questions->values();
     $totalQuestions = $questions->count();
     $prefillName = old('full_name', $student->full_name ?? '');
+    $prefillClass = old('class_id', $student->class_id ?? '');
     // Jawaban lama (saat validasi gagal) disuntikkan langsung ke state Alpine
     // lewat @js() — aman di atribut HTML (tanpa kutip ganda di hasilnya).
     $initialAnswers = (object) collect(old('answers', []))
@@ -27,6 +28,10 @@
                 document.getElementById('full_name')?.focus();
                 return;
             }
+            if (! document.getElementById('class_id')?.value) {
+                document.getElementById('class_id')?.focus();
+                return;
+            }
             if (this.remaining > 0) {
                 this.showMissing = true;
                 document.getElementById('question-list')?.scrollIntoView({ behavior: 'smooth' });
@@ -40,7 +45,7 @@
           @submit.prevent="submitForm">
         @csrf
 
-        {{-- Header kuesioner + identitas: cukup tulis nama --}}
+        {{-- Header kuesioner + identitas: nama & kelas --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h1 class="text-lg font-bold text-slate-800">Isi Kuesioner Gaya Belajar 👋</h1>
             <p class="mt-0.5 text-sm text-slate-600">{{ $questionnaire->title }} <span class="text-xs text-slate-400">• v{{ $questionnaire->version }}</span></p>
@@ -52,16 +57,42 @@
                 </div>
             @endif
 
-            <div class="mt-4">
-                <label for="full_name" class="mb-1.5 block text-sm font-semibold text-slate-700">Nama Lengkap Anda <span class="text-red-500">*</span></label>
-                <input type="text" id="full_name" name="full_name" value="{{ $prefillName }}" required maxlength="120"
-                       placeholder="Tulis nama Anda sesuai daftar sekolah"
-                       class="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
-                @error('full_name')
-                    <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
-                @else
-                    <p class="mt-1 text-xs text-slate-400">Nama dipakai untuk mencatat hasil — pastikan ditulis dengan benar.</p>
-                @enderror
+            @if ($classes->isEmpty())
+                <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    Belum ada data kelas — silakan hubungi guru BK untuk pendaftaran kelas sebelum mengisi kuesioner.
+                </div>
+            @endif
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="full_name" class="mb-1.5 block text-sm font-semibold text-slate-700">Nama Lengkap Anda <span class="text-red-500">*</span></label>
+                    <input type="text" id="full_name" name="full_name" value="{{ $prefillName }}" required maxlength="120"
+                           placeholder="Tulis nama Anda sesuai daftar sekolah"
+                           class="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    @error('full_name')
+                        <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                    @else
+                        <p class="mt-1 text-xs text-slate-400">Nama dipakai untuk mencatat hasil — pastikan ditulis dengan benar.</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="class_id" class="mb-1.5 block text-sm font-semibold text-slate-700">Kelas Anda <span class="text-red-500">*</span></label>
+                    <select id="class_id" name="class_id" required
+                            class="w-full rounded-lg border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                        <option value="">— Pilih kelas —</option>
+                        @foreach ($classes as $class)
+                            <option value="{{ $class->id }}" @selected((string) $prefillClass === (string) $class->id)>
+                                {{ $class->name }} ({{ $class->academic_year }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('class_id')
+                        <p class="mt-1 text-xs font-medium text-red-600">{{ $message }}</p>
+                    @else
+                        <p class="mt-1 text-xs text-slate-400">Kelas dipakai untuk memastikan data & rekap guru BK.</p>
+                    @enderror
+                </div>
             </div>
 
             {{-- Progres --}}
@@ -95,26 +126,49 @@
                     </p>
                 </div>
 
-                <div class="mt-4 space-y-2 pl-10">
-                    @foreach ($question->options as $option)
-                        @php
-                            $oldValue = old('answers.' . $question->id);
-                            $isChecked = $oldValue !== null && (string) $oldValue === (string) $option->id;
-                        @endphp
-                        <label for="answer-{{ $question->id }}-{{ $option->id }}"
-                               class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition {{ $isChecked ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400' : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50' }}">
-                            <input type="radio" id="answer-{{ $question->id }}-{{ $option->id }}"
-                                   name="answers[{{ $question->id }}]" value="{{ $option->id }}"
-                                   x-model="answers['{{ $question->id }}']"
-                                   {{ $isChecked ? 'checked' : '' }}
-                                   class="mt-0.5 h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                            <span class="flex-1 text-sm text-slate-700">
-                                <span class="mr-1.5 font-bold text-slate-800">{{ $option->option_code }}.</span>
-                                {{ $option->option_text }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
+                @if ($questionnaire->isLikert())
+                    {{-- Skala Likert: 4 tingkat ditampilkan sebagai baris pilihan. --}}
+                    <div class="mt-4 grid grid-cols-2 gap-2 pl-10 sm:grid-cols-4">
+                        @foreach ($question->options as $option)
+                            @php
+                                $oldValue = old('answers.' . $question->id);
+                                $isChecked = $oldValue !== null && (string) $oldValue === (string) $option->id;
+                            @endphp
+                            <label for="answer-{{ $question->id }}-{{ $option->id }}"
+                                   class="cursor-pointer rounded-xl border p-2.5 text-center transition {{ $isChecked ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400' : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50' }}">
+                                <input type="radio" id="answer-{{ $question->id }}-{{ $option->id }}"
+                                       name="answers[{{ $question->id }}]" value="{{ $option->id }}"
+                                       x-model="answers['{{ $question->id }}']"
+                                       {{ $isChecked ? 'checked' : '' }}
+                                       class="sr-only">
+                                <span class="block text-[11px] font-bold uppercase tracking-wide {{ $isChecked ? 'text-emerald-700' : 'text-slate-400' }}">{{ $option->option_code }}</span>
+                                <span class="mt-0.5 block text-xs font-semibold {{ $isChecked ? 'text-emerald-800' : 'text-slate-700' }}">{{ $option->option_text }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="mt-1.5 pl-10 text-[11px] text-slate-400">Pilih satu tingkat yang paling menggambarkan diri Anda.</p>
+                @else
+                    <div class="mt-4 space-y-2 pl-10">
+                        @foreach ($question->options as $option)
+                            @php
+                                $oldValue = old('answers.' . $question->id);
+                                $isChecked = $oldValue !== null && (string) $oldValue === (string) $option->id;
+                            @endphp
+                            <label for="answer-{{ $question->id }}-{{ $option->id }}"
+                                   class="flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition {{ $isChecked ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400' : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50' }}">
+                                <input type="radio" id="answer-{{ $question->id }}-{{ $option->id }}"
+                                       name="answers[{{ $question->id }}]" value="{{ $option->id }}"
+                                       x-model="answers['{{ $question->id }}']"
+                                       {{ $isChecked ? 'checked' : '' }}
+                                       class="mt-0.5 h-4 w-4 border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                <span class="flex-1 text-sm text-slate-700">
+                                    <span class="mr-1.5 font-bold text-slate-800">{{ $option->option_code }}.</span>
+                                    {{ $option->option_text }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
 
                 @error('answers.' . $question->id)
                     <p class="mt-2 pl-10 text-xs font-medium text-red-600">{{ $message }}</p>

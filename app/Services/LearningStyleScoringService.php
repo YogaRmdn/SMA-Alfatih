@@ -9,17 +9,27 @@ use Illuminate\Support\Facades\DB;
 /**
  * Mesin penilaian SIBEL.
  *
- * Aturan (lihat rencana proyek — bagian 5F):
- *  1-3. Hitung seluruh jawaban A (visual), B (auditori), C (kinestetik).
- *  4.   Tentukan skor tertinggi.
- *  5-7. Tunggal tertinggi -> kategori dominan.
- *  8-9. Tertinggi sama   -> hasil seri dua/tiga kategori.
+ * Dua metode penilaian (per kuesioner, `scoring_method`):
+ *
+ * A. Pilihan Tunggal (choice) — A/B/C, aturan lama (rencana proyek — 5F):
+ *    1-3. Hitung seluruh jawaban A (visual), B (auditori), C (kinestetik).
+ *    4.   Tentukan skor tertinggi.
+ *    5-7. Tunggal tertinggi -> kategori dominan.
+ *    8-9. Tertinggi sama     -> hasil seri dua/tiga kategori.
+ *    Persentase = (jumlah jawaban kategori / total jawaban valid) x 100%.
+ *
+ * B. Skala Likert (likert) — pernyataan + skala 4 tingkat:
+ *    1-3. Setiap pernyataan punya satu kategori indikator; skor kategori
+ *         = jumlah nilai opsi terpilih (Sangat Sesuai=4 ... Tidak Sesuai=1).
+ *    4-9. Aturan skor tertinggi & seri sama seperti metode pilihan tunggal.
+ *    Persentase = (skor kategori / skor maksimum kategori) x 100%, dengan
+ *    skor maksimum = jumlah pernyataan kategori x nilai maksimum opsi.
+ *
+ * Umum:
  *  10.  Tidak pernah memilih kategori secara acak saat seri.
  *  11.  Simpan skor, kategori, status seri, dan versi kuesioner.
  *  12.  Perhitungan dilakukan di backend (server-side).
  *  13.  Jumlah jawaban wajib harus sama dengan jumlah pertanyaan wajib.
- *
- * Persentase = (jumlah jawaban kategori / total jawaban valid) x 100%.
  */
 class LearningStyleScoringService
 {
@@ -29,6 +39,7 @@ class LearningStyleScoringService
      * @return array{
      *     scores: array<string, int>,
      *     percentages: array<string, float>,
+     *     max_scores: array<string, int>,
      *     total: int,
      *     dominant_categories: array<int, string>,
      *     result_status: string,
@@ -41,11 +52,13 @@ class LearningStyleScoringService
      */
     public function compute(SibelAttempt $attempt): array
     {
-        $attempt->loadMissing(['questionnaire', 'answers.option']);
+        $attempt->loadMissing(['questionnaire', 'questionnaire.questions', 'answers.option', 'answers.question']);
 
-        $questions = $attempt->questionnaire->questions;
+        $questionnaire = $attempt->questionnaire;
+        $questions = $questionnaire->questions;
         $requiredIds = $questions->where('is_required', true)->pluck('id');
         $answers = $attempt->answers;
+        $isLikert = $questionnaire->isLikert();
 
         // 13. Seluruh pertanyaan wajib harus terjawab.
         $answeredIds = $answers->pluck('question_id');
@@ -57,15 +70,21 @@ class LearningStyleScoringService
             );
         }
 
-        // 1-3. Hitung per kategori berdasarkan `category_code` pada opsi terpilih.
+        // 1-3. Akumulasi skor per kategori.
+        //  - choice: +1 per jawaban, kategori dari opsi terpilih.
+        //  - likert : +nilai opsi (1-4), kategori dari indikator pernyataan.
         $scores = array_fill_keys(array_keys(config('sibel.categories', [])), 0);
 
         foreach ($answers as $answer) {
-            $category = $this->categoryOf($answer->option?->option_code, $answer->option?->category_code);
+            $category = $isLikert
+                ? ($answer->question?->category_code ?: null)
+                : $this->categoryOf($answer->option?->option_code, $answer->option?->category_code);
 
-            if ($category !== null && array_key_exists($category, $scores)) {
-                $scores[$category]++;
+            if ($category === null || ! array_key_exists($category, $scores)) {
+                continue;
             }
+
+            $scores[$category] += $isLikert ? max(0, (int) ($answer->option?->value ?? 0)) : 1;
         }
 
         $total = array_sum($scores);
@@ -74,10 +93,16 @@ class LearningStyleScoringService
             throw new IncompleteAttemptException('Tidak ada jawaban valid yang bisa dinilai.');
         }
 
+        // Skor maksimum per kategori (likert: jumlah pernyataan x nilai maks opsi).
+        $maxScores = [];
+        foreach (array_keys($scores) as $key) {
+            $maxScores[$key] = $isLikert ? $questionnaire->maxLikertScore($key) : $total;
+        }
+
         // Persentase per kategori.
         $percentages = [];
         foreach ($scores as $key => $score) {
-            $percentages[$key] = round(($score / $total) * 100, 1);
+            $percentages[$key] = $maxScores[$key] > 0 ? round(($score / $maxScores[$key]) * 100, 1) : 0.0;
         }
 
         // 4. Skor tertinggi.
@@ -90,12 +115,13 @@ class LearningStyleScoringService
         return [
             'scores' => $scores,
             'percentages' => $percentages,
+            'max_scores' => $maxScores,
             'total' => $total,
             'dominant_categories' => $dominant,
             'result_status' => $resultStatus,
             'interpretation' => $this->interpretation($dominant, $resultStatus),
             'recommendation' => $this->recommendation($dominant),
-            'questionnaire_version' => $attempt->questionnaire->version,
+            'questionnaire_version' => $questionnaire->version,
         ];
     }
 

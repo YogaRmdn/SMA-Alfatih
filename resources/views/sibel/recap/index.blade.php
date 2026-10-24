@@ -9,11 +9,19 @@
         <h1 class="text-2xl font-bold text-slate-800">Rekapitulasi Kelas</h1>
         <p class="mt-1 text-sm text-slate-500">Distribusi gaya belajar berdasarkan hasil terakhir tiap siswa.</p>
     </div>
-    <a href="{{ route('sibel.recap.print', request()->query()) }}" target="_blank" rel="noopener"
-       class="inline-flex items-center gap-2 self-start rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-        Cetak Rekap
-    </a>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('sibel.results.export', request()->query()) }}"
+           class="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-900"
+           title="Unduh rekap, distribusi kelas, & detail jawaban (XLSX)">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+            Unduh Excel
+        </a>
+        <a href="{{ route('sibel.recap.print', request()->query()) }}" target="_blank" rel="noopener"
+           class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+            Cetak Rekap
+        </a>
+    </div>
 </div>
 
 {{-- Filter --}}

@@ -71,6 +71,32 @@ return [
         'C' => 'kinestetik',
     ],
 
+    /*
+    | Metode penilaian per kuesioner.
+    | - choice: pilihan tunggal A/B/C (metode lama; skor = jumlah jawaban
+    |   per kategori).
+    | - likert: skala Likert 4 tingkat; setiap pernyataan punya satu kategori
+    |   indikator dan skor kategori = jumlah nilai opsi terpilih.
+    */
+    'scoring_methods' => [
+        'choice' => 'Pilihan Tunggal (A/B/C)',
+        'likert' => 'Skala Likert (4 Tingkat)',
+    ],
+
+    /*
+    | Tingkatan skala Likert (4 pilihan — tanpa jawaban netral, sesuai standar
+    | instrumen kecenderungan gaya belajar). Nilai dipakai langsung untuk
+    | penilaian: Sangat Sesuai = 4 s.d. Tidak Sesuai = 1.
+    */
+    'likert' => [
+        'levels' => [
+            ['code' => 'A', 'label' => 'Sangat Sesuai', 'value' => 4],
+            ['code' => 'B', 'label' => 'Sesuai', 'value' => 3],
+            ['code' => 'C', 'label' => 'Kurang Sesuai', 'value' => 2],
+            ['code' => 'D', 'label' => 'Tidak Sesuai', 'value' => 1],
+        ],
+    ],
+
     /* Label untuk hasil seri. */
     'tie_label' => 'Seri',
 

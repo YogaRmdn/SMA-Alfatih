@@ -6,10 +6,18 @@
 @section('content')
 <x-admin.page-header title="Hasil Asesmen" subtitle="Riwayat hasil kuesioner gaya belajar seluruh siswa">
     <x-slot:button>
-        <a href="{{ route('sibel.recap.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6m4 6V7m4 10v-3M3 21h18M5 21V10l7-6 7 6v11" /></svg>
-            Rekap Kelas
-        </a>
+        <div class="flex flex-wrap justify-end gap-2">
+            <a href="{{ route('sibel.results.export', request()->query()) }}"
+               class="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-900"
+               title="Unduh rekap, distribusi kelas, & detail jawaban (XLSX)">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                Unduh Excel
+            </a>
+            <a href="{{ route('sibel.recap.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6m4 6V7m4 10v-3M3 21h18M5 21V10l7-6 7 6v11" /></svg>
+                Rekap Kelas
+            </a>
+        </div>
     </x-slot:button>
 </x-admin.page-header>
 

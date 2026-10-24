@@ -15,7 +15,15 @@ class SibelOption extends Model
         'option_code',
         'option_text',
         'category_code',
+        'value',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'value' => 'integer',
+        ];
+    }
 
     public function question(): BelongsTo
     {

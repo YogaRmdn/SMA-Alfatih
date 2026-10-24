@@ -17,8 +17,14 @@ use Illuminate\Support\Facades\Route;
 |   tamu (siswa)  -> buka /sibel: langsung halaman pengisian kuesioner
 |                   (isi nama + jawab pertanyaan), tanpa login; setelah
 |                   kirim, hasil tampil & bisa diunduh
-|   super_admin, admin, guru_bk -> login website (/login): dashboard,
-|                   data, kuesioner, hasil, rekap
+|   super_admin, admin, guru_bk, admin_sibel
+|                 -> login website (/login): dashboard, data, kuesioner,
+|                   hasil, rekap
+|
+| CATATAN PEMISAHAN AKSES:
+|   admin_sibel & guru_bk HANYA berhak atas panel ini — keduanya diblokir
+|   dari /admin & /toefl. admin (website) & super_admin tetap boleh masuk
+|   ke sini sebagai panel sekunder.
 |
 | Identitas siswa diikat ke session browser (`sibel_student_id`) setelah
 | jawaban dikirim (PortalController) — tidak ada akun login siswa.
@@ -49,7 +55,7 @@ Route::prefix('sibel')
         /*
         | Sisi pengelola: admin & guru BK (login website).
         */
-        Route::middleware(['auth', 'verified', 'role:super_admin,admin,guru_bk'])
+        Route::middleware(['auth', 'verified', 'role:super_admin,admin,guru_bk,admin_sibel'])
             ->group(function () {
                 Route::get('kelola', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -116,6 +122,7 @@ Route::prefix('sibel')
 
                 // Hasil & laporan.
                 Route::get('hasil', [ReportController::class, 'index'])->name('results.index');
+                Route::get('hasil/export', [ReportController::class, 'export'])->name('results.export');
                 Route::get('rekap', [ReportController::class, 'recap'])->name('recap.index');
                 Route::get('rekap/cetak', [ReportController::class, 'recapPrint'])->name('recap.print');
                 Route::get('hasil/{result}', [ReportController::class, 'show'])

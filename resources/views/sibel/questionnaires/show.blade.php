@@ -6,6 +6,12 @@
 @section('content')
 <x-admin.page-header :title="$questionnaire->title"
     subtitle="Kelola pertanyaan, buka/tutup sesi, dan pantau status pengisian siswa">
+    <x-slot:titleExtra>
+        <span class="ml-2 inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 align-middle text-xs font-bold text-sky-700"
+              title="Metode penilaian kuesioner ini">
+            {{ $questionnaire->scoringMethodLabel() }}
+        </span>
+    </x-slot:titleExtra>
     <x-slot:button>
         <div class="flex flex-wrap justify-end gap-2">
             @if ($questionnaire->needs_verification)
@@ -73,36 +79,72 @@
             <button type="button" @click="open = !open" class="flex w-full items-center justify-between px-5 py-4 text-left">
                 <span>
                     <span class="block text-base font-bold text-slate-800">Tambah Pertanyaan</span>
-                    <span class="block text-xs text-slate-500">Setiap pertanyaan memiliki tepat 3 pilihan: A (Visual), B (Auditori), C (Kinestetik).</span>
+                    @if ($questionnaire->isLikert())
+                        <span class="block text-xs text-slate-500">Setiap pernyataan dimiliki satu kategori indikator; 4 opsi skala Likert dibuat otomatis.</span>
+                    @else
+                        <span class="block text-xs text-slate-500">Setiap pertanyaan memiliki tepat 3 pilihan: A (Visual), B (Auditori), C (Kinestetik).</span>
+                    @endif
                 </span>
                 <svg class="h-5 w-5 shrink-0 text-slate-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
 
             <div x-show="open" x-cloak x-transition class="border-t border-slate-100 p-5">
-                <x-admin.field label="Teks Pertanyaan" name="question_text" :required="true">
-                    <x-admin.textarea name="question_text" rows="2" placeholder="Ketika mempelajari hal baru, saya lebih suka..." />
-                </x-admin.field>
-
-                <div class="mt-4 space-y-3">
-                    @foreach (config('sibel.categories') as $key => $category)
-                        <x-admin.field :label="'Pilihan ' . $category['code'] . ' — ' . $category['label']" :name="'options.' . $category['code']" :required="true">
-                            <x-admin.input :name="'options.' . $category['code']" placeholder="Teks pilihan jawaban..." />
-                        </x-admin.field>
-                    @endforeach
-                </div>
-
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                    <x-admin.field label="Nomor Urut" name="order_number" hint="Kosongkan untuk menempatkan di akhir.">
-                        <x-admin.input name="order_number" type="number" :value="old('order_number')" placeholder="Otomatis" />
+                @if ($questionnaire->isLikert())
+                    <x-admin.field label="Pernyataan" name="question_text" :required="true">
+                        <x-admin.textarea name="question_text" rows="2" placeholder="Saya lebih mudah memahami materi ketika disertai gambar, diagram, atau skema." />
                     </x-admin.field>
 
-                    <label class="mt-6 flex items-center gap-2 text-sm text-slate-700">
-                        <input type="hidden" name="is_required" value="0">
-                        <input type="checkbox" name="is_required" value="1" {{ old('is_required', true) ? 'checked' : '' }}
-                               class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                        Pertanyaan wajib dijawab
-                    </label>
-                </div>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                        <x-admin.field label="Kategori Indikator" name="category_code" :required="true"
+                            hint="Kategori yang dinilai dari pernyataan ini.">
+                            <x-admin.select name="category_code" :value="old('category_code')"
+                                placeholder="Pilih kategori..."
+                                :options="collect(config('sibel.categories'))->mapWithKeys(fn ($c, $key) => [$key => $c['label']])->all()" />
+                        </x-admin.field>
+
+                        <x-admin.field label="Nomor Urut" name="order_number" hint="Kosongkan untuk menempatkan di akhir.">
+                            <x-admin.input name="order_number" type="number" :value="old('order_number')" placeholder="Otomatis" />
+                        </x-admin.field>
+                    </div>
+
+                    <div class="mt-4 rounded-xl border border-sky-100 bg-sky-50/70 p-4">
+                        <p class="mb-2 text-sm font-semibold text-sky-900">Opsi skala (dibuat otomatis)</p>
+                        <ul class="space-y-1.5">
+                            @foreach (config('sibel.likert.levels') as $level)
+                                <li class="flex items-center gap-2 text-sm text-sky-900">
+                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-700 text-[11px] font-bold text-white">{{ $level['code'] }}</span>
+                                    {{ $level['label'] }}
+                                    <span class="text-xs text-sky-600">(nilai {{ $level['value'] }})</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @else
+                    <x-admin.field label="Teks Pertanyaan" name="question_text" :required="true">
+                        <x-admin.textarea name="question_text" rows="2" placeholder="Ketika mempelajari hal baru, saya lebih suka..." />
+                    </x-admin.field>
+
+                    <div class="mt-4 space-y-3">
+                        @foreach (config('sibel.categories') as $key => $category)
+                            <x-admin.field :label="'Pilihan ' . $category['code'] . ' — ' . $category['label']" :name="'options.' . $category['code']" :required="true">
+                                <x-admin.input :name="'options.' . $category['code']" placeholder="Teks pilihan jawaban..." />
+                            </x-admin.field>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                        <x-admin.field label="Nomor Urut" name="order_number" hint="Kosongkan untuk menempatkan di akhir.">
+                            <x-admin.input name="order_number" type="number" :value="old('order_number')" placeholder="Otomatis" />
+                        </x-admin.field>
+                    </div>
+                @endif
+
+                <label class="mt-4 flex items-center gap-2 text-sm text-slate-700">
+                    <input type="hidden" name="is_required" value="0">
+                    <input type="checkbox" name="is_required" value="1" {{ old('is_required', true) ? 'checked' : '' }}
+                           class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                    Pertanyaan wajib dijawab
+                </label>
 
                 <button type="submit" class="mt-5 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
                     Simpan Pertanyaan
@@ -124,6 +166,10 @@
                             <div class="min-w-0">
                                 <span class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-700 text-xs font-bold text-white">{{ $question->order_number }}</span>
                                 <span class="text-sm font-semibold text-slate-800">{{ $question->question_text }}</span>
+                                @if ($questionnaire->isLikert() && $question->category_code)
+                                    <span class="ml-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                                          style="background: {{ config('sibel.categories.' . $question->category_code . '.hex', '#64748b') }}">{{ $question->categoryLabel() }}</span>
+                                @endif
                                 @unless ($question->is_required)
                                     <span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-500">opsional</span>
                                 @endunless
@@ -147,10 +193,16 @@
                         <ul class="mt-3 space-y-1.5 pl-8">
                             @foreach ($question->options as $option)
                                 <li class="text-sm text-slate-600">
-                                    <span class="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white"
-                                          style="background: {{ config('sibel.categories.' . $option->category_code . '.hex', '#64748b') }}">{{ $option->option_code }}</span>
-                                    {{ $option->option_text }}
-                                    <span class="ml-1 text-xs text-slate-400">({{ $option->categoryLabel() }})</span>
+                                    @if ($questionnaire->isLikert())
+                                        <span class="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-600 text-[11px] font-bold text-white">{{ $option->option_code }}</span>
+                                        {{ $option->option_text }}
+                                        <span class="ml-1 text-xs font-semibold text-slate-400">(nilai {{ $option->value ?? '—' }})</span>
+                                    @else
+                                        <span class="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                                              style="background: {{ config('sibel.categories.' . $option->category_code . '.hex', '#64748b') }}">{{ $option->option_code }}</span>
+                                        {{ $option->option_text }}
+                                        <span class="ml-1 text-xs text-slate-400">({{ $option->categoryLabel() }})</span>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
@@ -158,29 +210,47 @@
                         {{-- Form edit --}}
                         <form x-show="editing" x-cloak method="POST" action="{{ route('sibel.questionnaires.questions.update', $question) }}" class="mt-4 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
                             @csrf @method('PUT')
-                            <x-admin.field label="Teks Pertanyaan" name="question_text" :required="true">
-                                <x-admin.textarea name="question_text" rows="2" :value="$question->question_text" />
-                            </x-admin.field>
-
-                            <div class="mt-3 space-y-3">
-                                @foreach ($question->options as $option)
-                                    <x-admin.field :label="'Pilihan ' . $option->option_code . ' — ' . $option->categoryLabel()" :name="'options.' . $option->option_code" :required="true">
-                                        <x-admin.input :name="'options.' . $option->option_code" :value="$option->option_text" />
-                                    </x-admin.field>
-                                @endforeach
-                            </div>
-
-                            <div class="mt-3 grid gap-4 sm:grid-cols-2">
-                                <x-admin.field label="Nomor Urut" name="order_number">
-                                    <x-admin.input name="order_number" type="number" :value="$question->order_number" />
+                            @if ($questionnaire->isLikert())
+                                <x-admin.field label="Pernyataan" name="question_text" :required="true">
+                                    <x-admin.textarea name="question_text" rows="2" :value="$question->question_text" />
                                 </x-admin.field>
-                                <label class="mt-6 flex items-center gap-2 text-sm text-slate-700">
-                                    <input type="hidden" name="is_required" value="0">
-                                    <input type="checkbox" name="is_required" value="1" {{ $question->is_required ? 'checked' : '' }}
-                                           class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                                    Pertanyaan wajib dijawab
-                                </label>
-                            </div>
+
+                                <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                                    <x-admin.field label="Kategori Indikator" name="category_code" :required="true">
+                                        <x-admin.select name="category_code" :value="old('category_code', $question->category_code)"
+                                            placeholder="Pilih kategori..."
+                                            :options="collect(config('sibel.categories'))->mapWithKeys(fn ($c, $key) => [$key => $c['label']])->all()" />
+                                    </x-admin.field>
+                                    <x-admin.field label="Nomor Urut" name="order_number">
+                                        <x-admin.input name="order_number" type="number" :value="$question->order_number" />
+                                    </x-admin.field>
+                                </div>
+                            @else
+                                <x-admin.field label="Teks Pertanyaan" name="question_text" :required="true">
+                                    <x-admin.textarea name="question_text" rows="2" :value="$question->question_text" />
+                                </x-admin.field>
+
+                                <div class="mt-3 space-y-3">
+                                    @foreach ($question->options as $option)
+                                        <x-admin.field :label="'Pilihan ' . $option->option_code . ' — ' . $option->categoryLabel()" :name="'options.' . $option->option_code" :required="true">
+                                            <x-admin.input :name="'options.' . $option->option_code" :value="$option->option_text" />
+                                        </x-admin.field>
+                                    @endforeach
+                                </div>
+
+                                <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                                    <x-admin.field label="Nomor Urut" name="order_number">
+                                        <x-admin.input name="order_number" type="number" :value="$question->order_number" />
+                                    </x-admin.field>
+                                </div>
+                            @endif
+
+                            <label class="mt-3 flex items-center gap-2 text-sm text-slate-700">
+                                <input type="hidden" name="is_required" value="0">
+                                <input type="checkbox" name="is_required" value="1" {{ $question->is_required ? 'checked' : '' }}
+                                       class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                Pertanyaan wajib dijawab
+                            </label>
 
                             <div class="mt-4 flex gap-2">
                                 <button type="submit" class="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">Simpan Perubahan</button>

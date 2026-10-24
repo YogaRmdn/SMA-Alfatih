@@ -36,7 +36,12 @@
 
         @php
             $sibelUser = auth()->user();
-            $isManager = $sibelUser && $sibelUser->hasRole('super_admin', 'admin', 'guru_bk');
+            $isManager = $sibelUser && $sibelUser->hasRole('super_admin', 'admin', 'guru_bk', 'admin_sibel');
+
+            // Hanya role yang benar-benar berhak membuka panel website yang
+            // melihat tautan pindah panel — guru BK & admin SIBEL tidak,
+            // supaya tautan yang muncul selalu bisa diklik (bukan 403).
+            $canOpenWebsiteAdmin = $sibelUser && $sibelUser->hasRole('super_admin', 'admin');
 
             $managerMenu = [
                 ['label' => 'Dashboard', 'route' => 'sibel.dashboard', 'match' => 'sibel.dashboard', 'icon' => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10'],
@@ -50,7 +55,7 @@
 
         <nav class="h-[calc(100vh-4rem)] overflow-y-auto px-3 py-4 space-y-1">
             @if ($isManager)
-                <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Menu Guru BK & Admin</p>
+                <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-400">Menu Pengelola SIBEL</p>
                 @foreach ($managerMenu as $item)
                     <a href="{{ route($item['route']) }}"
                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {{ request()->routeIs($item['match']) ? 'bg-white/15 text-white' : 'text-emerald-100 hover:bg-white/10 hover:text-white' }}">
@@ -61,7 +66,7 @@
             @endif
 
             <div class="mt-4 border-t border-white/10 pt-3">
-                @if ($isManager)
+                @if ($canOpenWebsiteAdmin)
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-emerald-200 transition-colors hover:bg-white/10 hover:text-white">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         Panel Admin

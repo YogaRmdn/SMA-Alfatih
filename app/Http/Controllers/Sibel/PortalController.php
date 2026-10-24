@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Sibel\FillQuestionnaireRequest;
 use App\Models\SibelAnswer;
 use App\Models\SibelAttempt;
+use App\Models\SibelClass;
 use App\Models\SibelQuestionnaire;
 use App\Models\SibelStudent;
 use App\Services\IncompleteAttemptException;
@@ -19,16 +20,16 @@ use Illuminate\View\View;
  * Pintu masuk SIBEL tanpa login.
  *
  * Buka /sibel -> langsung halaman pengisian kuesioner: siswa tinggal
- * menulis namanya lalu menjawab pertanyaan (tanpa memilih dari daftar).
- * Sesi browser (`sibel_student_id`) mengikat identitas setelah kirim,
- * sehingga halaman hasil & cetak tetap terproteksi per-siswa.
+ * menulis namanya + memilih kelas lalu menjawab pertanyaan (tanpa memilih
+ * dari daftar nama). Sesi browser (`sibel_student_id`) mengikat identitas
+ * setelah kirim, sehingga halaman hasil & cetak tetap terproteksi per-siswa.
  */
 class PortalController extends Controller
 {
     public function __construct(protected LearningStyleScoringService $scoring) {}
 
     /**
-     * Halaman pengisian kuesioner (langsung, tanpa form identitas terpisah).
+     * Halaman pengisian kuesioner (langsung, form identitas nama + kelas).
      * Pengelola (admin/guru BK) -> dashboard pengelola.
      */
     public function index(Request $request): View|RedirectResponse
@@ -36,7 +37,7 @@ class PortalController extends Controller
         $user = $request->user();
 
         // Pengelola tetap masuk ke dashboard SIBEL miliknya.
-        if ($user && $user->hasRole('super_admin', 'admin', 'guru_bk')) {
+        if ($user && $user->hasRole('super_admin', 'admin', 'guru_bk', 'admin_sibel')) {
             return redirect()->route('sibel.dashboard');
         }
 
@@ -74,11 +75,14 @@ class PortalController extends Controller
             }
         }
 
-        return view('sibel.fill', compact('questionnaire', 'student'));
+        // Daftar kelas untuk pemilihan identitas (wajib — rekap guru BK).
+        $classes = SibelClass::orderBy('name')->get();
+
+        return view('sibel.fill', compact('questionnaire', 'student', 'classes'));
     }
 
     /**
-     * Terima jawaban: ikat nama ke sesi, buat/lanjutkan sesi pengisian,
+     * Terima jawaban: ikat nama+kelas ke sesi, buat/lanjutkan sesi pengisian,
      * simpan jawaban, hitung skor, lalu tampilkan halaman hasil + unduhan.
      */
     public function submit(FillQuestionnaireRequest $request): RedirectResponse
@@ -90,7 +94,7 @@ class PortalController extends Controller
                 ->with('error', 'Sesi kuesioner belum tersedia. Silakan tunggu pengumuman dari guru BK.');
         }
 
-        $student = $this->resolveStudent($request->input('full_name'));
+        $student = $this->resolveStudent($request->input('full_name'), $request->integer('class_id'));
 
         $request->session()->put('sibel_student_id', $student->id);
 
@@ -192,23 +196,38 @@ class PortalController extends Controller
 
     /**
      * Cari identitas siswa aktif berdasarkan nama yang ditulis (huruf besar/kecil
-     * tidak berpengaruh). Bila belum ada, buat identitas baru tanpa kelas —
-     * guru BK bisa melengkapi datanya lewat menu Data Siswa.
+     * tidak berpengaruh) + kelas yang dipilih:
+     *   1. cocok nama & kelas  -> pakai identitas itu;
+     *   2. nama cocok tapi kelasnya masih kosong (identitas lama/mandiri)
+     *      -> lengkapi dengan kelas pilihan (validasi sudah menjamin semua
+     *         kecocokan nama berkelas null, jadi aman diadopsi);
+     *   3. belum ada           -> buat identitas baru berkelas.
      */
-    protected function resolveStudent(string $name): SibelStudent
+    protected function resolveStudent(string $name, int $classId): SibelStudent
     {
-        $student = SibelStudent::query()
+        $matches = SibelStudent::query()
             ->where('status', SibelStudent::STATUS_ACTIVE)
             ->whereRaw('LOWER(full_name) = ?', [mb_strtolower($name)])
             ->orderBy('id')
-            ->first();
+            ->get();
 
-        if ($student) {
-            return $student;
+        $exact = $matches->first(fn (SibelStudent $s) => (int) $s->class_id === $classId);
+
+        if ($exact) {
+            return $exact;
+        }
+
+        $legacy = $matches->first(fn (SibelStudent $s) => $s->class_id === null);
+
+        if ($legacy) {
+            $legacy->update(['class_id' => $classId]);
+
+            return $legacy;
         }
 
         return SibelStudent::create([
             'full_name' => $name,
+            'class_id' => $classId,
             'status' => SibelStudent::STATUS_ACTIVE,
             'source' => SibelStudent::SOURCE_SELF,
         ]);

@@ -13,6 +13,7 @@ class SibelQuestion extends Model
     protected $fillable = [
         'questionnaire_id',
         'question_text',
+        'category_code',
         'order_number',
         'is_required',
     ];
@@ -23,6 +24,28 @@ class SibelQuestion extends Model
             'is_required' => 'boolean',
             'order_number' => 'integer',
         ];
+    }
+
+    /**
+     * Kuesioner dinilai dengan Skala Likert.
+     */
+    public function isLikert(): bool
+    {
+        return $this->questionnaire
+            ? $this->questionnaire->isLikert()
+            : false;
+    }
+
+    /**
+     * Label kategori indikator (untuk pernyataan Likert), atau "-" bila tidak ada.
+     */
+    public function categoryLabel(): string
+    {
+        if ($this->category_code === null || $this->category_code === '') {
+            return '—';
+        }
+
+        return config("sibel.categories.{$this->category_code}.label") ?? ucfirst($this->category_code);
     }
 
     public function questionnaire(): BelongsTo

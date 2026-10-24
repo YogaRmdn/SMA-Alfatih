@@ -9,6 +9,9 @@
     <div class="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
             <h2 class="text-xl font-bold text-white sm:text-2xl">{{ $title }}</h2>
+            @if (! empty($titleExtra))
+                <div class="mt-1.5">{{ $titleExtra }}</div>
+            @endif
             @if ($subtitle)
                 <p class="mt-1.5 max-w-xl text-sm text-emerald-100/90">{{ $subtitle }}</p>
             @endif

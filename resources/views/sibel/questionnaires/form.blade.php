@@ -47,6 +47,26 @@
                 </x-admin.field>
             </div>
 
+            @php
+                // Metode penilaian dikunci setelah ada riwayat pengisian —
+                // hasil historis harus tetap konsisten dengan cara skoringnya.
+                $methodLocked = $questionnaire->exists && $questionnaire->attempts()->exists();
+            @endphp
+            @if ($methodLocked)
+                <x-admin.field label="Metode Penilaian" name="scoring_method"
+                    hint="Terkunci karena kuesioner ini sudah memiliki riwayat pengisian.">
+                    <p class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+                        {{ $questionnaire->scoringMethodLabel() }}
+                    </p>
+                </x-admin.field>
+            @else
+                <x-admin.field label="Metode Penilaian" name="scoring_method" :required="true"
+                    hint="Pilihan Tunggal: siswa memilih A/B/C per pertanyaan. Skala Likert: setiap pernyataan punya satu kategori indikator dan dijawab Sangat Sesuai s.d. Tidak Sesuai (nilai 4-1).">
+                    <x-admin.select name="scoring_method" :value="old('scoring_method', $questionnaire->scoring_method ?? 'choice')"
+                        :options="config('sibel.scoring_methods')" />
+                </x-admin.field>
+            @endif
+
             <div class="space-y-3 rounded-xl bg-slate-50 p-4">
                 <label class="flex items-start gap-3">
                     <input type="hidden" name="allow_retake" value="0">

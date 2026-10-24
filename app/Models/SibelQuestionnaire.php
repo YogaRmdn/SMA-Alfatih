@@ -13,6 +13,10 @@ class SibelQuestionnaire extends Model
 
     public const STATUS_CLOSED = 'closed';
 
+    public const SCORING_METHOD_CHOICE = 'choice';
+
+    public const SCORING_METHOD_LIKERT = 'likert';
+
     public const STATUS_LABELS = [
         self::STATUS_DRAFT => 'Draft',
         self::STATUS_ACTIVE => 'Sesi Dibuka',
@@ -25,6 +29,7 @@ class SibelQuestionnaire extends Model
         'title',
         'instructions',
         'version',
+        'scoring_method',
         'status',
         'allow_retake',
         'needs_verification',
@@ -52,6 +57,53 @@ class SibelQuestionnaire extends Model
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Kuesioner dinilai dengan Skala Likert (skor = jumlah nilai opsi).
+     */
+    public function isLikert(): bool
+    {
+        return $this->scoring_method === self::SCORING_METHOD_LIKERT;
+    }
+
+    public function scoringMethodLabel(): string
+    {
+        return config("sibel.scoring_methods.{$this->scoring_method}") ?? ucfirst($this->scoring_method);
+    }
+
+    /**
+     * Nilai maksimum opsi Likert (mis. 4 pada skala 4 tingkat).
+     */
+    public function likertMaxValue(): int
+    {
+        return (int) collect(config('sibel.likert.levels'))->max('value');
+    }
+
+    /**
+     * Jumlah pernyataan per kategori indikator (untuk skala maksimum per kategori).
+     *
+     * @return array<string, int>
+     */
+    public function itemCountsByCategory(): array
+    {
+        return $this->questions
+            ->filter(fn (SibelQuestion $question) => $question->category_code !== null)
+            ->countBy('category_code')
+            ->all();
+    }
+
+    /**
+     * Skor maksimum suatu kategori pada kuesioner Likert
+     * (jumlah pernyataan kategori × nilai maksimum opsi).
+     */
+    public function maxLikertScore(?string $categoryKey): int
+    {
+        if ($categoryKey === null) {
+            return 0;
+        }
+
+        return (int) ($this->itemCountsByCategory()[$categoryKey] ?? 0) * $this->likertMaxValue();
     }
 
     /**

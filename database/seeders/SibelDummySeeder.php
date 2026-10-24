@@ -11,6 +11,7 @@ use App\Models\SibelQuestionnaire;
 use App\Models\SibelStudent;
 use App\Services\LearningStyleScoringService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 /**
  * Data dummy lengkap untuk dashboard admin SIBEL (pengembangan lokal).
@@ -22,10 +23,14 @@ use Illuminate\Database\Seeder;
  *
  * Isinya:
  *  - 6 kelas + 30 siswa aktif + 2 siswa tidak aktif
+ *  - Sesi berjalan memakai kuesioner SKALA LIKERT (penilaian 4-1 per
+ *    pernyataan) — kuesioner pilihan A/B/C ditutup sebagai arsip hasil
  *  - 3 kuesioner berbeda status (Sesi Dibuka / Ditutup / Draft) — soal
  *    dikloning dari kuesioner bawaan SibelSeeder agar penilaian tetap valid
  *  - Sesi selesai lampau (terpublikasi) + sesi terkini (campuran
  *    terpublikasi/belum + catatan guru BK) + sesi berjalan + siswa belum mengisi
+ *  - Beberapa hasil Likert terbaru supaya laporan punya data sesi aktif;
+ *    mayoritas siswa sengaja dibiarkan belum mengisi agar portal bisa dicoba
  *
  * Seluruh skor dihitung lewat LearningStyleScoringService (server-side),
  * sehingga data dummy selalu konsisten dengan aturan penilaian aplikasi.
@@ -118,20 +123,36 @@ class SibelDummySeeder extends Seeder
 
     public function run(): void
     {
-        // Pastikan kuesioner bawaan (15 pertanyaan) tersedia lebih dulu.
+        // Pastikan kuesioner bawaan (15 pertanyaan) + versi Skala Likert
+        // tersedia lebih dulu.
         $this->call(SibelSeeder::class);
+        $this->call(SibelLikertSeeder::class);
 
         $primary = SibelQuestionnaire::where('title', 'Kuesioner Kecenderungan Gaya Belajar Siswa')
             ->firstOrFail();
 
-        // Kuesioner utama dibuka sesinya supaya portal /sibel bisa dipakai.
-        if (! $primary->isActive()) {
-            $primary->update(['status' => SibelQuestionnaire::STATUS_ACTIVE]);
+        // Sesi berjalan memakai kuesioner Skala Likert (nilai opsi 4-1 per
+        // pernyataan). Portal hanya menyajikan SATU kuesioner aktif — yang
+        // terbaru di antara yang berstatus active — jadi kuesioner pilihan
+        // A/B/C ditutup sebagai arsip (riwayat hasil & skornya tetap utuh).
+        $likert = SibelQuestionnaire::where('scoring_method', SibelQuestionnaire::SCORING_METHOD_LIKERT)
+            ->orderBy('id')
+            ->first();
+
+        if ($likert) {
+            $likert->update([
+                'status' => SibelQuestionnaire::STATUS_ACTIVE,
+                'needs_verification' => false,
+            ]);
+        }
+
+        if ($primary->isActive()) {
+            $primary->update(['status' => SibelQuestionnaire::STATUS_CLOSED]);
         }
 
         $closed = $this->questionnaire(
             title: 'Kuesioner Gaya Belajar — Semester Ganjil 2025/2026',
-            instructions: "Sesi pengisian semester ganjil 2025/2026. Sesi sudah ditutup dan hasil telah dipublikasikan kepada siswa.",
+            instructions: 'Sesi pengisian semester ganjil 2025/2026. Sesi sudah ditutup dan hasil telah dipublikasikan kepada siswa.',
             version: '1.0',
             status: SibelQuestionnaire::STATUS_CLOSED,
             needsVerification: false,
@@ -140,7 +161,7 @@ class SibelDummySeeder extends Seeder
 
         $draft = $this->questionnaire(
             title: 'Kuesioner Gaya Belajar — Semester Genap 2026/2027',
-            instructions: "Draf pengukuran ulang semester genap 2026/2027. Belum dibuka untuk siswa — menunggu verifikasi instrumen oleh guru BK.",
+            instructions: 'Draf pengukuran ulang semester genap 2026/2027. Belum dibuka untuk siswa — menunggu verifikasi instrumen oleh guru BK.',
             version: '0.9',
             status: SibelQuestionnaire::STATUS_DRAFT,
             needsVerification: true,
@@ -178,6 +199,7 @@ class SibelDummySeeder extends Seeder
             // Slot 7: sesi berjalan di kuesioner utama (progres sebagian).
             if ($slot === 7) {
                 $this->inProgressAttempt($student, $primary, $patterns[$index % count($patterns)]);
+
                 continue;
             }
 
@@ -200,12 +222,29 @@ class SibelDummySeeder extends Seeder
             ], $scoring);
         }
 
+        // Hasil terbaru pada sesi LIKERT yang sedang dibuka: 6 siswa pertama
+        // sudah mengisi (campuran terpublikasi/belum) supaya laporan & rekap
+        // punya data sesi aktif — sisanya sengaja dibiarkan belum mengisi
+        // agar portal /sibel masih bisa dicoba mengisi dari awal.
+        if ($likert) {
+            foreach ($activeStudents->take(6)->values() as $index => $student) {
+                $this->completedAttempt($student, $likert, $patterns[($index + 5) % count($patterns)], [
+                    'daysAgo' => $index + 1,
+                    'publish' => $index % 2 === 0,
+                    'teacherNote' => $index === 2
+                        ? self::TEACHER_NOTES[0]
+                        : null,
+                ], $scoring);
+            }
+        }
+
         $this->command?->info(sprintf(
-            'Data dummy SIBEL siap: %d kelas, %d siswa aktif (+%d tidak aktif), %d kuesioner.',
+            'Data dummy SIBEL siap: %d kelas, %d siswa aktif (+%d tidak aktif), %d kuesioner — sesi dibuka: %s.',
             $classes->count(),
             $activeStudents->count(),
             $inactiveStudents->count(),
             SibelQuestionnaire::count(),
+            SibelQuestionnaire::activeForFilling()?->title ?? '-',
         ));
     }
 
@@ -257,8 +296,8 @@ class SibelDummySeeder extends Seeder
 
     /**
      * @param  array<int, string>  $names
-     * @param  \Illuminate\Support\Collection<int, SibelClass>  $classes
-     * @return \Illuminate\Support\Collection<int, SibelStudent>
+     * @param  Collection<int, SibelClass>  $classes
+     * @return Collection<int, SibelStudent>
      */
     protected function students(array $names, $classes, string $status, int $numberOffset)
     {

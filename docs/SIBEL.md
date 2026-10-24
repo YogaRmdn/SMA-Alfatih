@@ -31,16 +31,22 @@ Berjalan pada path **`/sibel`** dengan route sendiri (`routes/sibel.php`).
 ## 1. Akses & Role
 
 SIBEL berjalan **tanpa login untuk siswa** — buka `/sibel` lalu **langsung
-halaman pengisian kuesioner**: tulis nama + jawab pertanyaan dalam satu
-halaman. Setelah kirim, identitas diikat ke **session browser**
+halaman pengisian kuesioner**: tulis nama + pilih kelas, lalu jawab
+pertanyaan dalam satu halaman. Setelah kirim, identitas diikat ke **session browser**
 (`sibel_student_id`, `PortalController`) sehingga halaman hasil & unduhan
 terproteksi per-siswa. Route pengelola tetap dilindungi
-`auth` + `verified` + `role:super_admin,admin,guru_bk` (login website `/login`).
+`auth` + `verified` + `role:super_admin,admin,guru_bk,admin_sibel` (login website `/login`).
 
 | Grup | Akses | Isi |
 |------|------|-------|
-| Siswa | **Tanpa login** — buka `/sibel`, tulis nama, jawab kuesioner | Pengisian langsung, hasil tampil & unduh PDF miliknya |
-| Pengelola | Login website, role `super_admin` / `admin` / `guru_bk` | Dashboard, Data Siswa, Kelas, Kuesioner, Hasil, Rekap |
+| Siswa | **Tanpa login** — buka `/sibel`, tulis nama + pilih kelas, jawab kuesioner | Pengisian langsung, hasil tampil & unduh PDF miliknya |
+| Pengelola | Login website, role `super_admin` / `admin` / `guru_bk` / `admin_sibel` | Dashboard, Data Siswa, Kelas, Kuesioner, Hasil, Rekap |
+
+**Pemisahan akses:** panel SIBEL berdiri sendiri dari panel admin website.
+Role `guru_bk` dan `admin_sibel` **hanya** berhak atas `/sibel` — keduanya
+diblokir dari `/admin` (dan `/toefl/kelola`). Tautan pindah panel "Panel
+Admin" di sidebar SIBEL hanya ditampilkan untuk `super_admin` / `admin`,
+sehingga tautan yang muncul selalu benar-benar bisa diklik.
 
 Rute utama (semua di bawah `/sibel`):
 
@@ -59,8 +65,8 @@ Rute utama (semua di bawah `/sibel`):
 
 Akun website ber-role `siswa` (warisan sistem lama) tetap bisa login di
 `/login`; setelah itu `/dashboard` mengarahkannya ke portal SIBEL dan
-identitasnya otomatis terikat. `/dashboard` untuk pengelola: `guru_bk` →
-Dashboard SIBEL, selainnya → dashboard admin.
+identitasnya otomatis terikat. `/dashboard` untuk pengelola: `guru_bk` &
+`admin_sibel` → Dashboard SIBEL, selainnya → dashboard admin.
 
 ---
 
@@ -74,8 +80,8 @@ Guru BK/Admin (login /login)
   4. "Buka Sesi Pengisian"
 
 Siswa (TANPA login)
-  5. Buka /sibel → langsung halaman kuesioner: tulis nama lengkap, jawab semua
-     pertanyaan (indikator progres) → konfirmasi → Kirim
+  5. Buka /sibel → langsung halaman kuesioner: tulis nama + pilih kelas,
+     jawab semua pertanyaan (indikator progres) → konfirmasi → Kirim
   6. Hasil, interpretasi & rekomendasi LANGSUNG tampil → "Unduh Hasil (PDF)"
 
 Guru BK
@@ -146,18 +152,38 @@ sudah punya jawaban tidak bisa dihapus.
 ## 4. Mesin Penilaian
 
 `app/Services/LearningStyleScoringService.php` — perhitungan **hanya di backend** (skor dari frontend
-tidak pernah dipercaya).
+tidak pernah dipercaya). Tersedia **dua metode** per kuesioner (`questionnaires.scoring_method`):
+
+### 4a. Pilihan Tunggal (A/B/C) — `scoring_method = choice` (bawaan)
 
 1. Hitung jumlah jawaban per kategori berdasarkan `options.category_code`
    (fallback pemetaan `config('sibel.code_category')`: `A → visual`, `B → auditori`, `C → kinestetik`).
 2. Skor kategori tertinggi → `dominant` (1 kategori) atau `tie` (2–3 kategori dengan skor sama).
    **Seri tidak pernah dipilih secara acak** — semua kategori teratas dicatat di `dominant_categories`.
-3. Persentase = `(jawaban kategori / total jawaban valid) × 100%` (dibulatkan 2 desimal, ≈ 100% gabungan).
+3. Persentase = `(jawaban kategori / total jawaban valid) × 100%` (≈ 100% gabungan).
 4. Interpretasi & rekomendasi dibangun dari `config/sibel.php` dengan bahasa **positif, non-menghakimi**
    ("kecenderungan, bukan satu-satunya cara belajar").
 5. Percobaan mengirim jawaban tidak lengkap → `IncompleteAttemptException` → transaksi di-rollback,
    sesi tetap `in_progress`.
 6. `results.attempt_id` unik — penilaian ulang pada sesi yang sama memperbarui baris yang sama (anti ganda).
+
+### 4b. Skala Likert (4 tingkat) — `scoring_method = likert`
+
+- Setiap pernyataan punya **satu kategori indikator** (`questions.category_code`: `visual` /
+  `auditori` / `kinestetik`) dan dijawab dengan skala seragam dari `config('sibel.likert.levels')`:
+  **Sangat Sesuai (4) → Sesuai (3) → Kurang Sesuai (2) → Tidak Sesuai (1)** — tanpa jawaban netral.
+- **Skor kategori = jumlah nilai opsi terpilih** (`options.value`) seluruh pernyataannya;
+  persentase = `(skor / skor maksimum) × 100%` dengan skor maksimum =
+  `jumlah pernyataan kategori × nilai opsi tertinggi`.
+- Aturan skor tertinggi, deteksi seri, interpretasi, rekomendasi, dan anti-tidak-lengkap
+  **sama** seperti metode pilihan tunggal.
+- Opsi skala dibuat **otomatis** oleh admin builder saat menambah pernyataan (admin hanya memilih
+  teks pernyataan + kategori indikator).
+- Metode dikunci setelah kuesioner punya riwayat pengisian agar hasil historis tetap konsisten;
+  kuesioner lama tetap `choice` dan seluruh hasil lama tidak berubah.
+
+> Tampilan pengisian: opsi Likert dirender sebagai **baris skala horizontal 4 kolom** pada
+> `resources/views/sibel/fill.blade.php` (nama input sama → validasi & alur kirim tidak berubah).
 
 ---
 
@@ -194,6 +220,27 @@ butuh verifikasi ulang (lihat catatan di atas).
 
 ---
 
+## 6a. Unduhan Excel (XLSX)
+
+- Route `GET /sibel/hasil/export` (`sibel.results.export`) — khusus pengelola
+  (`role:super_admin,admin,guru_bk,admin_sibel`, terproteksi `SibelResultPolicy::viewAny`).
+- Tombol **"Unduh Excel"** tersedia di **Dashboard SIBEL**, halaman **Hasil Asesmen**,
+  dan halaman **Rekap Kelas** (ikut filter pencarian/kelas/periode/status publikasi yang aktif).
+- Builder: `app/Exports/SibelResultsExport.php` memakai **OpenSpout** (`openspout/openspout` ^4)
+  murni XLSX — tanpa PhpSpreadsheet/ext-gd, file sementara otomatis terhapus setelah dikirim.
+- **3 sheet** per unduhan:
+  1. **Rekap Hasil** — kop laporan (nama sekolah, judul, meta filter + waktu cetak + operator),
+     tabel per siswa: tanggal, no. induk, nama, kelas, skor & persentase VAK, kategori dominan
+     (seri ditandai warna ungu), status publikasi, catatan guru BK, ditutup baris **JUMLAH**.
+  2. **Distribusi Kelas** — jumlah & persentase kategori dominan per kelas + baris **TOTAL SEKOLAH**.
+  3. **Detail Jawaban** — satu baris per butir per siswa: pernyataan, jawaban, **nilai Likert (1–4)**
+     (kolom "Nilai" diisi `-` untuk kuesioner pilihan tunggal), dan kategori indikator.
+- Desain profesional bawaan: kop emerald, header putih tebal, border tipis, baris zebra,
+  lebar kolom, **freeze baris header**, autofilter, gridlines mati, dan *print title*
+  agar baris header ikut tercetak di tiap halaman.
+
+---
+
 ## 7. Grafik (Chart.js)
 
 - Chart.js v4.4.1 dimuat dari CDN `https://cdn.jsdelivr.net/npm/chart.js@4.4.1/...`
@@ -212,7 +259,7 @@ butuh verifikasi ulang (lihat catatan di atas).
 - Sisi siswa tidak berbasis akun: identitas diikat ke **session browser** lewat penulisan nama
   (`POST /sibel/kirim` dibatasi throttle 20/menit); seluruh halaman hasil/cetak asesmen
   menolak (`403`) sesi yang identitasnya bukan pemilik attempt.
-- Route pengelola dibatasi middleware `role:super_admin,admin,guru_bk`; `SibelResultPolicy`
+- Route pengelola dibatasi middleware `role:super_admin,admin,guru_bk,admin_sibel`; `SibelResultPolicy`
   kini khusus pengelola (lihat/ubah hasil).
 - Skor, persentase, kategori dominan, interpretasi, dan rekomendasi **dihitung di backend** —
   frontend hanya mengirim pilihan `question_id → option_id`.
@@ -230,14 +277,16 @@ butuh verifikasi ulang (lihat catatan di atas).
 | Seeder | Isi |
 |---|---|
 | `SibelSeeder` (dipanggil `DatabaseSeeder`) | 1 kuesioner bawaan (15 pertanyaan × 3 opsi), status `draft`, `needs_verification = true`, idempoten |
+| `SibelLikertSeeder` (dipanggil `DatabaseSeeder`, idempoten) | Kuesioner **Skala Likert** opsional (v2.0): 15 pernyataan × 4 opsi skala (5 pernyataan per kategori indikator), status `draft`, `needs_verification = true` |
 | `SibelDemoSeeder` (manual) | 3 kelas, 9 siswa, sesi & hasil contoh (termasuk skenario seri), tanpa akun login — nama siswa demo ditulis langsung di `/sibel` |
-| `SibelDummySeeder` (manual, idempoten) | Data dummy dashboard: 6 kelas, 30 siswa aktif + 2 nonaktif, 3 kuesioner (1 aktif 15 soal, 1 closed, 1 draft), 56 attempts, 53 hasil (20 skenario seri, 45 dipublikasi) — skor dihitung mesin penilaian asli |
+| `SibelDummySeeder` (manual, idempoten) | Data dummy dashboard: 6 kelas, 30 siswa aktif + 2 nonaktif, 4 kuesioner (sesi dibuka **Skala Likert**, kuesioner A/B/C diarsipkan `closed`, 1 draft), 62 attempts — 6 hasil Likert terbaru + 53 hasil A/B/C lampau (20 skenario seri, 45 dipublikasi) — skor dihitung mesin penilaian asli |
 
 Jalankan demo:
 
 ```bash
 php artisan db:seed --class=SibelDemoSeeder   # demo ringkas
 php artisan db:seed --class=SibelDummySeeder  # data dummy dashboard lengkap
+php artisan db:seed --class=SibelLikertSeeder # kuesioner Skala Likert (draft)
 ```
 
 Menambahkan siswa: menu **Data Siswa → Tambah Siswa** (nama, kelas, NIS, status) —
@@ -264,6 +313,7 @@ Cakupan skenario (rencana proyek bagian 11):
 | `tests/Feature/SibelAssessmentTest.php` | Kirim lengkap → skor benar (3/1/0), anti kirim ganda, privasi hasil/cetak identitas lain (403), aturan pengisian ulang mengikuti guru BK, hasil langsung tampil + unduh tanpa publikasi, unique constraint jawaban |
 | `tests/Feature/SibelAuthorizationTest.php` | Portal terbuka tanpa login vs area pengelola terproteksi, akses guru BK/admin vs siswa vs tanpa role, redirect `/dashboard` per role, halaman pengelola ter-render |
 | `tests/Feature/SibelReportTest.php` | Konten cetak (identitas, skor, kesimpulan, rekomendasi, etika), hasil historis tak berubah saat instrumen diperbarui, keakuratan rekap (termasuk hasil terakhir per siswa & filter kelas/periode), filter daftar hasil, simpan catatan guru |
+| `tests/Feature/SibelLikertTest.php` | Skoring Likert (jumlah nilai opsi vs skor maksimum, deteksi seri), pengisian via portal tanpa login, builder otomatis 4 opsi skala + wajib kategori indikator, unduhan XLSX (3 sheet, kop, header, data siswa), akses unduhan diblokir untuk non-pengelola |
 
 Helper bersama: `tests/Concerns/BuildsSibelData.php`.
 

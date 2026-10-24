@@ -8,11 +8,11 @@ use App\Models\User;
 class SibelResultPolicy
 {
     /**
-     * Manajemen hasil: admin dan guru BK.
+     * Manajemen hasil: super admin, admin website, guru BK, dan admin SIBEL.
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('super_admin', 'admin', 'guru_bk');
+        return $user->hasRole('super_admin', 'admin', 'guru_bk', 'admin_sibel');
     }
 
     /**

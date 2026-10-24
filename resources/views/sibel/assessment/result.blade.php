@@ -99,7 +99,7 @@
             data: {
                 labels: @json(array_column(config('sibel.categories'), 'label')),
                 datasets: [{
-                    label: 'Jumlah jawaban',
+                    label: '{{ $attempt->questionnaire->isLikert() ? 'Jumlah Poin Likert' : 'Jumlah jawaban' }}',
                     data: @json([$result->scoreOf('visual'), $result->scoreOf('auditori'), $result->scoreOf('kinestetik')]),
                     backgroundColor: @json(array_column(config('sibel.categories'), 'hex')),
                     borderRadius: 8

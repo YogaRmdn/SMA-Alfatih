@@ -9,20 +9,23 @@ use App\Models\SibelQuestionnaire;
 use App\Models\SibelResult;
 use App\Models\SibelStudent;
 use App\Models\User;
+use App\Services\LearningStyleScoringService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\BuildsSibelData;
 use Tests\TestCase;
 
 /**
  * Portal SIBEL tanpa login (/sibel): langsung halaman pengisian kuesioner
- * dengan kolom nama (tanpa memilih dari daftar). Jawaban dikirim -> sesi
- * terikat ke nama tersebut -> hasil tampil & bisa diunduh.
+ * dengan kolom identitas nama + kelas (tanpa memilih dari daftar). Jawaban
+ * dikirim -> sesi terikat ke identitas tersebut -> hasil tampil & bisa diunduh.
  */
 class SibelPortalTest extends TestCase
 {
     use BuildsSibelData, RefreshDatabase;
 
     protected SibelClass $class;
+
+    protected SibelClass $otherClass;
 
     protected SibelStudent $student;
 
@@ -35,12 +38,14 @@ class SibelPortalTest extends TestCase
         $this->createSibelRoles();
 
         $this->class = SibelClass::create(['name' => 'X-A', 'academic_year' => '2026/2027']);
+        $this->otherClass = SibelClass::create(['name' => 'X-B', 'academic_year' => '2026/2027']);
         $this->student = $this->createStandaloneStudent('Aisyah Rahmawati', $this->class);
         $this->questionnaire = $this->createQuestionnaire(2);
     }
 
     /**
-     * Payload kirim jawaban: nama + jawaban lengkap sesuai pola kode.
+     * Payload kirim jawaban: identitas (nama + kelas) + jawaban lengkap
+     * sesuai pola kode.
      */
     protected function payload(string $name, string $pattern = 'AA'): array
     {
@@ -51,7 +56,7 @@ class SibelPortalTest extends TestCase
             $answers[$question->id] = $option->id;
         }
 
-        return ['full_name' => $name, 'answers' => $answers];
+        return ['full_name' => $name, 'class_id' => $this->class->id, 'answers' => $answers];
     }
 
     public function test_portal_terbuka_tanpa_login_dan_langsung_menampilkan_kuesioner(): void
@@ -60,6 +65,8 @@ class SibelPortalTest extends TestCase
             ->assertOk()
             ->assertSee('Isi Kuesioner Gaya Belajar')
             ->assertSee('Nama Lengkap Anda')
+            ->assertSee('Kelas Anda')
+            ->assertSee('Pilih kelas')
             ->assertSee('Pertanyaan ke-1')
             ->assertSee('Pertanyaan ke-2')
             ->assertDontSee('Pilih Identitas Siswa');
@@ -75,7 +82,8 @@ class SibelPortalTest extends TestCase
 
         $this->assertSame(SibelStudent::SOURCE_SELF, $student->source);
         $this->assertSame(SibelStudent::STATUS_ACTIVE, $student->status);
-        $this->assertNull($student->class_id);
+        // Identitas baru langsung tercatat pada kelas yang dipilih di form.
+        $this->assertSame($this->class->id, $student->class_id);
 
         $this->assertDatabaseHas('attempts', [
             'student_id' => $student->id,
@@ -110,6 +118,60 @@ class SibelPortalTest extends TestCase
         $payload['full_name'] = 'Ab';
         $this->post(route('sibel.submit'), $payload)
             ->assertSessionHasErrors('full_name');
+    }
+
+    public function test_kelas_wajib_dipilih_dan_harus_terdaftar(): void
+    {
+        // Kolom kelas kosong -> validasi gagal, tidak ada sesi tersimpan.
+        $payload = $this->payload('Sementara');
+        $payload['class_id'] = '';
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('class_id');
+
+        $this->assertSame(0, SibelAttempt::count());
+
+        // Kelas tidak dikenal (bukan data kelas) juga ditolak.
+        $payload['class_id'] = 99999;
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('class_id');
+
+        $this->assertSame(0, SibelAttempt::count());
+    }
+
+    public function test_nama_terdaftar_di_kelas_lain_ditolak(): void
+    {
+        // "Aisyah Rahmawati" tercatat di X-A — memilih X-B harus ditolak
+        // (mencegah identitas tertukar & pengisian ulang lewat kelas beda).
+        $payload = $this->payload('Aisyah Rahmawati');
+        $payload['class_id'] = $this->otherClass->id;
+
+        $this->post(route('sibel.submit'), $payload)
+            ->assertSessionHasErrors('class_id');
+
+        $this->assertSame(0, SibelAttempt::count());
+        $this->assertSame(1, SibelStudent::count());
+    }
+
+    public function test_identitas_lama_tanpa_kelas_mengadopsi_kelas_pilihan(): void
+    {
+        // Identitas lama (dibuat sebelum ada kolom kelas) -> kelas pilihan
+        // diisi ke profil yang sama, bukan membuat duplikat.
+        $legacy = SibelStudent::create([
+            'full_name' => 'Budi Santoso',
+            'status' => SibelStudent::STATUS_ACTIVE,
+            'source' => SibelStudent::SOURCE_SELF,
+        ]);
+
+        $this->post(route('sibel.submit'), $this->payload('Budi Santoso'))
+            ->assertRedirect(route('sibel.assessment.result', SibelAttempt::firstOrFail()));
+
+        $legacy->refresh();
+
+        // Tidak ada duplikat untuk "Budi Santoso" — profil lama yang dipakai.
+        $this->assertSame(1, SibelStudent::where('full_name', 'Budi Santoso')->count());
+        $this->assertSame($this->class->id, $legacy->class_id);
+        $this->assertDatabaseHas('attempts', ['student_id' => $legacy->id]);
     }
 
     public function test_jawaban_kosong_ditolak_dan_tidak_menyimpan_apa_pun(): void
@@ -236,28 +298,36 @@ class SibelPortalTest extends TestCase
         $firstQuestion = $this->questionnaire->questions()->with('options')->get()->first();
 
         $this->assertMatchesRegularExpression(
-            '/name="answers\[' . $firstQuestion->id . '\]"[^>]*checked/',
+            '/name="answers\['.$firstQuestion->id.'\]"[^>]*checked/',
             $response->getContent()
         );
     }
 
     public function test_halaman_cetak_siswa_tanpa_kelas_tidak_error(): void
     {
-        // Siswa hasil pengisian mandiri umumnya belum punya kelas (class_id null).
-        $this->post(route('sibel.submit'), $this->payload('Budi Santoso', 'AA'));
+        // Identitas lama/legasi bisa saja belum punya kelas (class_id null) —
+        // halaman hasil & cetak wajib tetap tampil tanpa error properti null.
+        $classless = SibelStudent::create([
+            'full_name' => 'Budi Santoso',
+            'status' => SibelStudent::STATUS_ACTIVE,
+            'source' => SibelStudent::SOURCE_SELF,
+        ]);
 
-        $attempt = SibelAttempt::firstOrFail();
+        $attempt = $this->createAttempt($classless, $this->questionnaire, 'AA');
+        app(LearningStyleScoringService::class)->scoreAndPersist($attempt);
 
         $this->assertNull($attempt->student->class_id);
 
         // Halaman hasil & cetak tetap tampil walau data kelas kosong
         // (kelas ditampilkan sebagai "—" — tanpa error properti null).
-        $this->get(route('sibel.assessment.result', $attempt))
+        $this->actingAsStudent($classless)
+            ->get(route('sibel.assessment.result', $attempt))
             ->assertOk()
             ->assertSee('Kelas')
             ->assertSee('—');
 
-        $this->get(route('sibel.assessment.print', $attempt))
+        $this->actingAsStudent($classless)
+            ->get(route('sibel.assessment.print', $attempt))
             ->assertOk()
             ->assertSee('Laporan Hasil Asesmen Gaya Belajar Siswa')
             ->assertSee('Budi Santoso');

@@ -9,11 +9,19 @@
         <h1 class="text-2xl font-bold text-slate-800">Dashboard SIBEL</h1>
         <p class="mt-1 text-sm text-slate-500">Sistem Informasi Gaya Belajar Siswa — ringkasan aktivitas pengisian kuesioner.</p>
     </div>
-    <a href="{{ route('sibel.questionnaires.index') }}"
-       class="inline-flex items-center gap-2 self-start rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-        Kelola Kuesioner
-    </a>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('sibel.results.export') }}"
+           class="inline-flex items-center gap-2 self-start rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-900"
+           title="Unduh rekap, distribusi kelas, & detail jawaban (XLSX)">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+            Unduh Excel
+        </a>
+        <a href="{{ route('sibel.questionnaires.index') }}"
+           class="inline-flex items-center gap-2 self-start rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Kelola Kuesioner
+        </a>
+    </div>
 </div>
 
 {{-- Kartu statistik --}}

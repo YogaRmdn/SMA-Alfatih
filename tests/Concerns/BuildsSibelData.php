@@ -24,6 +24,7 @@ trait BuildsSibelData
             ['name' => 'Super Admin', 'slug' => 'super_admin'],
             ['name' => 'Admin', 'slug' => 'admin'],
             ['name' => 'Guru BK', 'slug' => 'guru_bk'],
+            ['name' => 'Admin SIBEL', 'slug' => 'admin_sibel'],
             ['name' => 'Siswa', 'slug' => 'siswa'],
         ])->each(fn (array $role) => Role::create($role));
     }
@@ -56,6 +57,45 @@ trait BuildsSibelData
                     'option_code' => $code,
                     'option_text' => "Pilihan {$code} untuk pertanyaan {$i}",
                     'category_code' => $category,
+                ]);
+            }
+        }
+
+        return $questionnaire;
+    }
+
+    /**
+     * Buat kuesioner Skala Likert aktif: N pernyataan (kategori indikator
+     * berurutan V-A-K) dengan empat opsi skala (nilai 4-1) per pernyataan.
+     */
+    protected function createLikertQuestionnaire(
+        int $questionCount = 6,
+        string $status = SibelQuestionnaire::STATUS_ACTIVE
+    ): SibelQuestionnaire {
+        $questionnaire = SibelQuestionnaire::create([
+            'title' => 'Kuesioner Likert Gaya Belajar',
+            'version' => '2.0',
+            'scoring_method' => SibelQuestionnaire::SCORING_METHOD_LIKERT,
+            'status' => $status,
+        ]);
+
+        $categories = array_keys(config('sibel.categories'));
+
+        for ($i = 1; $i <= $questionCount; $i++) {
+            $question = SibelQuestion::create([
+                'questionnaire_id' => $questionnaire->id,
+                'question_text' => "Pernyataan ke-{$i}",
+                'category_code' => $categories[($i - 1) % count($categories)],
+                'order_number' => $i,
+                'is_required' => true,
+            ]);
+
+            foreach (config('sibel.likert.levels') as $level) {
+                SibelOption::create([
+                    'question_id' => $question->id,
+                    'option_code' => $level['code'],
+                    'option_text' => $level['label'],
+                    'value' => $level['value'],
                 ]);
             }
         }

@@ -15,14 +15,16 @@ use Tests\TestCase;
 
 /**
  * Alur pengisian kuesioner sisi siswa TANPA LOGIN (portal /sibel):
- * tulis nama + jawab pertanyaan dalam satu halaman; hasil langsung
- * tampil & bisa diunduh begitu jawaban dikirim.
+ * tulis nama + pilih kelas + jawab pertanyaan dalam satu halaman; hasil
+ * langsung tampil & bisa diunduh begitu jawaban dikirim.
  */
 class SibelAssessmentTest extends TestCase
 {
     use BuildsSibelData, RefreshDatabase;
 
     protected SibelQuestionnaire $questionnaire;
+
+    protected SibelClass $class;
 
     protected SibelStudent $student;
 
@@ -33,15 +35,13 @@ class SibelAssessmentTest extends TestCase
         $this->createSibelRoles();
 
         $this->questionnaire = $this->createQuestionnaire(4);
-        $this->student = $this->createStandaloneStudent(
-            'Siswa Satu',
-            SibelClass::create(['name' => 'X-A', 'academic_year' => '2026/2027'])
-        );
+        $this->class = SibelClass::create(['name' => 'X-A', 'academic_year' => '2026/2027']);
+        $this->student = $this->createStandaloneStudent('Siswa Satu', $this->class);
     }
 
     /**
-     * Payload kirim jawaban: nama + jawaban lengkap sesuai pola kode
-     * ("AAAB" dst — satu karakter per pertanyaan, berurutan).
+     * Payload kirim jawaban: identitas (nama + kelas) + jawaban lengkap
+     * sesuai pola kode ("AAAB" dst — satu karakter per pertanyaan, berurutan).
      */
     protected function payload(string $name, string $pattern): array
     {
@@ -52,7 +52,7 @@ class SibelAssessmentTest extends TestCase
             $answers[$question->id] = $option->id;
         }
 
-        return ['full_name' => $name, 'answers' => $answers];
+        return ['full_name' => $name, 'class_id' => $this->class->id, 'answers' => $answers];
     }
 
     public function test_pengiriman_lengkap_menghasilkan_skor_benar(): void
