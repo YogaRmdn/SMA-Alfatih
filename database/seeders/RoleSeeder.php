@@ -23,7 +23,17 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'Guru BK',
                 'slug' => 'guru_bk',
-                'description' => 'Mengelola data siswa, kuesioner SIBEL, hasil, dan rekap kelas.',
+                'description' => 'Pengelola modul SIBEL — data siswa, kuesioner gaya belajar, hasil, dan rekap kelas. TIDAK berhak atas modul TOEFL.',
+            ],
+            [
+                'name' => 'Admin SIBEL',
+                'slug' => 'admin_sibel',
+                'description' => 'Admin khusus modul SIBEL — hanya bisa mengelola SIBEL, tanpa akses panel website & TOEFL.',
+            ],
+            [
+                'name' => 'Admin TOEFL',
+                'slug' => 'admin_toefl',
+                'description' => 'Admin khusus modul TOEFL — ujian, soal, kode akses, peserta, dan hasil. TIDAK berhak atas modul SIBEL maupun panel website.',
             ],
             [
                 'name' => 'Siswa',

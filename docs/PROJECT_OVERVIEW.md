@@ -48,8 +48,12 @@ Tidak memakai: API routes, Livewire, Filament, Inertia, Spatie — murni server-
 
 ## Autentikasi & Role
 
-- Sistem role custom 2 level (tanpa Spatie): `super_admin`, `admin`
-  - Tabel `roles`, kolom `users.role_id`
+- Sistem role custom (tanpa Spatie), tabel `roles` + kolom `users.role_id`:
+  `super_admin`, `admin` (panel website), `guru_bk`, `admin_sibel`
+  (khusus SIBEL — **tidak** bisa buka `/admin` maupun `/toefl/kelola`),
+  `siswa`
+  - Role `toefl_siswa` sudah **dihapus** — peserta TOEFL & SIBEL tanpa akun
+    (cukup tulis nama + kelas + kode akses di `/toefl`)
   - Helper `User::hasRole()`, `User::isSuperAdmin()`, `User::isAdmin()`
 - Middleware alias `role` → `App\Http\Middleware\EnsureUserHasRole` (`bootstrap/app.php`)
 - Route admin: `auth + verified + role:super_admin|admin`, prefix `/admin`

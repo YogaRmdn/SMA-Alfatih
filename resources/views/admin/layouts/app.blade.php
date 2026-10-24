@@ -19,13 +19,19 @@
             ['label' => 'Data Pendaftar', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb.index', 'slug' => 'ppdb.'],
             ['label' => 'Atur Formulir', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'admin.ppdb-form-fields.index', 'slug' => 'ppdb-form-fields'],
         ]],
-        'sibel' => ['label' => 'SIBEL Gaya Belajar', 'icon' => 'M12 14l9-5-9-5-9 5 9 5zm0 0v6.969c0 .538-.224 1.052-.622 1.412A9.99 9.99 0 0112 23a9.99 9.99 0 01-6.378-2.619A1.98 1.98 0 015 18.97V14m9-6a2 2 0 10-2 2 2 2 0 002-2z', 'route_prefix' => 'sibel.', 'children' => [
+        'sibel' => ['label' => 'SIBEL Gaya Belajar', 'icon' => 'M12 14l9-5-9-5-9 5 9 5zm0 0v6.969c0 .538-.224 1.052-.622 1.412A9.99 9.99 0 0112 23a9.99 9.99 0 01-6.378-2.619A1.98 1.98 0 015 18.97V14m9-6a2 2 0 10-2 2 2 2 0 002-2z', 'route_prefix' => 'sibel.', 'roles' => ['super_admin', 'admin', 'guru_bk', 'admin_sibel'], 'children' => [
             ['label' => 'Dashboard SIBEL', 'icon' => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10', 'route' => 'sibel.dashboard', 'slug' => 'dashboard'],
             ['label' => 'Data Siswa', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', 'route' => 'sibel.students.index', 'slug' => 'students'],
             ['label' => 'Kelas', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'route' => 'sibel.classes.index', 'slug' => 'classes'],
             ['label' => 'Kuesioner', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 00-2-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', 'route' => 'sibel.questionnaires.index', 'slug' => 'questionnaires'],
             ['label' => 'Hasil Asesmen', 'icon' => 'M9 17v-6m4 6V7m4 10v-3M3 21h18M5 21V10l7-6 7 6v11', 'route' => 'sibel.results.index', 'slug' => 'results'],
             ['label' => 'Rekap Kelas', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'route' => 'sibel.recap.index', 'slug' => 'recap'],
+        ]],
+        'toefl' => ['label' => 'TOEFL ITP Online', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', 'route_prefix' => 'toefl.admin.', 'roles' => ['super_admin', 'admin', 'admin_toefl'], 'children' => [
+            ['label' => 'Dashboard TOEFL', 'icon' => 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10', 'route' => 'toefl.admin.dashboard', 'slug' => 'dashboard'],
+            ['label' => 'Daftar Ujian', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'route' => 'toefl.admin.exams.index', 'slug' => 'exams'],
+            ['label' => 'Data Peserta', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', 'route' => 'toefl.admin.students.index', 'slug' => 'students'],
+            ['label' => 'Hasil & Sesi', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'route' => 'toefl.admin.results.index', 'slug' => 'results'],
         ]],
         'download' => ['label' => 'Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'children' => [
             ['label' => 'File Download', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4', 'route' => 'admin.downloads.index', 'slug' => 'downloads'],
@@ -48,6 +54,15 @@
             ['label' => 'Setting Website', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z', 'route' => 'admin.settings.edit', 'slug' => 'settings'],
         ]],
     ];
+
+    /*
+    | Pemisahan modul: menu SIBEL hanya untuk pengelola SIBEL, menu TOEFL hanya
+    | untuk pengelola TOEFL — akun satu modul tidak melihat menu modul lain.
+    */
+    $menu = collect($menu)
+        ->filter(fn (array $item) => empty($item['roles'])
+            || (auth()->check() && auth()->user()->hasRole(...$item['roles'])))
+        ->all();
 @endphp
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">

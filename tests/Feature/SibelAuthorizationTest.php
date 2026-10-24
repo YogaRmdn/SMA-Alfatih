@@ -25,6 +25,8 @@ class SibelAuthorizationTest extends TestCase
 
     protected User $admin;
 
+    protected User $adminSibel;
+
     protected User $siswa;
 
     protected SibelStudent $student;
@@ -41,6 +43,7 @@ class SibelAuthorizationTest extends TestCase
 
         $this->guruBk = $this->createSibelUser('guru_bk', 'Guru BK Uji');
         $this->admin = $this->createSibelUser('admin', 'Admin Uji');
+        $this->adminSibel = $this->createSibelUser('admin_sibel', 'Admin SIBEL Uji');
         $this->siswa = $this->createSibelUser('siswa', 'Siswa Uji');
 
         $class = SibelClass::create(['name' => 'XI-IPA-1', 'academic_year' => '2026/2027']);
@@ -102,6 +105,61 @@ class SibelAuthorizationTest extends TestCase
         foreach (['sibel.dashboard', 'sibel.students.index', 'sibel.questionnaires.index', 'sibel.results.index', 'sibel.recap.index'] as $route) {
             $this->actingAs($this->admin)->get(route($route))->assertOk();
         }
+    }
+
+    public function test_admin_sibel_dapat_mengakses_seluruh_layanan_pengelola(): void
+    {
+        foreach ($this->managerRoutes() as $route => $parameters) {
+            $this->actingAs($this->adminSibel)
+                ->get(route($route, $parameters))
+                ->assertOk();
+        }
+    }
+
+    /**
+     * admin_sibel khusus SIBEL: diblokir dari panel website & panel TOEFL.
+     */
+    public function test_admin_sibel_diblokir_dari_panel_admin_dan_toefl(): void
+    {
+        foreach (['/admin', '/admin/news', '/admin/users', '/toefl/kelola', '/toefl/kelola/ujian'] as $uri) {
+            $this->actingAs($this->adminSibel)
+                ->get($uri)
+                ->assertForbidden();
+        }
+    }
+
+    public function test_pengalihan_dashboard_admin_sibel_menuju_panel_sibel(): void
+    {
+        $this->actingAs($this->adminSibel)
+            ->get(route('dashboard'))
+            ->assertRedirect(route('sibel.dashboard'));
+
+        // Membuka /sibel juga langsung ke dashboard SIBEL, bukan form pengisian.
+        $this->actingAs($this->adminSibel)
+            ->get(route('sibel.portal'))
+            ->assertRedirect(route('sibel.dashboard'));
+    }
+
+    /**
+     * Tautan pindah panel "Panel Admin" hanya untuk role yang berhak
+     * membuka /admin — guru BK & admin SIBEL tidak melihatnya.
+     */
+    public function test_tautan_pindah_panel_hanya_untuk_yang_berhak(): void
+    {
+        $this->actingAs($this->adminSibel)
+            ->get(route('sibel.dashboard'))
+            ->assertOk()
+            ->assertDontSee(route('admin.dashboard'), false);
+
+        $this->actingAs($this->guruBk)
+            ->get(route('sibel.dashboard'))
+            ->assertOk()
+            ->assertDontSee(route('admin.dashboard'), false);
+
+        $this->actingAs($this->admin)
+            ->get(route('sibel.dashboard'))
+            ->assertOk()
+            ->assertSee(route('admin.dashboard'), false);
     }
 
     public function test_siswa_diblokir_dari_seluruh_layanan_pengelola(): void

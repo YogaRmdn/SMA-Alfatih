@@ -48,7 +48,9 @@ class AuthenticatedSessionController extends Controller
     {
         $path = parse_url($intended, PHP_URL_PATH) ?: '/';
 
-        $isPanel = str_starts_with($path, '/admin') || str_starts_with($path, '/sibel');
+        $isPanel = str_starts_with($path, '/admin')
+            || str_starts_with($path, '/sibel')
+            || str_starts_with($path, '/toefl/kelola');
         if (! $isPanel) {
             return true;
         }
@@ -57,8 +59,16 @@ class AuthenticatedSessionController extends Controller
             return true;
         }
 
-        if ($user->hasRole('guru_bk')) {
-            return ! str_starts_with($path, '/admin');
+        // Admin TOEFL: hanya panel TOEFL — tidak boleh ke /admin maupun SIBEL.
+        if ($user->hasRole('admin_toefl')) {
+            return str_starts_with($path, '/toefl/kelola');
+        }
+
+        // Guru BK & admin SIBEL: panel SIBEL saja — tidak boleh ke /admin
+        // maupun panel TOEFL.
+        if ($user->hasRole('guru_bk', 'admin_sibel')) {
+            return ! str_starts_with($path, '/admin')
+                && ! str_starts_with($path, '/toefl/kelola');
         }
 
         // Siswa: hanya area pengisian miliknya sendiri.

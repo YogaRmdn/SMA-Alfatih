@@ -51,8 +51,15 @@ Route::get('/dashboard', function () {
         return redirect()->route('sibel.portal');
     }
 
-    if ($user?->hasRole('guru_bk')) {
+    // Guru BK & admin SIBEL hanya berhak atas panel SIBEL — langsung
+    // diarahkan ke sana, bukan ke dashboard admin website.
+    if ($user?->hasRole('guru_bk', 'admin_sibel')) {
         return redirect()->route('sibel.dashboard');
+    }
+
+    // Admin TOEFL hanya berhak atas panel TOEFL — mendarat di sana.
+    if ($user?->hasRole('admin_toefl')) {
+        return redirect()->route('toefl.admin.dashboard');
     }
 
     return redirect()->route('admin.dashboard');
