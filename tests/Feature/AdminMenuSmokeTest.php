@@ -24,7 +24,10 @@ use App\Models\Setting;
 use App\Models\Staff;
 use App\Models\Teacher;
 use App\Models\Testimonial;
+use App\Models\ToeflExam;
+use App\Models\ToeflStudent;
 use App\Models\User;
+use App\Services\ToeflAccessCodeService;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -402,5 +405,100 @@ class AdminMenuSmokeTest extends TestCase
             ->assertSee(route('sibel.questionnaires.index'))
             ->assertSee(route('sibel.results.index'))
             ->assertSee(route('sibel.recap.index'));
+    }
+
+    public function test_sidebar_toefl_menu_is_complete(): void
+    {
+        $this->actingAs($this->admin());
+
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('TOEFL ITP Online')
+            ->assertSee('Dashboard TOEFL')
+            ->assertSee('Daftar Ujian')
+            ->assertSee('Data Peserta')
+            ->assertSee('Hasil & Sesi')
+            ->assertSee(route('toefl.admin.dashboard'))
+            ->assertSee(route('toefl.admin.exams.index'))
+            ->assertSee(route('toefl.admin.students.index'))
+            ->assertSee(route('toefl.admin.results.index'));
+    }
+
+    public function test_toefl_admin_pages_render_for_admin(): void
+    {
+        $this->actingAs($this->admin());
+
+        $pages = [
+            'toefl.admin.dashboard' => '/toefl/kelola',
+            'toefl.admin.exams.index' => '/toefl/kelola/ujian',
+            'toefl.admin.exams.create' => '/toefl/kelola/ujian/create',
+            'toefl.admin.students.index' => '/toefl/kelola/siswa',
+            'toefl.admin.students.create' => '/toefl/kelola/siswa/create',
+            'toefl.admin.results.index' => '/toefl/kelola/hasil',
+        ];
+
+        foreach ($pages as $name => $uri) {
+            try {
+                $this->withoutExceptionHandling()->get($uri)->assertOk();
+            } catch (\Throwable $e) {
+                $this->fail("{$name} @ {$uri}: ".$e->getMessage());
+            }
+        }
+    }
+
+    public function test_halaman_detail_ujian_mengelola_kode_akses(): void
+    {
+        $exam = ToeflExam::create([
+            'title' => 'Ujian Kode Akses',
+            'status' => ToeflExam::STATUS_PUBLISHED,
+            'exam_code' => 'KODEAKS1',
+            'duration_seconds' => 6900,
+            'total_questions' => 0,
+        ]);
+
+        $issued = app(ToeflAccessCodeService::class)->issue($exam);
+
+        $this->actingAs($this->admin());
+
+        // Panel penerbitan & daftar kode ada di halaman ujian (bukan siswa).
+        $this->get(route('toefl.admin.exams.show', $exam))
+            ->assertOk()
+            ->assertSee('Kode Akses Ujian')
+            ->assertSee('Buat Kode Akses')
+            ->assertSee($issued['model']->code_prefix)
+            ->assertSee('tanpa registrasi & login', false);
+    }
+
+    public function test_halaman_edit_peserta_tidak_menerbitkan_kode_lagi(): void
+    {
+        $student = ToeflStudent::create([
+            'full_name' => 'Peserta Coba',
+            'class_name' => 'X-1',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($this->admin());
+
+        $this->get(route('toefl.admin.students.edit', $student))
+            ->assertOk()
+            ->assertDontSee('Terbitkan Kode Akses')
+            ->assertDontSee('issue-code');
+    }
+
+    public function test_toefl_admin_pages_forbidden_for_other_roles(): void
+    {
+        $role = Role::firstOrCreate(['slug' => 'siswa'], ['name' => 'Siswa']);
+        $user = User::factory()->create([
+            'role_id' => $role->id,
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get('/toefl/kelola')
+            ->assertForbidden();
+
+        $this->actingAs($user)
+            ->get('/toefl/kelola/ujian')
+            ->assertForbidden();
     }
 }

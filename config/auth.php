@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Catatan: modul TOEFL TIDAK memakai guard khusus lagi — peserta
+        // ujian masuk tanpa registrasi & login (identitas + attempt diikat
+        // ke session browser, lihat routes/toefl.php).
     ],
 
     /*
